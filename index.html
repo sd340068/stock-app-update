@@ -95,7 +95,7 @@ body{
 }
 
 .panel-brand img{
-  height:90px;
+  height:80px; /* <-- logo size */
   margin-bottom:12px;
 }
 
@@ -229,10 +229,21 @@ function stockClass(v){
   return v<10?"stock-critical":v<20?"stock-low":"stock-ok";
 }
 
+/* NEW: Brand stats for tile summary */
+function getBrandStats(brandName){
+  const items = allData.filter(p => p.brand === brandName);
+  const total = items.length;
+  const critical = items.filter(p => p.stock < 10).length;
+  return { total, critical };
+}
+
 function renderTiles(){
   const c=document.getElementById("brandTiles");
   c.innerHTML="";
+
   brands.forEach(b=>{
+    const stats = getBrandStats(b.name);
+
     const tile=document.createElement("div");
     tile.className=`tile ${b.key} ${activeBrand===b.name?"active":""}`;
     tile.onclick=()=>{
@@ -240,9 +251,15 @@ function renderTiles(){
       renderTiles();
       renderTable();
     };
+
     tile.innerHTML=`
       <div class="tile-logo"><img src="${b.logo}"></div>
-      <div><strong>${b.name}</strong></div>
+      <div>
+        <strong>${b.name}</strong>
+        <div style="font-size:12px; color:var(--muted); margin-top:6px;">
+          ${stats.total} parts • ${stats.critical} critical
+        </div>
+      </div>
     `;
     c.appendChild(tile);
   });
@@ -269,7 +286,6 @@ function unlockEditing(){
   if(prompt("Password")==EDIT_PASSWORD){
     editingUnlocked=true;
 
-    // 🔥 UPDATE BUTTON STYLE + TEXT
     const btn = document.getElementById("unlockBtn");
     btn.innerText = "Unlocked";
     btn.style.background = "#16a34a";
@@ -312,4 +328,3 @@ loadStock();
 </script>
 </body>
 </html>
-

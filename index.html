@@ -2,10 +2,22 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Stock Dashboard</title>
+  <title>Inventory Dashboard</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <style>
+    :root {
+      --bg: #f4f6f8;
+      --card: #ffffff;
+      --text: #111827;
+      --muted: #6b7280;
+      --border: #e5e7eb;
+      --green: #16a34a;
+      --orange: #f59e0b;
+      --red: #dc2626;
+      --blue: #2563eb;
+    }
+
     * {
       box-sizing: border-box;
     }
@@ -13,48 +25,52 @@
     body {
       margin: 0;
       min-height: 100vh;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+      font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
       display: flex;
       justify-content: center;
-      align-items: center;
-      color: #111;
+      padding: 40px 16px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 900px;
     }
 
     .card {
-      background: #ffffff;
-      width: 100%;
-      max-width: 650px;
-      border-radius: 16px;
-      box-shadow: 0 20px 40px rgba(0,0,0,0.2);
-      padding: 24px 26px 30px;
+      background: var(--card);
+      border-radius: 14px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+      overflow: hidden;
     }
 
     .header {
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--border);
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 20px;
     }
 
     .header h1 {
-      font-size: 22px;
+      font-size: 20px;
       margin: 0;
       font-weight: 600;
     }
 
     .unlock-btn {
+      border: none;
       background: #111827;
       color: white;
-      border: none;
-      border-radius: 999px;
       padding: 8px 14px;
+      border-radius: 999px;
       font-size: 13px;
       cursor: pointer;
     }
 
     .unlock-btn.unlocked {
-      background: #16a34a;
+      background: var(--green);
     }
 
     table {
@@ -62,159 +78,200 @@
       border-collapse: collapse;
     }
 
-    th {
+    thead th {
       text-align: left;
       font-size: 12px;
-      color: #6b7280;
-      padding-bottom: 8px;
-      font-weight: 600;
+      color: var(--muted);
+      padding: 12px 24px;
+      background: #fafafa;
+      position: sticky;
+      top: 0;
+      z-index: 1;
     }
 
-    td {
-      padding: 10px 0;
-      border-top: 1px solid #e5e7eb;
+    tbody td {
+      padding: 14px 24px;
+      border-top: 1px solid var(--border);
       font-size: 14px;
     }
 
-    tr:hover td {
-      background: #f9fafb;
+    tbody tr:hover {
+      background: #fafafa;
     }
 
-    .edit-btn {
-      background: #2563eb;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      padding: 6px 12px;
+    .stock-pill {
+      display: inline-block;
+      min-width: 44px;
+      text-align: center;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-weight: 600;
       font-size: 13px;
       cursor: pointer;
     }
 
+    .stock-green {
+      background: #dcfce7;
+      color: var(--green);
+    }
+
+    .stock-orange {
+      background: #ffedd5;
+      color: var(--orange);
+    }
+
+    .stock-red {
+      background: #fee2e2;
+      color: var(--red);
+    }
+
+    .stock-input {
+      width: 70px;
+      padding: 6px;
+      font-size: 14px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+    }
+
     .locked {
-      color: #9ca3af;
+      color: var(--muted);
       font-size: 13px;
     }
 
     @media (max-width: 600px) {
-      .card {
-        margin: 16px;
+      thead {
+        display: none;
+      }
+      tbody td {
+        padding: 12px 16px;
       }
     }
   </style>
 </head>
 <body>
 
+<div class="container">
   <div class="card">
     <div class="header">
-      <h1>📦 Stock Dashboard</h1>
-      <button id="unlockBtn" class="unlock-btn" onclick="unlockEditing()">
-        🔒 Unlock Editing
-      </button>
+      <h1>📦 Inventory</h1>
+      <button id="unlockBtn" class="unlock-btn" onclick="unlockEditing()">🔒 Unlock Editing</button>
     </div>
 
-    <table id="stockTable">
-      <tr>
-        <th>Product</th>
-        <th>Stock</th>
-        <th></th>
-      </tr>
-    </table>
-  </div>
-
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-  <script>
-    // 🔧 CONFIG
-    const SUPABASE_URL = "https://thvbweemnzdvwyaxvwbz.supabase.co";
-    const SUPABASE_KEY = "sb_publishable_U6Nsj6HClebAVWOx7MLhng_3t2z6w1G";
-    const EDIT_PASSWORD = "BeckyStock";
-
-    const client = window.supabase.createClient(
-      SUPABASE_URL,
-      SUPABASE_KEY
-    );
-
-    let editingUnlocked = false;
-
-    async function loadStock() {
-      const { data, error } = await client
-        .from("products")
-        .select("id, name, stock")
-        .order("name");
-
-      if (error) {
-        alert(error.message);
-        return;
-      }
-
-      const table = document.getElementById("stockTable");
-
-      table.innerHTML = `
+    <table>
+      <thead>
         <tr>
           <th>Product</th>
           <th>Stock</th>
-          <th></th>
         </tr>
+      </thead>
+      <tbody id="tableBody"></tbody>
+    </table>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script>
+  // 🔧 CONFIG
+  const SUPABASE_URL = "https://thvbweemnzdvwyaxvwbz.supabase.co";
+  const SUPABASE_KEY = "sb_publishable_U6Nsj6HClebAVWOx7MLhng_3t2z6w1G";
+  const EDIT_PASSWORD = "BeckyStock";
+
+  const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  let editingUnlocked = false;
+
+  function stockClass(stock) {
+    if (stock < 10) return "stock-pill stock-red";
+    if (stock < 20) return "stock-pill stock-orange";
+    return "stock-pill stock-green";
+  }
+
+  async function loadStock() {
+    const { data, error } = await client
+      .from("products")
+      .select("id, name, stock")
+      .order("name");
+
+    if (error) {
+      alert(error.message);
+      return;
+    }
+
+    const body = document.getElementById("tableBody");
+    body.innerHTML = "";
+
+    data.forEach(item => {
+      const tr = document.createElement("tr");
+
+      tr.innerHTML = `
+        <td>${item.name}</td>
+        <td>
+          ${
+            editingUnlocked
+              ? `<span class="${stockClass(item.stock)}" onclick="startEdit(this, ${item.id}, ${item.stock})">${item.stock}</span>`
+              : `<span class="${stockClass(item.stock)}">${item.stock}</span>`
+          }
+        </td>
       `;
 
-      data.forEach(item => {
-        const row = document.createElement("tr");
+      body.appendChild(tr);
+    });
+  }
 
-        row.innerHTML = `
-          <td>${item.name}</td>
-          <td>${item.stock}</td>
-          <td>
-            ${
-              editingUnlocked
-                ? `<button class="edit-btn" onclick="editStock(${item.id}, '${item.name}', ${item.stock})">Edit</button>`
-                : `<span class="locked">Locked</span>`
-            }
-          </td>
-        `;
+  function unlockEditing() {
+    const input = prompt("Enter edit password:");
 
-        table.appendChild(row);
-      });
-    }
-
-    function unlockEditing() {
-      const input = prompt("Enter edit password:");
-
-      if (input === EDIT_PASSWORD) {
-        editingUnlocked = true;
-        const btn = document.getElementById("unlockBtn");
-        btn.textContent = "🔓 Editing Enabled";
-        btn.classList.add("unlocked");
-        loadStock();
-      } else {
-        alert("Incorrect password");
-      }
-    }
-
-    async function editStock(id, name, currentStock) {
-      const newStock = prompt(`Update stock for "${name}"`, currentStock);
-      if (newStock === null) return;
-
-      const stockNum = parseInt(newStock);
-      if (isNaN(stockNum)) {
-        alert("Enter a valid number");
-        return;
-      }
-
-      const { error } = await client
-        .from("products")
-        .update({ stock: stockNum })
-        .eq("id", id);
-
-      if (error) {
-        alert(error.message);
-        return;
-      }
-
+    if (input === EDIT_PASSWORD) {
+      editingUnlocked = true;
+      const btn = document.getElementById("unlockBtn");
+      btn.textContent = "🔓 Editing Enabled";
+      btn.classList.add("unlocked");
       loadStock();
+    } else {
+      alert("Incorrect password");
+    }
+  }
+
+  function startEdit(el, id, currentStock) {
+    const input = document.createElement("input");
+    input.type = "number";
+    input.value = currentStock;
+    input.className = "stock-input";
+
+    el.replaceWith(input);
+    input.focus();
+
+    input.addEventListener("keydown", e => {
+      if (e.key === "Enter") saveEdit(input, id);
+      if (e.key === "Escape") loadStock();
+    });
+
+    input.addEventListener("blur", () => saveEdit(input, id));
+  }
+
+  async function saveEdit(input, id) {
+    const value = parseInt(input.value);
+    if (isNaN(value)) {
+      loadStock();
+      return;
+    }
+
+    const { error } = await client
+      .from("products")
+      .update({ stock: value })
+      .eq("id", id);
+
+    if (error) {
+      alert(error.message);
+      return;
     }
 
     loadStock();
-  </script>
+  }
+
+  loadStock();
+</script>
 
 </body>
 </html>

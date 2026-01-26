@@ -17,7 +17,6 @@
       --xbox: #16a34a;
       --nintendo: #dc2626;
       --ipad: #475569;
-      --neutral: #334155;
     }
 
     * { box-sizing: border-box; }
@@ -41,7 +40,7 @@
 
     .tiles {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
       gap: 16px;
       margin-bottom: 24px;
     }
@@ -54,6 +53,9 @@
       cursor: pointer;
       transition: transform .15s ease, box-shadow .15s ease;
       border-left: 6px solid var(--neutral);
+      display: flex;
+      align-items: center;
+      gap: 14px;
     }
 
     .tile:hover {
@@ -69,6 +71,17 @@
     .tile.xbox { border-left-color: var(--xbox); }
     .tile.nintendo { border-left-color: var(--nintendo); }
     .tile.ipad { border-left-color: var(--ipad); }
+
+    .tile-logo {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #f8fafc;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.8);
+    }
 
     .tile h3 {
       margin: 0 0 6px;
@@ -147,6 +160,22 @@
 
     .secondary { background: #e2e8f0; color: #0f172a; }
 
+    .stock-input {
+      width: 80px;
+      padding: 6px;
+      font-size: 14px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+    }
+
+    @media (max-width: 700px) {
+      thead {
+        display: none;
+      }
+      td {
+        padding: 14px 20px;
+      }
+    }
   </style>
 </head>
 <body>
@@ -159,7 +188,7 @@
   <!-- TABLE -->
   <div class="panel">
     <div class="header">
-      <h2>Parts Inventory</h2>
+      <h2 id="tableTitle">Select a brand</h2>
       <button id="unlockBtn" class="unlock-btn" onclick="unlockEditing()">🔒 Unlock Editing</button>
     </div>
 
@@ -183,13 +212,20 @@
 <script>
   const SUPABASE_URL = "https://thvbweemnzdvwyaxvwbz.supabase.co";
   const SUPABASE_KEY = "sb_publishable_U6Nsj6HClebAVWOx7MLhng_3t2z6w1G";
-  const EDIT_PASSWORD = "BeckyStock";
+  const EDIT_PASSWORD = "CHANGE_THIS_PASSWORD";
 
   const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
   let editingUnlocked = false;
-  let activeBrand = "All";
+  let activeBrand = null;
   let allData = [];
+
+  const brands = [
+    { name: "PlayStation", key: "ps", color: "var(--ps)", logo: "M20 4h-16a2 2 0 00-2 2v12a2 2 0 002 2h16a2 2 0 002-2v-12a2 2 0 00-2-2zM8 7h8v2h-8v-2zm0 4h8v2h-8v-2zm0 4h5v2h-5v-2z" },
+    { name: "Xbox", key: "xbox", color: "var(--xbox)", logo: "M12 2c2.21 0 4 1.79 4 4v1.2c1.45.41 2.6 1.54 3.01 3.01H19c0-3.31-2.69-6-6-6-1.34 0-2.58.44-3.57 1.18C9.79 3.5 10.85 2 12 2zm0 20c-2.21 0-4-1.79-4-4v-1.2c-1.45-.41-2.6-1.54-3.01-3.01H5c0 3.31 2.69 6 6 6 1.34 0 2.58-.44 3.57-1.18C14.21 20.5 13.15 22 12 22z" },
+    { name: "Nintendo", key: "nintendo", color: "var(--nintendo)", logo: "M8 4h8a4 4 0 014 4v8a4 4 0 01-4 4H8a4 4 0 01-4-4V8a4 4 0 014-4zm1 6h6v2H9v-2zm0 4h6v2H9v-2z" },
+    { name: "iPad", key: "ipad", color: "var(--ipad)", logo: "M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h8a2 2 0 002-2V4a2 2 0 00-2-2zm-4 18a1 1 0 110-2 1 1 0 010 2z" }
+  ];
 
   function stockClass(v) {
     if (v < 10) return "stock-critical";
@@ -197,8 +233,15 @@
     return "stock-ok";
   }
 
-  function brandClass(b) {
-    return b.toLowerCase();
+  function getBrandLogo(name) {
+    const brand = brands.find(b => b.name === name);
+    if (!brand) return null;
+
+    return `
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
+        <path d="${brand.logo}"></path>
+      </svg>
+    `;
   }
 
   async function loadStock() {
@@ -214,56 +257,44 @@
 
     allData = data;
     renderTiles();
-    renderTable();
   }
 
   function renderTiles() {
     const tiles = document.getElementById("brandTiles");
     tiles.innerHTML = "";
 
-    const brands = ["All", ...new Set(allData.map(p => p.brand))];
-
     brands.forEach(b => {
-      const count = allData.filter(p => b === "All" || p.brand === b).length;
-      const low = allData.filter(p => (b === "All" || p.brand === b) && p.stock < 10).length;
+      const count = allData.filter(p => p.brand === b.name).length;
+      const low = allData.filter(p => p.brand === b.name && p.stock < 10).length;
 
       const div = document.createElement("div");
-      div.className = `tile ${brandClass(b)} ${activeBrand === b ? "active" : ""}`;
-      div.onclick = () => { activeBrand = b; renderTable(); renderTiles(); };
+      div.className = `tile ${b.key} ${activeBrand === b.name ? "active" : ""}`;
+      div.onclick = () => {
+        activeBrand = b.name;
+        document.getElementById("tableTitle").innerText = `${b.name} Parts`;
+        renderTable();
+        renderTiles();
+      };
 
       div.innerHTML = `
-        <h3>${b}</h3>
-        <p>${count} parts · ${low} critical</p>
+        <div class="tile-logo" style="color:${b.color}">
+          ${getBrandLogo(b.name)}
+        </div>
+        <div>
+          <h3>${b.name}</h3>
+          <p>${count} parts · ${low} critical</p>
+        </div>
       `;
 
       tiles.appendChild(div);
     });
-  }
 
-  function renderTable() {
-    const body = document.getElementById("tableBody");
-    body.innerHTML = "";
-
-    allData
-      .filter(p => activeBrand === "All" || p.brand === activeBrand)
-      .forEach(item => {
-        const tr = document.createElement("tr");
-
-        tr.innerHTML = `
-          <td>${item.name}</td>
-          <td>${item.brand}</td>
-          <td class="${stockClass(item.stock)}">${item.stock}</td>
-          <td>
-            ${
-              editingUnlocked
-                ? `<button class="action-btn" onclick="startEdit(this, ${item.id}, ${item.stock})">Edit</button>`
-                : ""
-            }
-          </td>
-        `;
-
-        body.appendChild(tr);
-      });
+    if (!activeBrand) {
+      document.getElementById("tableTitle").innerText = "Select a brand";
+      document.getElementById("tableBody").innerHTML = "";
+    } else {
+      renderTable();
+    }
   }
 
   function unlockEditing() {
@@ -274,6 +305,8 @@
       btn.textContent = "🔓 Editing Enabled";
       btn.classList.add("unlocked");
       renderTable();
+    } else {
+      alert("Incorrect password");
     }
   }
 
@@ -281,10 +314,10 @@
     const td = btn.parentElement.previousElementSibling;
     const actions = btn.parentElement;
 
-    td.innerHTML = `<input type="number" value="${stock}" style="width:80px">`;
+    td.innerHTML = `<input class="stock-input" type="number" value="${stock}" />`;
     actions.innerHTML = `
       <button class="action-btn" onclick="saveEdit(this, ${id})">Save</button>
-      <button class="action-btn secondary" onclick="loadStock()">Cancel</button>
+      <button class="action-btn secondary" onclick="renderTable()">Cancel</button>
     `;
   }
 
@@ -292,7 +325,21 @@
     const input = btn.parentElement.previousElementSibling.querySelector("input");
     const value = parseInt(input.value);
 
-    await client.from("products").update({ stock: value }).eq("id", id);
+    if (isNaN(value)) {
+      renderTable();
+      return;
+    }
+
+    const { error } = await client
+      .from("products")
+      .update({ stock: value })
+      .eq("id", id);
+
+    if (error) {
+      alert(error.message);
+      return;
+    }
+
     loadStock();
   }
 

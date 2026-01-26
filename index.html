@@ -1,218 +1,188 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<title>Console Parts Inventory</title>
-<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Inventory</title>
 
 <style>
 :root {
-  --bg: #f1f5f9;
-  --panel: #ffffff;
-  --border: #e5e7eb;
-  --text: #0f172a;
-  --muted: #64748b;
-
-  --ps: #2563eb;
-  --xbox: #16a34a;
-  --nintendo: #dc2626;
-  --ipad: #111827;
-  .panel-brand {
-  text-align: center;
-  padding: 28px 20px 12px;
-  border-bottom: 1px solid var(--border);
+  --bg:#f1f5f9;
+  --panel:#ffffff;
+  --border:#e5e7eb;
+  --text:#0f172a;
+  --muted:#64748b;
+  --ps:#2563eb;
+  --xbox:#16a34a;
+  --nintendo:#dc2626;
+  --ipad:#111827;
 }
 
-.panel-brand img {
-  height: 48px;
-  margin-bottom: 12px;
-}
-
-.panel-title {
-  font-size: 18px;
-  font-weight: 600;
-  letter-spacing: -0.01em;
-}
-
-.panel-subtitle {
-  font-size: 13px;
-  color: var(--muted);
-  margin-top: 4px;
-}
-
-}
-
-* { box-sizing: border-box; }
-
-body {
-  margin: 0;
-  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
-  min-height: 100vh;
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family:Inter,system-ui;
   background:
-    radial-gradient(
-      1200px 400px at top center,
-      #e0e7ff 0%,
-      transparent 60%
-    ),
-    #f1f5f9;
-  background-repeat: no-repeat;
-  background-attachment: fixed;
-  color: var(--text);
-  padding: 36px 20px;
+    radial-gradient(1200px 400px at top center, #e0e7ff 0%, transparent 60%),
+    var(--bg);
+  background-repeat:no-repeat;
+  background-attachment:fixed;
+  color:var(--text);
+  padding:36px 20px;
 }
 
-.wrapper {
-  max-width: 1150px;
-  margin: auto;
+.wrapper{
+  max-width:1150px;
+  margin:auto;
 }
 
-.tiles {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 18px;
-  margin-bottom: 28px;
+.tiles{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+  gap:18px;
+  margin-bottom:28px;
 }
 
-.tile {
-  background: var(--panel);
-  border-radius: 18px;
-  padding: 20px;
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  cursor: pointer;
-  box-shadow: 0 12px 28px rgba(15,23,42,0.08);
-  transition: all .18s ease;
-  border-left: 6px solid transparent;
+.tile{
+  background:var(--panel);
+  border-radius:18px;
+  padding:20px;
+  display:flex;
+  gap:16px;
+  cursor:pointer;
+  box-shadow:0 12px 28px rgba(0,0,0,.08);
+  border-left:6px solid transparent;
+  transition:transform .2s ease, box-shadow .2s ease;
+}
+.tile:hover{
+  transform:translateY(-2px);
+  box-shadow:0 18px 36px rgba(0,0,0,.12);
+}
+.tile.active{
+  outline:2px solid #c7d2fe;
 }
 
-.tile:hover {
-  transform: translateY(-2px);
+.tile.ps{border-left-color:var(--ps)}
+.tile.xbox{border-left-color:var(--xbox)}
+.tile.nintendo{border-left-color:var(--nintendo)}
+.tile.ipad{border-left-color:var(--ipad)}
+
+.tile-logo{
+  width:52px;
+  height:52px;
+  border-radius:14px;
+  background:#f8fafc;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.tile-logo img{
+  max-width:36px;
+  max-height:36px;
 }
 
-.tile.active {
-  outline: 2px solid #cbd5f5;
+.panel{
+  background:var(--panel);
+  border-radius:22px;
+  overflow:hidden;
+  box-shadow:0 30px 60px rgba(0,0,0,.12);
 }
 
-.tile.ps { border-left-color: var(--ps); }
-.tile.xbox { border-left-color: var(--xbox); }
-.tile.nintendo { border-left-color: var(--nintendo); }
-.tile.ipad { border-left-color: var(--ipad); }
-
-.tile-logo {
-  width: 52px;
-  height: 52px;
-  border-radius: 14px;
-  background: #f8fafc;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.panel-brand{
+  text-align:center;
+  padding:28px 20px 12px;
+  border-bottom:1px solid var(--border);
 }
 
-.tile-logo img {
-  max-width: 36px;
-  max-height: 36px;
-  object-fit: contain;
+.panel-brand img{
+  height:48px;
+  margin-bottom:12px;
 }
 
-.tile h3 {
-  margin: 0 0 6px;
-  font-size: 16px;
-  font-weight: 600;
+.panel-title{
+  font-size:18px;
+  font-weight:600;
+  letter-spacing:-0.01em;
 }
 
-.tile p {
-  margin: 0;
-  font-size: 13px;
-  color: var(--muted);
+.panel-subtitle{
+  font-size:13px;
+  color:var(--muted);
+  margin-top:4px;
 }
 
-.panel {
-  background: #f8fafc;
-  border-radius: 22px;
-  overflow: hidden;
-  box-shadow: 0 30px 60px rgba(0,0,0,.12);
-    <div class="panel-brand">
-  <img src="./logo.webp" alt="Logo">
-  <div class="panel-title">Console Parts Inventory</div>
-  <div class="panel-subtitle">Live stock management</div>
-</div>
+.header{
+  padding:26px 30px;
+  display:flex;
+  justify-content:space-between;
+  border-bottom:1px solid var(--border);
 }
 
-
-
-
-.header {
-  padding: 26px 30px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  border-bottom: 1px solid var(--border);
+table{
+  width:100%;
+  border-collapse:collapse;
 }
 
-.header h2 {
-  margin: 0;
-  font-size: 20px;
+th,td{
+  padding:16px 30px;
+  border-bottom:1px solid var(--border);
 }
 
-.unlock-btn {
-  background: #0f172a;
-  color: white;
-  border: none;
-  border-radius: 999px;
-  padding: 10px 18px;
-  font-size: 13px;
-  cursor: pointer;
+th{
+  background:#f8fafc;
+  font-size:12px;
+  color:var(--muted);
+  position:sticky;
+  top:0;
+  z-index:2;
 }
 
-.unlock-btn.unlocked {
-  background: #16a34a;
+.stock-ok{color:#16a34a;font-weight:600}
+.stock-low{color:#f59e0b;font-weight:600}
+.stock-critical{
+  color:#dc2626;
+  font-weight:700;
+  text-shadow:0 0 8px rgba(220,38,38,.35);
 }
 
-table {
-  width: 100%;
-  border-collapse: collapse;
+.action-btn{
+  background:#2563eb;
+  color:#fff;
+  border:none;
+  border-radius:8px;
+  padding:6px 14px;
+  cursor:pointer;
 }
 
-th {
-  background: #f8fafc;
-  text-align: left;
-  font-size: 12px;
-  color: var(--muted);
-  padding: 14px 30px;
-  border-bottom: 1px solid var(--border);
+.secondary{
+  background:#e5e7eb;
+  color:#0f172a;
 }
 
-td {
-  padding: 16px 30px;
-  border-bottom: 1px solid var(--border);
-  font-size: 14px;
+.stock-input{
+  width:90px;
+  padding:6px;
+  border-radius:8px;
+  border:1px solid var(--border);
 }
 
-.stock-ok { color: #16a34a; font-weight: 600; }
-.stock-low { color: #f59e0b; font-weight: 600; }
-.stock-critical { color: #dc2626; font-weight: 700; }
-
-.action-btn {
-  background: #2563eb;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  padding: 6px 14px;
-  font-size: 13px;
-  cursor: pointer;
+tbody tr:hover{
+  background:#f8fafc;
 }
 
-.secondary {
-  background: #e5e7eb;
-  color: #0f172a;
+tbody tr:nth-child(even){
+  background:#fbfdff;
 }
 
-.stock-input {
-  width: 90px;
-  padding: 6px;
-  border-radius: 8px;
-  border: 1px solid var(--border);
+/* Hide buttons until row hover */
+td:last-child button{
+  opacity:0;
+  transform:translateX(4px);
+  transition:.2s;
+}
+tr:hover td:last-child button{
+  opacity:1;
+  transform:none;
 }
 </style>
 </head>
@@ -220,12 +190,18 @@ td {
 <body>
 <div class="wrapper">
 
-  <div class="tiles" id="brandTiles"></div>
+  <div id="brandTiles" class="tiles"></div>
 
   <div class="panel">
+    <div class="panel-brand">
+      <img src="./logo.webp" alt="Logo">
+      <div class="panel-title">Console Parts Inventory</div>
+      <div class="panel-subtitle">Live stock management</div>
+    </div>
+
     <div class="header">
       <h2 id="tableTitle">Select a brand</h2>
-      <button id="unlockBtn" class="unlock-btn" onclick="unlockEditing()">🔒 Unlock Editing</button>
+      <button id="unlockBtn" onclick="unlockEditing()">🔒 Unlock Editing</button>
     </div>
 
     <table>
@@ -244,7 +220,6 @@ td {
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
 <script>
 const SUPABASE_URL = "https://thvbweemnzdvwyaxvwbz.supabase.co";
 const SUPABASE_KEY = "sb_publishable_U6Nsj6HClebAVWOx7MLhng_3t2z6w1G";
@@ -252,126 +227,92 @@ const EDIT_PASSWORD = "BeckyStock";
 
 const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-let allData = [];
-let activeBrand = null;
-let editingUnlocked = false;
+let allData=[], activeBrand=null, editingUnlocked=false;
 
-const brands = [
-  { name: "PlayStation", key: "ps", logo: "https://w7.pngwing.com/pngs/576/731/png-transparent-playstation-4-playstation-3-playstation-blue-angle-electronics-thumbnail.png" },
-  { name: "Xbox", key: "xbox", logo: "https://toppng.com/uploads/preview/xbox-logo-png-1518x1490-117357646030uslcz65ud.webp" },
-  { name: "Nintendo", key: "nintendo", logo: "https://w7.pngwing.com/pngs/638/371/png-transparent-nintendo-logo-nintendo-cdr-text-rectangle.png" },
-  { name: "iPad", key: "ipad", logo: "https://www.freepnglogos.com/uploads/apple-logo-png/apple-logo-icon-16.png" }
+const brands=[
+ {name:"PlayStation",key:"ps",logo:"https://w7.pngwing.com/pngs/576/731/png-transparent-playstation-4-playstation-3-playstation-blue-angle-electronics-thumbnail.png"},
+ {name:"Xbox",key:"xbox",logo:"https://toppng.com/uploads/preview/xbox-logo-png-1518x1490-117357646030uslcz65ud.webp"},
+ {name:"Nintendo",key:"nintendo",logo:"https://w7.pngwing.com/pngs/638/371/png-transparent-nintendo-logo-nintendo-cdr-text-rectangle.png"},
+ {name:"iPad",key:"ipad",logo:"https://www.freepnglogos.com/uploads/apple-logo-png/apple-logo-icon-16.png"}
 ];
 
-function stockClass(v) {
-  if (v < 10) return "stock-critical";
-  if (v < 20) return "stock-low";
-  return "stock-ok";
+function stockClass(v){
+  return v<10?"stock-critical":v<20?"stock-low":"stock-ok";
 }
 
-async function loadStock() {
-  const { data, error } = await client
-    .from("products")
-    .select("id, name, brand, stock")
-    .order("name");
-
-  if (!error) {
-    allData = data;
-  }
-
-  renderTiles(); // ✅ ALWAYS render tiles
-  renderTable();
-}
-
-function renderTiles() {
-  const container = document.getElementById("brandTiles");
-  container.innerHTML = "";
-
-  brands.forEach(b => {
-    const count = allData.filter(p => p.brand === b.name).length;
-    const low = allData.filter(p => p.brand === b.name && p.stock < 10).length;
-
-    const tile = document.createElement("div");
-    tile.className = `tile ${b.key} ${activeBrand === b.name ? "active" : ""}`;
-    tile.onclick = () => {
-      activeBrand = b.name;
+function renderTiles(){
+  const c=document.getElementById("brandTiles");
+  c.innerHTML="";
+  brands.forEach(b=>{
+    const tile=document.createElement("div");
+    tile.className=`tile ${b.key} ${activeBrand===b.name?"active":""}`;
+    tile.onclick=()=>{
+      activeBrand=b.name;
       renderTiles();
       renderTable();
     };
-
-    tile.innerHTML = `
+    tile.innerHTML=`
       <div class="tile-logo"><img src="${b.logo}"></div>
-      <div>
-        <h3>${b.name}</h3>
-        <p>${count} parts · ${low} critical</p>
-      </div>
+      <div><strong>${b.name}</strong></div>
     `;
-
-    container.appendChild(tile);
+    c.appendChild(tile);
   });
 }
 
-function renderTable() {
-  if (!activeBrand) return;
+function renderTable(){
+  if(!activeBrand) return;
+  document.getElementById("tableTitle").innerText=`${activeBrand} Parts`;
+  const body=document.getElementById("tableBody");
+  body.innerHTML="";
 
-  document.getElementById("tableTitle").innerText = `${activeBrand} Parts`;
-  const body = document.getElementById("tableBody");
-  body.innerHTML = "";
-
-  allData
-    .filter(p => p.brand === activeBrand)
-    .forEach(item => {
-      body.innerHTML += `
-        <tr>
-          <td>${item.name}</td>
-          <td>${item.brand}</td>
-          <td class="${stockClass(item.stock)}">${item.stock}</td>
-          <td>
-            ${editingUnlocked ? `<button class="action-btn" onclick="startEdit(this, ${item.id}, ${item.stock})">Edit</button>` : ""}
-          </td>
-        </tr>
-      `;
-    });
+  allData.filter(p=>p.brand===activeBrand).forEach(p=>{
+    body.innerHTML+=`
+      <tr>
+        <td>${p.name}</td>
+        <td>${p.brand}</td>
+        <td class="${stockClass(p.stock)}">${p.stock}</td>
+        <td>${editingUnlocked?`<button class="action-btn" onclick="startEdit(this,${p.id},${p.stock})">Edit</button>`:""}</td>
+      </tr>
+    `;
+  });
 }
 
-function unlockEditing() {
-  if (prompt("Enter edit password:") === EDIT_PASSWORD) {
-    editingUnlocked = true;
-    document.getElementById("unlockBtn").classList.add("unlocked");
-    document.getElementById("unlockBtn").textContent = "🔓 Editing Enabled";
+function unlockEditing(){
+  if(prompt("Password")==EDIT_PASSWORD){
+    editingUnlocked=true;
     renderTable();
   }
 }
 
-function startEdit(btn, id, stock) {
-  btn.parentElement.previousElementSibling.innerHTML =
+function startEdit(btn,id,stock){
+  btn.parentElement.previousElementSibling.innerHTML=
     `<input class="stock-input" type="number" value="${stock}">`;
-
-  btn.parentElement.innerHTML = `
-    <button class="action-btn" onclick="saveEdit(this, ${id})">Save</button>
-    <button class="action-btn secondary" onclick="renderTable()">Cancel</button>
-  `;
+  btn.parentElement.innerHTML=
+    `<button class="action-btn" onclick="saveEdit(this,${id})">Save</button>
+     <button class="action-btn secondary" onclick="renderTable()">Cancel</button>`;
 }
 
-async function saveEdit(btn, id) {
-  const value = parseInt(btn.parentElement.previousElementSibling.querySelector("input").value);
-  if (isNaN(value)) return renderTable();
+async function saveEdit(btn,id){
+  const val=parseInt(btn.parentElement.previousElementSibling.querySelector("input").value);
 
-  await client.from("products").update({ stock: value }).eq("id", id);
+  await client.from("products").update({stock:val}).eq("id",id);
 
-  const item = allData.find(p => p.id === id);
-  if (item) item.stock = value;
+  const item=allData.find(p=>p.id===id);
+  if(item) item.stock=val;
 
   renderTable();
   renderTiles();
 }
 
+async function loadStock(){
+  const {data}=await client.from("products").select("*");
+  allData=data||[];
+  renderTable();
+  renderTiles();
+}
+
+renderTiles();
 loadStock();
 </script>
 </body>
 </html>
-
-
-
-
-

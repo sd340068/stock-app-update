@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Stock Levels</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 30px;
+    }
+    table {
+      border-collapse: collapse;
+      width: 500px;
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 8px;
+    }
+    th {
+      background-color: #eee;
+    }
+    button {
+      padding: 6px 10px;
+    }
+  </style>
+</head>
+<body>
+
+<h2>Product Stock Levels</h2>
+
+<table id="stockTable">
+  <tr>
+    <th>Product</th>
+    <th>Stock</th>
+    <th>Actions</th>
+  </tr>
+</table>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script>
+  const SUPABASE_URL = "https://thvbweemnzdvwyaxvwbz.supabase.co";
+  const SUPABASE_KEY = "sb_publishable_U6Nsj6HClebAVWOx7MLhng_3t2z6w1G";
+
+  const client = window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY
+  );
+
+  async function loadStock() {
+    const { data, error } = await client
+      .from("products")
+      .select("id, name, stock")
+      .order("name");
+
+    if (error) {
+      console.error(error);
+      alert(error.message);
+      return;
+    }
+
+    console.log("DATA FROM SUPABASE:", data);
+
+    const table = document.getElementById("stockTable");
+
+    table.innerHTML = `
+      <tr>
+        <th>Product</th>
+        <th>Stock</th>
+        <th>Actions</th>
+      </tr>
+    `;
+
+    data.forEach(item => {
+      const row = document.createElement("tr");
+
+      row.innerHTML = `
+        <td>${item.name}</td>
+        <td>${item.stock}</td>
+        <td>
+          <button onclick="editStock(${item.id}, '${item.name}', ${item.stock})">
+            Edit
+          </button>
+        </td>
+      `;
+
+      table.appendChild(row);
+    });
+  }
+
+  async function editStock(id, name, currentStock) {
+    const newStock = prompt(`Update stock for "${name}"`, currentStock);
+
+    if (newStock === null) return;
+
+    const stockNum = parseInt(newStock);
+    if (isNaN(stockNum)) {
+      alert("Please enter a valid number");
+      return;
+    }
+
+    const { error } = await client
+      .from("products")
+      .update({ stock: stockNum })
+      .eq("id", id);
+
+    if (error) {
+      console.error(error);
+      alert(error.message);
+      return;
+    }
+
+    loadStock();
+  }
+
+  loadStock();
+</script>
+
+</body>
+</html>

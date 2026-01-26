@@ -17,6 +17,29 @@
   --xbox: #16a34a;
   --nintendo: #dc2626;
   --ipad: #111827;
+  .panel-brand {
+  text-align: center;
+  padding: 28px 20px 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.panel-brand img {
+  height: 48px;
+  margin-bottom: 12px;
+}
+
+.panel-title {
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.panel-subtitle {
+  font-size: 13px;
+  color: var(--muted);
+  margin-top: 4px;
+}
+
 }
 
 * { box-sizing: border-box; }
@@ -24,7 +47,8 @@
 body {
   margin: 0;
   font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
-  background: var(--bg);
+  background: radial-gradient(1200px 400px at top, #e0e7ff 0%, transparent 60%),
+    #f1f5f9;
   color: var(--text);
   padding: 36px 20px;
 }
@@ -96,11 +120,19 @@ body {
 }
 
 .panel {
-  background: var(--panel);
+  background: #f8fafc;
   border-radius: 22px;
   overflow: hidden;
-  box-shadow: 0 24px 48px rgba(15,23,42,0.12);
+  box-shadow: 0 30px 60px rgba(0,0,0,.12);
+    <div class="panel-brand">
+  <img src="https://cnlselectronics.co.uk/wp-content/uploads/elementor/thumbs/no-background-light-1-r11idql742azbi4r5t0rzzrc3rkvw4kj5g025e4z58.webp" alt="Logo">
+  <div class="panel-title">Console Parts Inventory</div>
+  <div class="panel-subtitle">Live stock management</div>
+</div>
 }
+
+
+
 
 .header {
   padding: 26px 30px;
@@ -330,4 +362,5 @@ loadStock();
 </script>
 </body>
 </html>
+
 

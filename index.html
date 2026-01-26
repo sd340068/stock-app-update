@@ -34,8 +34,6 @@ body {
   margin: auto;
 }
 
-/* ─────────── BRAND TILES ─────────── */
-
 .tiles {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -58,7 +56,6 @@ body {
 
 .tile:hover {
   transform: translateY(-2px);
-  box-shadow: 0 16px 34px rgba(15,23,42,0.12);
 }
 
 .tile.active {
@@ -97,8 +94,6 @@ body {
   font-size: 13px;
   color: var(--muted);
 }
-
-/* ─────────── TABLE PANEL ─────────── */
 
 .panel {
   background: var(--panel);
@@ -178,7 +173,6 @@ td {
   padding: 6px;
   border-radius: 8px;
   border: 1px solid var(--border);
-  font-size: 14px;
 }
 </style>
 </head>
@@ -241,13 +235,12 @@ async function loadStock() {
     .select("id, name, brand, stock")
     .order("name");
 
-  if (error) {
-    alert(error.message);
-    return;
+  if (!error) {
+    allData = data;
   }
 
-  allData = data;
-  renderTiles();
+  renderTiles(); // ✅ ALWAYS render tiles
+  renderTable();
 }
 
 function renderTiles() {
@@ -267,9 +260,7 @@ function renderTiles() {
     };
 
     tile.innerHTML = `
-      <div class="tile-logo">
-        <img src="${b.logo}">
-      </div>
+      <div class="tile-logo"><img src="${b.logo}"></div>
       <div>
         <h3>${b.name}</h3>
         <p>${count} parts · ${low} critical</p>
@@ -290,69 +281,47 @@ function renderTable() {
   allData
     .filter(p => p.brand === activeBrand)
     .forEach(item => {
-      const row = document.createElement("tr");
-      row.innerHTML = `
-        <td>${item.name}</td>
-        <td>${item.brand}</td>
-        <td class="${stockClass(item.stock)}">${item.stock}</td>
-        <td>
-          ${editingUnlocked ? `<button class="action-btn" onclick="startEdit(this, ${item.id}, ${item.stock})">Edit</button>` : ""}
-        </td>
+      body.innerHTML += `
+        <tr>
+          <td>${item.name}</td>
+          <td>${item.brand}</td>
+          <td class="${stockClass(item.stock)}">${item.stock}</td>
+          <td>
+            ${editingUnlocked ? `<button class="action-btn" onclick="startEdit(this, ${item.id}, ${item.stock})">Edit</button>` : ""}
+          </td>
+        </tr>
       `;
-      body.appendChild(row);
     });
 }
 
 function unlockEditing() {
-  const pw = prompt("Enter edit password:");
-  if (pw === EDIT_PASSWORD) {
+  if (prompt("Enter edit password:") === EDIT_PASSWORD) {
     editingUnlocked = true;
-    const btn = document.getElementById("unlockBtn");
-    btn.textContent = "🔓 Editing Enabled";
-    btn.classList.add("unlocked");
+    document.getElementById("unlockBtn").classList.add("unlocked");
+    document.getElementById("unlockBtn").textContent = "🔓 Editing Enabled";
     renderTable();
-  } else {
-    alert("Incorrect password");
   }
 }
 
 function startEdit(btn, id, stock) {
-  const td = btn.parentElement.previousElementSibling;
-  const actions = btn.parentElement;
+  btn.parentElement.previousElementSibling.innerHTML =
+    `<input class="stock-input" type="number" value="${stock}">`;
 
-  td.innerHTML = `<input class="stock-input" type="number" value="${stock}">`;
-  actions.innerHTML = `
+  btn.parentElement.innerHTML = `
     <button class="action-btn" onclick="saveEdit(this, ${id})">Save</button>
     <button class="action-btn secondary" onclick="renderTable()">Cancel</button>
   `;
 }
 
-/* ✅ FIXED SAVE FUNCTION */
 async function saveEdit(btn, id) {
-  const input = btn.parentElement.previousElementSibling.querySelector("input");
-  const value = parseInt(input.value);
+  const value = parseInt(btn.parentElement.previousElementSibling.querySelector("input").value);
+  if (isNaN(value)) return renderTable();
 
-  if (isNaN(value)) {
-    renderTable();
-    return;
-  }
+  await client.from("products").update({ stock: value }).eq("id", id);
 
-  const { error } = await client
-    .from("products")
-    .update({ stock: value })
-    .eq("id", id);
-
-  if (error) {
-    alert(error.message);
-    renderTable();
-    return;
-  }
-
-  // Update local cache
   const item = allData.find(p => p.id === id);
   if (item) item.stock = value;
 
-  // Re-render immediately
   renderTable();
   renderTiles();
 }

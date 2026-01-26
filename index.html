@@ -2,177 +2,185 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Inventory Dashboard</title>
+  <title>Parts Inventory</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <style>
     :root {
-      --bg: #f4f6f8;
-      --card: #ffffff;
-      --text: #111827;
-      --muted: #6b7280;
-      --border: #e5e7eb;
-      --green: #16a34a;
-      --orange: #f59e0b;
-      --red: #dc2626;
-      --blue: #2563eb;
+      --bg: linear-gradient(135deg, #eef2f7, #dbe3ee);
+      --panel: #ffffff;
+      --border: #e2e8f0;
+      --text: #0f172a;
+      --muted: #64748b;
+
+      --ps: #2563eb;
+      --xbox: #16a34a;
+      --nintendo: #dc2626;
+      --ipad: #475569;
+      --neutral: #334155;
     }
 
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
 
     body {
       margin: 0;
-      min-height: 100vh;
       font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       background: var(--bg);
       color: var(--text);
+      padding: 40px 20px;
       display: flex;
       justify-content: center;
-      padding: 40px 16px;
     }
 
-    .container {
+    .wrapper {
       width: 100%;
-      max-width: 900px;
+      max-width: 1100px;
     }
 
-    .card {
-      background: var(--card);
-      border-radius: 14px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+    /* ---------- BRAND TILES ---------- */
+
+    .tiles {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .tile {
+      background: var(--panel);
+      border-radius: 16px;
+      padding: 18px;
+      box-shadow: 0 10px 25px rgba(15,23,42,0.08);
+      cursor: pointer;
+      transition: transform .15s ease, box-shadow .15s ease;
+      border-left: 6px solid var(--neutral);
+    }
+
+    .tile:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 14px 30px rgba(15,23,42,0.12);
+    }
+
+    .tile.active {
+      outline: 2px solid #94a3b8;
+    }
+
+    .tile.ps { border-left-color: var(--ps); }
+    .tile.xbox { border-left-color: var(--xbox); }
+    .tile.nintendo { border-left-color: var(--nintendo); }
+    .tile.ipad { border-left-color: var(--ipad); }
+
+    .tile h3 {
+      margin: 0 0 6px;
+      font-size: 16px;
+      font-weight: 600;
+    }
+
+    .tile p {
+      margin: 0;
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    /* ---------- TABLE PANEL ---------- */
+
+    .panel {
+      background: var(--panel);
+      border-radius: 18px;
+      box-shadow: 0 20px 40px rgba(15,23,42,0.12);
       overflow: hidden;
     }
 
     .header {
-      padding: 20px 24px;
-      border-bottom: 1px solid var(--border);
+      padding: 24px 28px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-    }
-
-    .header h1 {
-      font-size: 20px;
-      margin: 0;
-      font-weight: 600;
+      border-bottom: 1px solid var(--border);
     }
 
     .unlock-btn {
-      border: none;
-      background: #111827;
+      background: #0f172a;
       color: white;
-      padding: 8px 14px;
+      border: none;
       border-radius: 999px;
+      padding: 10px 18px;
       font-size: 13px;
       cursor: pointer;
     }
 
-    .unlock-btn.unlocked {
-      background: var(--green);
-    }
+    .unlock-btn.unlocked { background: #16a34a; }
 
     table {
       width: 100%;
       border-collapse: collapse;
     }
 
-    thead th {
+    th {
       text-align: left;
       font-size: 12px;
       color: var(--muted);
-      padding: 12px 24px;
-      background: #fafafa;
-      position: sticky;
-      top: 0;
-      z-index: 1;
+      padding: 14px 28px;
+      border-bottom: 1px solid var(--border);
+      background: #f8fafc;
     }
 
-    tbody td {
-      padding: 14px 24px;
-      border-top: 1px solid var(--border);
+    td {
+      padding: 16px 28px;
+      border-bottom: 1px solid var(--border);
       font-size: 14px;
     }
 
-    tbody tr:hover {
-      background: #fafafa;
-    }
+    .stock-ok { color: #16a34a; font-weight: 600; }
+    .stock-low { color: #f59e0b; font-weight: 600; }
+    .stock-critical { color: #dc2626; font-weight: 700; }
 
-    .stock-pill {
-      display: inline-block;
-      min-width: 44px;
-      text-align: center;
-      padding: 4px 10px;
-      border-radius: 999px;
-      font-weight: 600;
+    .action-btn {
+      background: #2563eb;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 6px 14px;
       font-size: 13px;
       cursor: pointer;
     }
 
-    .stock-green {
-      background: #dcfce7;
-      color: var(--green);
-    }
+    .secondary { background: #e2e8f0; color: #0f172a; }
 
-    .stock-orange {
-      background: #ffedd5;
-      color: var(--orange);
-    }
-
-    .stock-red {
-      background: #fee2e2;
-      color: var(--red);
-    }
-
-    .stock-input {
-      width: 70px;
-      padding: 6px;
-      font-size: 14px;
-      border: 1px solid var(--border);
-      border-radius: 6px;
-    }
-
-    .locked {
-      color: var(--muted);
-      font-size: 13px;
-    }
-
-    @media (max-width: 600px) {
-      thead {
-        display: none;
-      }
-      tbody td {
-        padding: 12px 16px;
-      }
-    }
   </style>
 </head>
 <body>
 
-<div class="container">
-  <div class="card">
+<div class="wrapper">
+
+  <!-- BRAND TILES -->
+  <div class="tiles" id="brandTiles"></div>
+
+  <!-- TABLE -->
+  <div class="panel">
     <div class="header">
-      <h1>📦 Inventory</h1>
+      <h2>Parts Inventory</h2>
       <button id="unlockBtn" class="unlock-btn" onclick="unlockEditing()">🔒 Unlock Editing</button>
     </div>
 
     <table>
       <thead>
         <tr>
-          <th>Product</th>
+          <th>Part</th>
+          <th>Brand</th>
           <th>Stock</th>
+          <th></th>
         </tr>
       </thead>
       <tbody id="tableBody"></tbody>
     </table>
   </div>
+
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script>
-  // 🔧 CONFIG
   const SUPABASE_URL = "https://thvbweemnzdvwyaxvwbz.supabase.co";
   const SUPABASE_KEY = "sb_publishable_U6Nsj6HClebAVWOx7MLhng_3t2z6w1G";
   const EDIT_PASSWORD = "BeckyStock";
@@ -180,17 +188,23 @@
   const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
   let editingUnlocked = false;
+  let activeBrand = "All";
+  let allData = [];
 
-  function stockClass(stock) {
-    if (stock < 10) return "stock-pill stock-red";
-    if (stock < 20) return "stock-pill stock-orange";
-    return "stock-pill stock-green";
+  function stockClass(v) {
+    if (v < 10) return "stock-critical";
+    if (v < 20) return "stock-low";
+    return "stock-ok";
+  }
+
+  function brandClass(b) {
+    return b.toLowerCase();
   }
 
   async function loadStock() {
     const { data, error } = await client
       .from("products")
-      .select("id, name, stock")
+      .select("id, name, stock, brand")
       .order("name");
 
     if (error) {
@@ -198,75 +212,87 @@
       return;
     }
 
+    allData = data;
+    renderTiles();
+    renderTable();
+  }
+
+  function renderTiles() {
+    const tiles = document.getElementById("brandTiles");
+    tiles.innerHTML = "";
+
+    const brands = ["All", ...new Set(allData.map(p => p.brand))];
+
+    brands.forEach(b => {
+      const count = allData.filter(p => b === "All" || p.brand === b).length;
+      const low = allData.filter(p => (b === "All" || p.brand === b) && p.stock < 10).length;
+
+      const div = document.createElement("div");
+      div.className = `tile ${brandClass(b)} ${activeBrand === b ? "active" : ""}`;
+      div.onclick = () => { activeBrand = b; renderTable(); renderTiles(); };
+
+      div.innerHTML = `
+        <h3>${b}</h3>
+        <p>${count} parts · ${low} critical</p>
+      `;
+
+      tiles.appendChild(div);
+    });
+  }
+
+  function renderTable() {
     const body = document.getElementById("tableBody");
     body.innerHTML = "";
 
-    data.forEach(item => {
-      const tr = document.createElement("tr");
+    allData
+      .filter(p => activeBrand === "All" || p.brand === activeBrand)
+      .forEach(item => {
+        const tr = document.createElement("tr");
 
-      tr.innerHTML = `
-        <td>${item.name}</td>
-        <td>
-          ${
-            editingUnlocked
-              ? `<span class="${stockClass(item.stock)}" onclick="startEdit(this, ${item.id}, ${item.stock})">${item.stock}</span>`
-              : `<span class="${stockClass(item.stock)}">${item.stock}</span>`
-          }
-        </td>
-      `;
+        tr.innerHTML = `
+          <td>${item.name}</td>
+          <td>${item.brand}</td>
+          <td class="${stockClass(item.stock)}">${item.stock}</td>
+          <td>
+            ${
+              editingUnlocked
+                ? `<button class="action-btn" onclick="startEdit(this, ${item.id}, ${item.stock})">Edit</button>`
+                : ""
+            }
+          </td>
+        `;
 
-      body.appendChild(tr);
-    });
+        body.appendChild(tr);
+      });
   }
 
   function unlockEditing() {
     const input = prompt("Enter edit password:");
-
     if (input === EDIT_PASSWORD) {
       editingUnlocked = true;
       const btn = document.getElementById("unlockBtn");
       btn.textContent = "🔓 Editing Enabled";
       btn.classList.add("unlocked");
-      loadStock();
-    } else {
-      alert("Incorrect password");
+      renderTable();
     }
   }
 
-  function startEdit(el, id, currentStock) {
-    const input = document.createElement("input");
-    input.type = "number";
-    input.value = currentStock;
-    input.className = "stock-input";
+  function startEdit(btn, id, stock) {
+    const td = btn.parentElement.previousElementSibling;
+    const actions = btn.parentElement;
 
-    el.replaceWith(input);
-    input.focus();
-
-    input.addEventListener("keydown", e => {
-      if (e.key === "Enter") saveEdit(input, id);
-      if (e.key === "Escape") loadStock();
-    });
-
-    input.addEventListener("blur", () => saveEdit(input, id));
+    td.innerHTML = `<input type="number" value="${stock}" style="width:80px">`;
+    actions.innerHTML = `
+      <button class="action-btn" onclick="saveEdit(this, ${id})">Save</button>
+      <button class="action-btn secondary" onclick="loadStock()">Cancel</button>
+    `;
   }
 
-  async function saveEdit(input, id) {
+  async function saveEdit(btn, id) {
+    const input = btn.parentElement.previousElementSibling.querySelector("input");
     const value = parseInt(input.value);
-    if (isNaN(value)) {
-      loadStock();
-      return;
-    }
 
-    const { error } = await client
-      .from("products")
-      .update({ stock: value })
-      .eq("id", id);
-
-    if (error) {
-      alert(error.message);
-      return;
-    }
-
+    await client.from("products").update({ stock: value }).eq("id", id);
     loadStock();
   }
 

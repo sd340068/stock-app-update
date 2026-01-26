@@ -328,14 +328,35 @@ function startEdit(btn, id, stock) {
 }
 
 async function saveEdit(btn, id) {
-  const value = parseInt(btn.parentElement.previousElementSibling.querySelector("input").value);
-  if (isNaN(value)) return renderTable();
+  const input = btn.parentElement.previousElementSibling.querySelector("input");
+  const value = parseInt(input.value);
 
-  await client.from("products").update({ stock: value }).eq("id", id);
-  loadStock();
+  if (isNaN(value)) {
+    renderTable();
+    return;
+  }
+
+  const { error } = await client
+    .from("products")
+    .update({ stock: value })
+    .eq("id", id);
+
+  if (error) {
+    alert(error.message);
+    renderTable();
+    return;
+  }
+
+  // ✅ Update local cache immediately
+  const item = allData.find(p => p.id === id);
+  if (item) item.stock = value;
+
+  // ✅ Re-render instantly
+  renderTable();
+  renderTiles();
 }
 
-loadStock();
 </script>
 </body>
 </html>
+

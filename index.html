@@ -21,12 +21,18 @@
     }
     button {
       padding: 6px 10px;
+      cursor: pointer;
+    }
+    #unlockBtn {
+      margin-bottom: 15px;
     }
   </style>
 </head>
 <body>
 
 <h2>Product Stock Levels</h2>
+
+<button id="unlockBtn" onclick="unlockEditing()">🔒 Unlock Editing</button>
 
 <table id="stockTable">
   <tr>
@@ -39,13 +45,17 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script>
+  // 🔹 CHANGE THESE
   const SUPABASE_URL = "https://thvbweemnzdvwyaxvwbz.supabase.co";
   const SUPABASE_KEY = "sb_publishable_U6Nsj6HClebAVWOx7MLhng_3t2z6w1G";
+  const EDIT_PASSWORD = "BeckyStock";
 
   const client = window.supabase.createClient(
     SUPABASE_URL,
     SUPABASE_KEY
   );
+
+  let editingUnlocked = false;
 
   async function loadStock() {
     const { data, error } = await client
@@ -58,8 +68,6 @@
       alert(error.message);
       return;
     }
-
-    console.log("DATA FROM SUPABASE:", data);
 
     const table = document.getElementById("stockTable");
 
@@ -78,9 +86,11 @@
         <td>${item.name}</td>
         <td>${item.stock}</td>
         <td>
-          <button onclick="editStock(${item.id}, '${item.name}', ${item.stock})">
-            Edit
-          </button>
+          ${
+            editingUnlocked
+              ? `<button onclick="editStock(${item.id}, '${item.name}', ${item.stock})">Edit</button>`
+              : `<span style="color:#999">Locked</span>`
+          }
         </td>
       `;
 
@@ -88,9 +98,20 @@
     });
   }
 
+  function unlockEditing() {
+    const input = prompt("Enter edit password:");
+
+    if (input === EDIT_PASSWORD) {
+      editingUnlocked = true;
+      document.getElementById("unlockBtn").innerText = "🔓 Editing Unlocked";
+      loadStock();
+    } else {
+      alert("Incorrect password");
+    }
+  }
+
   async function editStock(id, name, currentStock) {
     const newStock = prompt(`Update stock for "${name}"`, currentStock);
-
     if (newStock === null) return;
 
     const stockNum = parseInt(newStock);

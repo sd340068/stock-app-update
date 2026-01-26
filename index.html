@@ -212,7 +212,7 @@
 <script>
   const SUPABASE_URL = "https://thvbweemnzdvwyaxvwbz.supabase.co";
   const SUPABASE_KEY = "sb_publishable_U6Nsj6HClebAVWOx7MLhng_3t2z6w1G";
-  const EDIT_PASSWORD = "CHANGE_THIS_PASSWORD";
+  const EDIT_PASSWORD = "BeckyStock";
 
   const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
@@ -252,8 +252,11 @@
 
     if (error) {
       alert(error.message);
+      console.error("Supabase error:", error);
       return;
     }
+
+    console.log("DATA LOADED:", data);
 
     allData = data;
     renderTiles();
@@ -271,9 +274,8 @@
       div.className = `tile ${b.key} ${activeBrand === b.name ? "active" : ""}`;
       div.onclick = () => {
         activeBrand = b.name;
-        document.getElementById("tableTitle").innerText = `${b.name} Parts`;
-        renderTable();
         renderTiles();
+        renderTable();
       };
 
       div.innerHTML = `
@@ -288,13 +290,32 @@
 
       tiles.appendChild(div);
     });
+  }
 
-    if (!activeBrand) {
-      document.getElementById("tableTitle").innerText = "Select a brand";
-      document.getElementById("tableBody").innerHTML = "";
-    } else {
-      renderTable();
-    }
+  function renderTable() {
+    if (!activeBrand) return;
+
+    const body = document.getElementById("tableBody");
+    body.innerHTML = "";
+
+    const filtered = allData.filter(p => p.brand === activeBrand);
+
+    document.getElementById("tableTitle").innerText = `${activeBrand} Parts`;
+
+    console.log("FILTERED DATA:", filtered);
+
+    filtered.forEach(item => {
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td>${item.name}</td>
+        <td>${item.brand}</td>
+        <td class="${stockClass(item.stock)}">${item.stock}</td>
+        <td>
+          ${editingUnlocked ? `<button class="action-btn" onclick="startEdit(this, ${item.id}, ${item.stock})">Edit</button>` : ""}
+        </td>
+      `;
+      body.appendChild(row);
+    });
   }
 
   function unlockEditing() {

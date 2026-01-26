@@ -173,17 +173,6 @@ tbody tr:hover{
 tbody tr:nth-child(even){
   background:#fbfdff;
 }
-
-/* Hide buttons until row hover */
-td:last-child button{
-  opacity:0;
-  transform:translateX(4px);
-  transition:.2s;
-}
-tr:hover td:last-child button{
-  opacity:1;
-  transform:none;
-}
 </style>
 </head>
 
@@ -194,7 +183,7 @@ tr:hover td:last-child button{
 
   <div class="panel">
     <div class="panel-brand">
-      <img src="./logo.webp" alt="Logo">
+      <img src="/logo.webp" alt="Logo">
       <div class="panel-title">Console Parts Inventory</div>
       <div class="panel-subtitle">Live stock management</div>
     </div>
@@ -272,14 +261,21 @@ function renderTable(){
         <td>${p.brand}</td>
         <td class="${stockClass(p.stock)}">${p.stock}</td>
         <td>${editingUnlocked?`<button class="action-btn" onclick="startEdit(this,${p.id},${p.stock})">Edit</button>`:""}</td>
-      </tr>
-    `;
+      </tr>`;
   });
 }
 
 function unlockEditing(){
   if(prompt("Password")==EDIT_PASSWORD){
     editingUnlocked=true;
+
+    // 🔥 UPDATE BUTTON STYLE + TEXT
+    const btn = document.getElementById("unlockBtn");
+    btn.innerText = "Unlocked";
+    btn.style.background = "#16a34a";
+    btn.style.color = "#fff";
+    btn.disabled = true;
+
     renderTable();
   }
 }

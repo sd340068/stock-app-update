@@ -16,6 +16,34 @@
   --xbox:#16a34a;
   --nintendo:#dc2626;
   --ipad:#111827;
+  .status{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  font-size:12px;
+  font-weight:600;
+  letter-spacing:.04em;
+}
+
+.status .dot{
+  width:10px;
+  height:10px;
+  border-radius:50%;
+}
+
+.status.live .dot{
+  background:#22c55e;
+  box-shadow:0 0 10px rgba(34,197,94,.9);
+}
+
+.status.offline .dot{
+  background:#ef4444;
+  box-shadow:0 0 10px rgba(239,68,68,.9);
+}
+
+.status.live .label{ color:#16a34a }
+.status.offline .label{ color:#dc2626 }
+
 }
 
   .saved-row {
@@ -142,6 +170,11 @@ body{
   display:flex;
   justify-content:space-between;
   border-bottom:1px solid var(--border);
+<div id="connectionStatus" class="status live">
+  <span class="dot"></span>
+  <span class="label">LIVE</span>
+</div>
+
 }
 
 table{
@@ -369,7 +402,28 @@ async function loadStock(){
 
 renderTiles();
 loadStock();
+
+  function updateConnectionStatus(){
+  const el = document.getElementById("connectionStatus");
+  if(!el) return;
+
+  if(navigator.onLine){
+    el.className = "status live";
+    el.querySelector(".label").innerText = "LIVE";
+  } else {
+    el.className = "status offline";
+    el.querySelector(".label").innerText = "OFFLINE";
+  }
+}
+
+window.addEventListener("online", updateConnectionStatus);
+window.addEventListener("offline", updateConnectionStatus);
+
+// Run once on load
+updateConnectionStatus();
+
 </script>
 </body>
 </html>
+
 

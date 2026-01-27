@@ -295,7 +295,15 @@ const brands=[
  {name:"iPad",key:"ipad",logo:"https://www.freepnglogos.com/uploads/apple-logo-png/apple-logo-icon-16.png"}
 ];
 
-function stockClass(v){return v<10?"stock-critical":v<20?"stock-low":"stock-ok"}
+function stockClass(item){
+  const critical = item.critical_threshold ?? 10;
+  const low = item.low_threshold ?? 20;
+
+  if(item.stock <= critical) return "stock-critical";
+  if(item.stock <= low) return "stock-low";
+  return "stock-ok";
+}
+
 
 function getBrandStats(brand){
  const items=allData.filter(p=>p.brand===brand);
@@ -366,7 +374,8 @@ function renderTable(){
    <tr>
     <td>${p.name}</td>
     <td>${p.brand}</td>
-    <td class="${stockClass(p.stock)}">
+    <td class="${stockClass(p)}">
+
       ${p.stock}
       ${eta?`<div style="font-size:11px;color:var(--muted)">~${eta} days left</div>`:""}
     </td>
@@ -442,3 +451,4 @@ loadStock();
 </script>
 </body>
 </html>
+

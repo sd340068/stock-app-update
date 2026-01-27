@@ -1,237 +1,309 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Inventory</title>
+<meta charset="UTF-8" />
+<title>Inventory Dashboard</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
-:root{
-  --bg:#f1f5f9;
-  --panel:#ffffff;
-  --border:#e5e7eb;
-  --text:#0f172a;
-  --muted:#64748b;
-  --ps:#2563eb;
-  --xbox:#16a34a;
-  --nintendo:#dc2626;
-  --ipad:#111827;
+:root {
+  --bg-gradient: linear-gradient(135deg,#0f2027,#203a43,#2c5364);
+  --card-bg: #ffffff;
+  --accent: #4f46e5;
+  --ok: #16a34a;
+  --low: #f59e0b;
+  --critical: #dc2626;
 }
 
-*{box-sizing:border-box}
+* { box-sizing:border-box; font-family: Inter, system-ui, sans-serif; }
 
-body{
+body {
   margin:0;
-  font-family:Inter,system-ui;
-  background:
-    radial-gradient(1200px 400px at top center,#e0e7ff 0%,transparent 60%),
-    var(--bg);
-  background-repeat:no-repeat;
-  background-attachment:fixed;
-  color:var(--text);
-  padding:36px 20px;
+  min-height:100vh;
+  background: var(--bg-gradient);
+  background-attachment: fixed;
+  padding:40px;
+  color:#111;
 }
 
-.wrapper{max-width:1150px;margin:auto}
-
-/* ---------- TILES ---------- */
-
-.tiles{
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
-  gap:18px;
-  margin-bottom:28px;
-}
-
-.tile{
-  background:var(--panel);
-  border-radius:18px;
-  padding:20px;
-  display:flex;
-  gap:16px;
-  cursor:pointer;
-  box-shadow:0 12px 28px rgba(0,0,0,.08);
-  border-left:6px solid transparent;
-  transition:.2s;
-}
-.tile:hover{transform:translateY(-2px)}
-.tile.active{outline:2px solid #c7d2fe}
-
-.tile.ps{border-left-color:var(--ps)}
-.tile.xbox{border-left-color:var(--xbox)}
-.tile.nintendo{border-left-color:var(--nintendo)}
-.tile.ipad{border-left-color:var(--ipad)}
-
-.tile-logo{
-  width:52px;height:52px;border-radius:14px;
-  background:#f8fafc;display:flex;
-  align-items:center;justify-content:center;
-}
-.tile-logo img{max-width:36px;max-height:36px}
-
-/* ---------- PANEL ---------- */
-
-.panel{
-  background:var(--panel);
-  border-radius:22px;
-  overflow:hidden;
-  box-shadow:0 30px 60px rgba(0,0,0,.12);
-}
-
-.header{
-  padding:20px 30px;
+.header {
   display:flex;
   justify-content:space-between;
+  align-items:flex-start;
+  margin-bottom:30px;
+}
+
+.tiles {
+  display:grid;
+  grid-template-columns: repeat(4,1fr);
+  gap:20px;
+}
+
+.tile {
+  background:rgba(255,255,255,.12);
+  backdrop-filter: blur(12px);
+  border-radius:16px;
+  padding:20px;
+  cursor:pointer;
+  color:white;
+  transition:.25s;
+  border:1px solid rgba(255,255,255,.15);
+}
+
+.tile:hover { transform:translateY(-4px); }
+
+.tile img { height:28px; margin-bottom:10px; }
+
+.tile h3 { margin:5px 0; }
+
+.stats { font-size:13px; opacity:.85; }
+
+.live {
+  display:flex;
   align-items:center;
-  border-bottom:1px solid var(--border);
+  gap:8px;
+  font-weight:600;
+  color:white;
 }
 
-table{width:100%;border-collapse:collapse}
-th,td{padding:16px 30px;border-bottom:1px solid var(--border)}
-th{background:#f8fafc;font-size:12px;color:var(--muted)}
-
-.stock-ok{color:#16a34a;font-weight:600}
-.stock-low{color:#f59e0b;font-weight:600}
-.stock-critical{color:#dc2626;font-weight:700}
-
-.action-btn{
-  background:#2563eb;color:#fff;border:none;
-  border-radius:8px;padding:6px 14px;cursor:pointer
+.dot {
+  width:12px;
+  height:12px;
+  border-radius:50%;
 }
-.stock-input{
-  width:90px;padding:6px;border-radius:8px;border:1px solid var(--border)
+
+.live.on .dot {
+  background:#22c55e;
+  box-shadow:0 0 12px #22c55e;
+  animation:pulse 1.5s infinite;
+}
+
+.live.off .dot {
+  background:#ef4444;
+  box-shadow:0 0 12px #ef4444;
+}
+
+@keyframes pulse {
+  0%{box-shadow:0 0 0 rgba(34,197,94,.7);}
+  70%{box-shadow:0 0 20px rgba(34,197,94,0);}
+  100%{box-shadow:0 0 0 rgba(34,197,94,0);}
+}
+
+.main {
+  margin-top:40px;
+  background:white;
+  border-radius:20px;
+  padding:30px;
+  box-shadow:0 30px 60px rgba(0,0,0,.25);
+}
+
+.center-logo {
+  display:flex;
+  justify-content:center;
+  margin-bottom:20px;
+}
+
+.center-logo img {
+  height:90px;
+}
+
+h2 {
+  text-align:center;
+  margin-bottom:20px;
+}
+
+table {
+  width:100%;
+  border-collapse:collapse;
+}
+
+th,td {
+  padding:14px;
+  border-bottom:1px solid #eee;
+}
+
+th { text-align:left; }
+
+.stock-ok { color:var(--ok); font-weight:600; }
+.stock-low { color:var(--low); font-weight:600; }
+.stock-critical { color:var(--critical); font-weight:700; }
+
+button {
+  padding:8px 14px;
+  border:none;
+  border-radius:8px;
+  cursor:pointer;
+  font-weight:600;
+}
+
+.edit { background:#e5e7eb; }
+.save { background:#22c55e; color:white; }
+.cancel { background:#ef4444; color:white; }
+
+.unlock {
+  margin-bottom:15px;
+  background:#e5e7eb;
+}
+
+.unlock.active {
+  background:#22c55e;
+  color:white;
 }
 </style>
 </head>
 
 <body>
-<div class="wrapper">
 
-  <div id="brandTiles" class="tiles"></div>
-
-  <div class="panel">
-    <div class="header">
-      <h2 id="tableTitle">Select a brand</h2>
-      <button onclick="unlockEditing()">🔒 Unlock Editing</button>
+<div class="header">
+  <div class="tiles">
+    <div class="tile" onclick="loadBrand('PlayStation')">
+      <img src="https://w7.pngwing.com/pngs/576/731/png-transparent-playstation-4-playstation-3-playstation-blue-angle-electronics-thumbnail.png">
+      <h3>PlayStation</h3>
+      <div class="stats" id="ps-stats"></div>
     </div>
 
-    <table>
-      <thead>
-        <tr>
-          <th>Part</th>
-          <th>Stock</th>
-          <th>Status</th>
-          <th></th>
-        </tr>
-      </thead>
-      <tbody id="tableBody"></tbody>
-    </table>
+    <div class="tile" onclick="loadBrand('Xbox')">
+      <img src="https://toppng.com/uploads/preview/xbox-logo-png-1518x1490-117357646030uslcz65ud.webp">
+      <h3>Xbox</h3>
+      <div class="stats" id="xbox-stats"></div>
+    </div>
+
+    <div class="tile" onclick="loadBrand('Nintendo')">
+      <img src="https://w7.pngwing.com/pngs/638/371/png-transparent-nintendo-logo-nintendo-cdr-text-rectangle.png">
+      <h3>Nintendo</h3>
+      <div class="stats" id="nin-stats"></div>
+    </div>
+
+    <div class="tile" onclick="loadBrand('iPad')">
+      <img src="https://www.freepnglogos.com/uploads/apple-logo-png/apple-logo-icon-16.png">
+      <h3>iPad</h3>
+      <div class="stats" id="ipad-stats"></div>
+    </div>
   </div>
 
+  <div class="live" id="liveStatus">
+    <div class="dot"></div>
+    <span id="liveText">Checking…</span>
+  </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script>
-const SUPABASE_URL="https://thvbweemnzdvwyaxvwbz.supabase.co";
-const SUPABASE_KEY="sb_publishable_U6Nsj6HClebAVWOx7MLhng_3t2z6w1G";
-const EDIT_PASSWORD="BeckyStock";
+<div class="main">
+  <button class="unlock" id="unlockBtn" onclick="toggleEdit()">Unlock Editing</button>
 
-const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  <div class="center-logo">
+    <img src="logo.webp">
+  </div>
 
-let allData=[];
-let activeBrand=null;
-let editingUnlocked=false;
+  <h2 id="tableTitle">Select a brand</h2>
 
-const brands=["PlayStation","Xbox","Nintendo","iPad"];
-
-/* 🔴🟡🟢 PER-PRODUCT THRESHOLDS (FINAL, CORRECT VERSION) */
-function stockClass(item){
-  const low =
-    Number.isInteger(item.low_threshold) && item.low_threshold > 0
-      ? item.low_threshold
-      : 20;
-
-  const critical =
-    Number.isInteger(item.critical_threshold) && item.critical_threshold > 0
-      ? item.critical_threshold
-      : 10;
-
-  if(item.stock <= critical) return "stock-critical";
-  if(item.stock <= low) return "stock-low";
-  return "stock-ok";
-}
-
-function renderTiles(){
-  const c=document.getElementById("brandTiles");
-  c.innerHTML="";
-  brands.forEach(b=>{
-    const t=document.createElement("div");
-    t.className="tile";
-    t.innerHTML=`<strong>${b}</strong>`;
-    t.onclick=()=>{activeBrand=b;renderTable()};
-    c.appendChild(t);
-  });
-}
-
-function renderTable(){
-  if(!activeBrand)return;
-  document.getElementById("tableTitle").innerText=`${activeBrand} Parts`;
-  const body=document.getElementById("tableBody");
-  body.innerHTML="";
-
-  allData.filter(p=>p.brand===activeBrand).forEach(p=>{
-    console.log("DEBUG:",p.name,p.stock,p.low_threshold,p.critical_threshold);
-
-    body.innerHTML+=`
+  <table>
+    <thead>
       <tr>
-        <td>${p.name}</td>
-        <td class="${stockClass(p)}">${p.stock}</td>
-        <td>
-          ${p.stock <= (p.critical_threshold ?? 10) ? "Critical" :
-            p.stock <= (p.low_threshold ?? 20) ? "Low" : "OK"}
-        </td>
-        <td>
-          <button class="action-btn" onclick="startEdit(this,${p.id},${p.stock})">Edit</button>
-        </td>
+        <th>Product</th>
+        <th>Stock</th>
+        <th>Status</th>
+        <th></th>
       </tr>
-    `;
-  });
-}
+    </thead>
+    <tbody id="tableBody"></tbody>
+  </table>
+</div>
 
-function unlockEditing(){
-  if(prompt("Password")===EDIT_PASSWORD){
-    editingUnlocked=true;
-    alert("Editing unlocked");
+<script>
+const SUPABASE_URL = "https://thvbweemnzdvwyaxvwbz.supabase.co";
+const SUPABASE_KEY = "sb_publishable_U6Nsj6HClebAVWOx7MLhng_3t2z6w1G";
+const EDIT_PASSWORD = "BeckyStock";
+
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+let editingUnlocked = false;
+let currentBrand = null;
+
+function toggleEdit(){
+  if(!editingUnlocked){
+    const input = prompt("Enter edit password:");
+    if(input !== EDIT_PASSWORD){
+      alert("Incorrect password");
+      return;
+    }
+    editingUnlocked = true;
+    unlockBtn.classList.add("active");
+    unlockBtn.textContent = "Editing Unlocked";
+  } else {
+    editingUnlocked = false;
+    unlockBtn.classList.remove("active");
+    unlockBtn.textContent = "Unlock Editing";
   }
 }
 
-function startEdit(btn,id,stock){
-  if(!editingUnlocked)return;
-  const row=btn.closest("tr");
-  row.children[1].innerHTML=`<input class="stock-input" value="${stock}">`;
-  btn.outerHTML=`<button class="action-btn" onclick="saveEdit(this,${id})">Save</button>`;
+function thresholds(p){
+  return {
+    low: Number.isInteger(p.low_threshold) && p.low_threshold > 0 ? p.low_threshold : 20,
+    critical: Number.isInteger(p.critical_threshold) && p.critical_threshold > 0 ? p.critical_threshold : 10
+  };
 }
 
-async function saveEdit(btn,id){
-  const row=btn.closest("tr");
-  const val=parseInt(row.querySelector("input").value);
-
-  await client.from("products").update({stock:val}).eq("id",id);
-
-  const item=allData.find(p=>p.id===id);
-  if(item)item.stock=val;
-
-  renderTable();
+function stockClass(p){
+  const t = thresholds(p);
+  if(p.stock <= t.critical) return "stock-critical";
+  if(p.stock <= t.low) return "stock-low";
+  return "stock-ok";
 }
 
-async function loadStock(){
-  const {data,error}=await client.from("products").select("*");
-  if(error){console.error(error);return}
-  allData=data;
-  renderTiles();
+function stockStatus(p){
+  const t = thresholds(p);
+  if(p.stock <= t.critical) return "Critical";
+  if(p.stock <= t.low) return "Low";
+  return "OK";
 }
 
-loadStock();
+async function loadBrand(brand){
+  currentBrand = brand;
+  tableTitle.textContent = brand + " Parts";
+  const { data } = await supabase.from("products").select("*").eq("brand",brand);
+  render(data || []);
+}
+
+function render(data){
+  tableBody.innerHTML = "";
+  data.forEach(p=>{
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${p.product}</td>
+      <td class="${stockClass(p)}">${p.stock}</td>
+      <td>${stockStatus(p)}</td>
+      <td>
+        <button class="edit" onclick="editRow(this,${p.id},${p.stock})">Edit</button>
+      </td>`;
+    tableBody.appendChild(tr);
+  });
+}
+
+function editRow(btn,id,value){
+  if(!editingUnlocked) return;
+  const td = btn.parentElement.previousElementSibling.previousElementSibling;
+  td.innerHTML = `<input type="number" value="${value}" />`;
+  btn.outerHTML = `
+    <button class="save" onclick="saveRow(this,${id})">Save</button>
+    <button class="cancel" onclick="loadBrand(currentBrand)">Cancel</button>`;
+}
+
+async function saveRow(btn,id){
+  const input = btn.parentElement.previousElementSibling.querySelector("input");
+  const value = Number(input.value);
+  await supabase.from("products").update({ stock:value }).eq("id",id);
+  loadBrand(currentBrand);
+}
+
+async function checkLive(){
+  const { error } = await supabase.from("products").select("id").limit(1);
+  liveStatus.className = "live " + (error ? "off" : "on");
+  liveText.textContent = error ? "Offline" : "Live";
+}
+
+checkLive();
 </script>
+
 </body>
 </html>

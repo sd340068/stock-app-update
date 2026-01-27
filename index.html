@@ -18,6 +18,32 @@
   --ipad:#111827;
 }
 
+  .saved-row {
+  animation: savedFlash 0.8s ease;
+}
+
+@keyframes savedFlash {
+  0%   { background: #dcfce7; }
+  100% { background: transparent; }
+}
+
+.save-badge {
+  display: inline-block;
+  margin-left: 10px;
+  font-size: 12px;
+  color: #16a34a;
+  font-weight: 600;
+  opacity: 0;
+  animation: badgeFade 1.2s ease forwards;
+}
+
+@keyframes badgeFade {
+  0%   { opacity: 0; transform: translateY(2px); }
+  30%  { opacity: 1; transform: translateY(0); }
+  100% { opacity: 0; }
+}
+
+
 *{box-sizing:border-box}
 body{
   margin:0;
@@ -305,16 +331,34 @@ function startEdit(btn,id,stock){
 }
 
 async function saveEdit(btn,id){
-  const val=parseInt(btn.parentElement.previousElementSibling.querySelector("input").value);
+  const row = btn.closest("tr");
+  const input = row.querySelector("input");
+  const val = parseInt(input.value);
 
   await client.from("products").update({stock:val}).eq("id",id);
 
-  const item=allData.find(p=>p.id===id);
-  if(item) item.stock=val;
+  const item = allData.find(p => p.id === id);
+  if(item) item.stock = val;
 
   renderTable();
   renderTiles();
+
+  // Re-find the updated row
+  const rows = [...document.querySelectorAll("#tableBody tr")];
+  const updatedRow = rows.find(r => r.innerText.includes(item.name));
+
+  if(updatedRow){
+    updatedRow.classList.add("saved-row");
+
+    const stockCell = updatedRow.children[2];
+    stockCell.innerHTML += `<span class="save-badge">✔ Saved</span>`;
+
+    setTimeout(() => {
+      updatedRow.classList.remove("saved-row");
+    }, 800);
+  }
 }
+
 
 async function loadStock(){
   const {data}=await client.from("products").select("*");
@@ -328,3 +372,4 @@ loadStock();
 </script>
 </body>
 </html>
+

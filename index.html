@@ -32,10 +32,7 @@ body{
   padding:36px 20px;
 }
 
-.wrapper{
-  max-width:1150px;
-  margin:auto;
-}
+.wrapper{max-width:1150px;margin:auto}
 
 /* ---------- TILES ---------- */
 
@@ -57,13 +54,8 @@ body{
   border-left:6px solid transparent;
   transition:.2s;
 }
-.tile:hover{
-  transform:translateY(-2px);
-  box-shadow:0 18px 36px rgba(0,0,0,.12);
-}
-.tile.active{
-  outline:2px solid #c7d2fe;
-}
+.tile:hover{transform:translateY(-2px)}
+.tile.active{outline:2px solid #c7d2fe}
 
 .tile.ps{border-left-color:var(--ps)}
 .tile.xbox{border-left-color:var(--xbox)}
@@ -71,18 +63,11 @@ body{
 .tile.ipad{border-left-color:var(--ipad)}
 
 .tile-logo{
-  width:52px;
-  height:52px;
-  border-radius:14px;
-  background:#f8fafc;
-  display:flex;
-  align-items:center;
-  justify-content:center;
+  width:52px;height:52px;border-radius:14px;
+  background:#f8fafc;display:flex;
+  align-items:center;justify-content:center;
 }
-.tile-logo img{
-  max-width:36px;
-  max-height:36px;
-}
+.tile-logo img{max-width:36px;max-height:36px}
 
 /* ---------- PANEL ---------- */
 
@@ -93,35 +78,6 @@ body{
   box-shadow:0 30px 60px rgba(0,0,0,.12);
 }
 
-/* BRAND MOOD */
-.panel[data-brand="PlayStation"] .header{background:rgba(37,99,235,.06)}
-.panel[data-brand="Xbox"] .header{background:rgba(22,163,74,.06)}
-.panel[data-brand="Nintendo"] .header{background:rgba(220,38,38,.06)}
-.panel[data-brand="iPad"] .header{background:rgba(15,23,42,.06)}
-
-.panel-brand{
-  text-align:center;
-  padding:28px 20px 12px;
-  border-bottom:1px solid var(--border);
-}
-
-.panel-brand img{
-  height:90px;
-  margin-bottom:12px;
-}
-
-.panel-title{
-  font-size:18px;
-  font-weight:600;
-}
-
-.panel-subtitle{
-  font-size:13px;
-  color:var(--muted);
-}
-
-/* ---------- HEADER ---------- */
-
 .header{
   padding:20px 30px;
   display:flex;
@@ -130,112 +86,20 @@ body{
   border-bottom:1px solid var(--border);
 }
 
-.header-right{
-  display:flex;
-  align-items:center;
-  gap:14px;
-}
-
-/* STATUS */
-.status{
-  display:flex;
-  align-items:center;
-  gap:8px;
-  font-size:12px;
-  font-weight:600;
-}
-.status .dot{
-  width:10px;
-  height:10px;
-  border-radius:50%;
-}
-.status.live .dot{
-  background:#22c55e;
-  animation:pulse 2s infinite;
-}
-.status.offline .dot{
-  background:#ef4444;
-  box-shadow:0 0 10px rgba(239,68,68,.9);
-}
-.status.live .label{color:#16a34a}
-.status.offline .label{color:#dc2626}
-
-@keyframes pulse{
-  0%{box-shadow:0 0 6px rgba(34,197,94,.6)}
-  50%{box-shadow:0 0 14px rgba(34,197,94,1)}
-  100%{box-shadow:0 0 6px rgba(34,197,94,.6)}
-}
-
-/* ---------- TABLE ---------- */
-
-table{
-  width:100%;
-  border-collapse:collapse;
-}
-
-th,td{
-  padding:16px 30px;
-  border-bottom:1px solid var(--border);
-}
-
-th{
-  background:#f8fafc;
-  font-size:12px;
-  color:var(--muted);
-  position:sticky;
-  top:0;
-}
-
-tbody tr:hover{background:#f8fafc}
+table{width:100%;border-collapse:collapse}
+th,td{padding:16px 30px;border-bottom:1px solid var(--border)}
+th{background:#f8fafc;font-size:12px;color:var(--muted)}
 
 .stock-ok{color:#16a34a;font-weight:600}
 .stock-low{color:#f59e0b;font-weight:600}
-.stock-critical{
-  color:#dc2626;
-  font-weight:700;
-  text-shadow:0 0 8px rgba(220,38,38,.35);
-}
+.stock-critical{color:#dc2626;font-weight:700}
 
 .action-btn{
-  background:#2563eb;
-  color:#fff;
-  border:none;
-  border-radius:8px;
-  padding:6px 14px;
-  cursor:pointer;
+  background:#2563eb;color:#fff;border:none;
+  border-radius:8px;padding:6px 14px;cursor:pointer
 }
-
-.secondary{
-  background:#e5e7eb;
-  color:#0f172a;
-}
-
 .stock-input{
-  width:90px;
-  padding:6px;
-  border-radius:8px;
-  border:1px solid var(--border);
-}
-
-/* SAVE FEEDBACK */
-
-.saved-row{animation:savedFlash .8s}
-@keyframes savedFlash{
-  0%{background:#dcfce7}
-  100%{background:transparent}
-}
-
-.save-badge{
-  margin-left:10px;
-  font-size:11px;
-  color:#16a34a;
-  font-weight:600;
-  animation:fadeBadge 1.2s forwards;
-}
-@keyframes fadeBadge{
-  0%{opacity:0}
-  30%{opacity:1}
-  100%{opacity:0}
+  width:90px;padding:6px;border-radius:8px;border:1px solid var(--border)
 }
 </style>
 </head>
@@ -246,35 +110,24 @@ tbody tr:hover{background:#f8fafc}
   <div id="brandTiles" class="tiles"></div>
 
   <div class="panel">
-    <div class="panel-brand">
-      <img src="/logo.webp">
-      <div class="panel-title">Console Parts Inventory</div>
-      <div class="panel-subtitle">Live stock management</div>
-    </div>
-
     <div class="header">
       <h2 id="tableTitle">Select a brand</h2>
-      <div class="header-right">
-        <div id="connectionStatus" class="status live">
-          <span class="dot"></span>
-          <span class="label">LIVE</span>
-        </div>
-        <button id="unlockBtn" onclick="unlockEditing()">🔒 Unlock Editing</button>
-      </div>
+      <button onclick="unlockEditing()">🔒 Unlock Editing</button>
     </div>
 
     <table>
       <thead>
         <tr>
           <th>Part</th>
-          <th>Brand</th>
           <th>Stock</th>
+          <th>Status</th>
           <th></th>
         </tr>
       </thead>
       <tbody id="tableBody"></tbody>
     </table>
   </div>
+
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -283,180 +136,102 @@ const SUPABASE_URL="https://thvbweemnzdvwyaxvwbz.supabase.co";
 const SUPABASE_KEY="sb_publishable_U6Nsj6HClebAVWOx7MLhng_3t2z6w1G";
 const EDIT_PASSWORD="BeckyStock";
 
-const client=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-let allData=[],activeBrand=null,editingUnlocked=false;
-const stockHistory={};
+let allData=[];
+let activeBrand=null;
+let editingUnlocked=false;
 
-const brands=[
- {name:"PlayStation",key:"ps",logo:"https://w7.pngwing.com/pngs/576/731/png-transparent-playstation-4-playstation-3-playstation-blue-angle-electronics-thumbnail.png"},
- {name:"Xbox",key:"xbox",logo:"https://toppng.com/uploads/preview/xbox-logo-png-1518x1490-117357646030uslcz65ud.webp"},
- {name:"Nintendo",key:"nintendo",logo:"https://w7.pngwing.com/pngs/638/371/png-transparent-nintendo-logo-nintendo-cdr-text-rectangle.png"},
- {name:"iPad",key:"ipad",logo:"https://www.freepnglogos.com/uploads/apple-logo-png/apple-logo-icon-16.png"}
-];
+const brands=["PlayStation","Xbox","Nintendo","iPad"];
 
+/* 🔴🟡🟢 PER-PRODUCT THRESHOLDS (FINAL, CORRECT VERSION) */
 function stockClass(item){
-  const critical =
-    item.critical_threshold && item.critical_threshold > 0
-      ? item.critical_threshold
-      : 10;
-
   const low =
-    item.low_threshold && item.low_threshold > 0
+    Number.isInteger(item.low_threshold) && item.low_threshold > 0
       ? item.low_threshold
       : 20;
+
+  const critical =
+    Number.isInteger(item.critical_threshold) && item.critical_threshold > 0
+      ? item.critical_threshold
+      : 10;
 
   if(item.stock <= critical) return "stock-critical";
   if(item.stock <= low) return "stock-low";
   return "stock-ok";
 }
 
-
-function getBrandStats(brand){
- const items=allData.filter(p=>p.brand===brand);
- return{total:items.length,critical:items.filter(p=>p.stock<10).length}
-}
-
-/* ROLLING AVERAGE TIME-TO-ZERO */
-function estimateTimeToZero(id){
- const h=stockHistory[id];
- if(!h || h.length < 3) return null;
-
- const last = h.slice(-5); // last 5 changes
- let totalDelta=0;
- let totalDays=0;
-
- for(let i=1; i<last.length; i++){
-   const prev=last[i-1];
-   const cur=last[i];
-   const deltaStock = prev.stock - cur.stock;
-   const deltaDays = (cur.time - prev.time) / (1000*60*60*24);
-   if(deltaStock>0 && deltaDays>0){
-     totalDelta += deltaStock;
-     totalDays += deltaDays;
-   }
- }
-
- if(totalDelta<=0 || totalDays<=0) return null;
-
- const ratePerDay = totalDelta / totalDays;
- const current = last[last.length-1];
- const daysLeft = Math.floor(current.stock / ratePerDay);
-
- if(daysLeft <= 0 || daysLeft > 180) return null;
- return daysLeft;
-}
-
 function renderTiles(){
- const c=document.getElementById("brandTiles");
- c.innerHTML="";
- brands.forEach(b=>{
-  const s=getBrandStats(b.name);
-  const t=document.createElement("div");
-  t.className=`tile ${b.key} ${activeBrand===b.name?"active":""}`;
-  t.onclick=()=>{activeBrand=b.name;renderTiles();renderTable();}
-  t.innerHTML=`
-   <div class="tile-logo"><img src="${b.logo}"></div>
-   <div>
-     <strong>${b.name}</strong>
-     <div style="font-size:12px;color:var(--muted);margin-top:6px">
-       ${s.total} parts • ${s.critical} critical
-     </div>
-   </div>`;
-  c.appendChild(t);
- });
+  const c=document.getElementById("brandTiles");
+  c.innerHTML="";
+  brands.forEach(b=>{
+    const t=document.createElement("div");
+    t.className="tile";
+    t.innerHTML=`<strong>${b}</strong>`;
+    t.onclick=()=>{activeBrand=b;renderTable()};
+    c.appendChild(t);
+  });
 }
 
 function renderTable(){
- if(!activeBrand)return;
- document.querySelector(".panel").dataset.brand=activeBrand;
- document.getElementById("tableTitle").innerText=`${activeBrand} Parts`;
+  if(!activeBrand)return;
+  document.getElementById("tableTitle").innerText=`${activeBrand} Parts`;
+  const body=document.getElementById("tableBody");
+  body.innerHTML="";
 
- const body=document.getElementById("tableBody");
- body.innerHTML="";
+  allData.filter(p=>p.brand===activeBrand).forEach(p=>{
+    console.log("DEBUG:",p.name,p.stock,p.low_threshold,p.critical_threshold);
 
- allData.filter(p=>p.brand===activeBrand).forEach(p=>{
-  const eta=estimateTimeToZero(p.id);
-  body.innerHTML+=`
-   <tr>
-    <td>${p.name}</td>
-    <td>${p.brand}</td>
-    <td class="${stockClass(p)}">
-
-      ${p.stock}
-      ${eta?`<div style="font-size:11px;color:var(--muted)">~${eta} days left</div>`:""}
-    </td>
-    <td><button class="action-btn" onclick="startEdit(this,${p.id},${p.stock})">Edit</button></td>
-   </tr>`;
- });
+    body.innerHTML+=`
+      <tr>
+        <td>${p.name}</td>
+        <td class="${stockClass(p)}">${p.stock}</td>
+        <td>
+          ${p.stock <= (p.critical_threshold ?? 10) ? "Critical" :
+            p.stock <= (p.low_threshold ?? 20) ? "Low" : "OK"}
+        </td>
+        <td>
+          <button class="action-btn" onclick="startEdit(this,${p.id},${p.stock})">Edit</button>
+        </td>
+      </tr>
+    `;
+  });
 }
 
 function unlockEditing(){
- if(prompt("Password")==EDIT_PASSWORD){
-  editingUnlocked=true;
-  const b=document.getElementById("unlockBtn");
-  b.innerText="Unlocked";
-  b.style.background="#16a34a";
-  b.style.color="#fff";
-  b.disabled=true;
- }
+  if(prompt("Password")===EDIT_PASSWORD){
+    editingUnlocked=true;
+    alert("Editing unlocked");
+  }
 }
 
 function startEdit(btn,id,stock){
- if(!editingUnlocked)return;
- const row=btn.closest("tr");
- row.children[2].innerHTML=`<input class="stock-input" value="${stock}">`;
- btn.parentElement.innerHTML=`<button class="action-btn" onclick="saveEdit(this,${id})">Save</button>`;
+  if(!editingUnlocked)return;
+  const row=btn.closest("tr");
+  row.children[1].innerHTML=`<input class="stock-input" value="${stock}">`;
+  btn.outerHTML=`<button class="action-btn" onclick="saveEdit(this,${id})">Save</button>`;
 }
 
 async function saveEdit(btn,id){
- const row=btn.closest("tr");
- const val=parseInt(row.querySelector("input").value);
+  const row=btn.closest("tr");
+  const val=parseInt(row.querySelector("input").value);
 
- await client.from("products").update({stock:val}).eq("id",id);
+  await client.from("products").update({stock:val}).eq("id",id);
 
- const item=allData.find(p=>p.id===id);
- if(item){
-  if(!stockHistory[id])stockHistory[id]=[];
-  stockHistory[id].push({stock:val,time:Date.now()});
-  item.stock=val;
- }
+  const item=allData.find(p=>p.id===id);
+  if(item)item.stock=val;
 
- renderTable();
- renderTiles();
-
- const rows=[...document.querySelectorAll("#tableBody tr")];
- const r=rows.find(x=>x.innerText.includes(item.name));
- if(r){
-  r.classList.add("saved-row");
-  r.children[2].innerHTML+=`<span class="save-badge">✔ Saved</span>`;
- }
+  renderTable();
 }
 
 async function loadStock(){
- const {data}=await client.from("products").select("*");
- allData=data||[];
- renderTiles();
+  const {data,error}=await client.from("products").select("*");
+  if(error){console.error(error);return}
+  allData=data;
+  renderTiles();
 }
 
-function updateConnectionStatus(){
- const el=document.getElementById("connectionStatus");
- if(navigator.onLine){
-  el.className="status live";
-  el.querySelector(".label").innerText="LIVE";
- }else{
-  el.className="status offline";
-  el.querySelector(".label").innerText="OFFLINE";
- }
-}
-
-window.addEventListener("online",updateConnectionStatus);
-window.addEventListener("offline",updateConnectionStatus);
-
-updateConnectionStatus();
 loadStock();
 </script>
 </body>
 </html>
-
-

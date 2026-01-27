@@ -296,25 +296,30 @@ const brands=[
 ];
 
 function stockClass(item){
-  const critical =
-    Number.isInteger(item.critical_threshold) && item.critical_threshold > 0
-      ? item.critical_threshold
-      : 10;
+  // Try both naming styles
+  const criticalValue =
+    item.critical_threshold ?? item.critical ?? item.criticalLevel ?? null;
+  const lowValue =
+    item.low_threshold ?? item.low ?? item.lowLevel ?? null;
 
-  const low =
-    Number.isInteger(item.low_threshold) && item.low_threshold > 0
-      ? item.low_threshold
-      : 20;
+  const critical = Number(criticalValue);
+  const low = Number(lowValue);
 
-  if(item.stock <= critical) return "stock-critical";
-  if(item.stock <= low) return "stock-low";
+  const crit = Number.isFinite(critical) ? critical : 2;
+  const lw = Number.isFinite(low) ? low : 5;
+
+  if (item.stock <= crit) return "stock-critical";
+  if (item.stock <= lw) return "stock-low";
   return "stock-ok";
 }
 
 function getBrandStats(brand){
  const items=allData.filter(p=>p.brand===brand);
- return{total:items.length,critical:items.filter(p=>p.stock<10).length}
+ return {
+  total: items.length,
+  critical: items.filter(p => stockClass(p) === "stock-critical").length
 }
+
 
 /* ROLLING AVERAGE TIME-TO-ZERO */
 function estimateTimeToZero(id){
@@ -456,3 +461,4 @@ loadStock();
 </script>
 </body>
 </html>
+

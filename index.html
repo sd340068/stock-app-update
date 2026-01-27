@@ -296,8 +296,15 @@ const brands=[
 ];
 
 function stockClass(item){
-  const critical = item.critical_threshold ?? 10;
-  const low = item.low_threshold ?? 20;
+  const critical =
+    item.critical_threshold && item.critical_threshold > 0
+      ? item.critical_threshold
+      : 10;
+
+  const low =
+    item.low_threshold && item.low_threshold > 0
+      ? item.low_threshold
+      : 20;
 
   if(item.stock <= critical) return "stock-critical";
   if(item.stock <= low) return "stock-low";
@@ -451,4 +458,5 @@ loadStock();
 </script>
 </body>
 </html>
+
 

@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Inventory</title>
 
+  
+
 <style>
 :root {
   --bg:#f1f5f9;
@@ -92,6 +94,23 @@ body{
   overflow:hidden;
   box-shadow:0 30px 60px rgba(0,0,0,.12);
 }
+
+  .panel[data-brand="PlayStation"] .header {
+  background: rgba(37, 99, 235, 0.06);
+}
+
+.panel[data-brand="Xbox"] .header {
+  background: rgba(22, 163, 74, 0.06);
+}
+
+.panel[data-brand="Nintendo"] .header {
+  background: rgba(220, 38, 38, 0.06);
+}
+
+.panel[data-brand="iPad"] .header {
+  background: rgba(15, 23, 42, 0.06);
+}
+
 
 .panel-brand{
   text-align:center;
@@ -223,6 +242,9 @@ tbody tr:hover{background:#f8fafc}
   animation:savedFlash .8s ease;
 }
 
+  const stockHistory = {};
+
+
 @keyframes savedFlash{
   0%{background:#dcfce7}
   100%{background:transparent}
@@ -329,7 +351,14 @@ function renderTiles(){
 }
 
 function renderTable(){
- if(!activeBrand)return;
+ function renderTable(){
+  if(!activeBrand) return;
+
+  const panel = document.querySelector(".panel");
+  panel.setAttribute("data-brand", activeBrand);
+
+  document.getElementById("tableTitle").innerText = `${activeBrand} Parts`;
+
  document.getElementById("tableTitle").innerText=`${activeBrand} Parts`;
  const body=document.getElementById("tableBody");
  body.innerHTML="";
@@ -367,12 +396,25 @@ async function saveEdit(btn,id){
  await client.from("products").update({stock:val}).eq("id",id);
  const item=allData.find(p=>p.id===id);
  if(item)item.stock=val;
+  if(!stockHistory[id]) stockHistory[id] = [];
+stockHistory[id].push({
+  stock: val,
+  time: Date.now()
+});
+
  renderTable();renderTiles();
  const rows=[...document.querySelectorAll("#tableBody tr")];
  const r=rows.find(x=>x.innerText.includes(item.name));
  if(r){
   r.classList.add("saved-row");
   r.children[2].innerHTML+=`<span class="save-badge">✔ Saved</span>`;
+   const eta = estimateTimeToZero(p.id);
+
+<td class="${stockClass(p.stock)}">
+  ${p.stock}
+  ${eta ? `<div style="font-size:11px;color:var(--muted)">~${eta} days left</div>` : ""}
+</td>
+
  }
 }
 
@@ -398,6 +440,29 @@ window.addEventListener("offline",updateConnectionStatus);
 
 updateConnectionStatus();
 loadStock();
+
+
+  function estimateTimeToZero(id){
+  const h = stockHistory[id];
+  if(!h || h.length < 2) return null;
+
+  const a = h[h.length - 2];
+  const b = h[h.length - 1];
+
+  const deltaStock = a.stock - b.stock;
+  const deltaTime = (b.time - a.time) / (1000 * 60 * 60 * 24); // days
+
+  if(deltaStock <= 0 || deltaTime <= 0) return null;
+
+  const perDay = deltaStock / deltaTime;
+  const daysLeft = Math.floor(b.stock / perDay);
+
+  if(daysLeft > 180) return null; // ignore silly estimates
+
+  return daysLeft;
+}
+
 </script>
 </body>
 </html>
+

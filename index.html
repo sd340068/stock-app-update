@@ -311,7 +311,6 @@ function stockClass(item){
   return "stock-ok";
 }
 
-
 function getBrandStats(brand){
  const items=allData.filter(p=>p.brand===brand);
  return{total:items.length,critical:items.filter(p=>p.stock<10).length}
@@ -381,7 +380,7 @@ function renderTable(){
    <tr>
     <td>${p.name}</td>
     <td>${p.brand}</td>
-   <td class="${stockClass(p)}">
+    <td class="${stockClass(p)}">
       ${p.stock}
       ${eta?`<div style="font-size:11px;color:var(--muted)">~${eta} days left</div>`:""}
     </td>
@@ -457,4 +456,3 @@ loadStock();
 </script>
 </body>
 </html>
-

@@ -316,9 +316,11 @@ function stockClass(item){
 function getBrandStats(brand){
  const items=allData.filter(p=>p.brand===brand);
  return {
-  total: items.length,
-  critical: items.filter(p => stockClass(p) === "stock-critical").length
+   total: items.length,
+   critical: items.filter(p => stockClass(p) === "stock-critical").length
+ }
 }
+
 
 
 /* ROLLING AVERAGE TIME-TO-ZERO */
@@ -461,4 +463,5 @@ loadStock();
 </script>
 </body>
 </html>
+
 

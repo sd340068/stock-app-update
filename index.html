@@ -296,68 +296,30 @@ const brands=[
 ];
 
 function stockClass(item){
-  // Try both naming styles
-  const criticalValue =
-    item.critical_threshold ?? item.critical ?? item.criticalLevel ?? null;
-  const lowValue =
-    item.low_threshold ?? item.low ?? item.lowLevel ?? null;
-
-  const critical = Number(criticalValue);
-  const low = Number(lowValue);
-
-  const crit = Number.isFinite(critical) ? critical : 2;
-  const lw = Number.isFinite(low) ? low : 5;
-
-  if (item.stock <= crit) return "stock-critical";
-  if (item.stock <= lw) return "stock-low";
-  return "stock-ok";
+ const crit = Number(item.critical_threshold ?? 2);
+ const low = Number(item.low_threshold ?? 5);
+ if(item.stock <= crit) return "stock-critical";
+ if(item.stock <= low) return "stock-low";
+ return "stock-ok";
 }
 
-function getBrandStats(brand){
- const items=allData.filter(p=>p.brand===brand);
- return {
-   total: items.length,
-   critical: items.filter(p => stockClass(p) === "stock-critical").length
- }
-}
-
-
-
-/* ROLLING AVERAGE TIME-TO-ZERO */
-function estimateTimeToZero(id){
- const h=stockHistory[id];
- if(!h || h.length < 3) return null;
-
- const last = h.slice(-5); // last 5 changes
- let totalDelta=0;
- let totalDays=0;
-
- for(let i=1; i<last.length; i++){
-   const prev=last[i-1];
-   const cur=last[i];
-   const deltaStock = prev.stock - cur.stock;
-   const deltaDays = (cur.time - prev.time) / (1000*60*60*24);
-   if(deltaStock>0 && deltaDays>0){
-     totalDelta += deltaStock;
-     totalDays += deltaDays;
-   }
- }
-
- if(totalDelta<=0 || totalDays<=0) return null;
-
- const ratePerDay = totalDelta / totalDays;
- const current = last[last.length-1];
- const daysLeft = Math.floor(current.stock / ratePerDay);
-
- if(daysLeft <= 0 || daysLeft > 180) return null;
- return daysLeft;
+/* ---------- NEW: time formatting ---------- */
+function timeAgo(date){
+ const d = new Date(date);
+ const mins = Math.floor((Date.now() - d) / 60000);
+ if(mins < 1) return "just now";
+ if(mins < 60) return `${mins} min ago`;
+ const hrs = Math.floor(mins / 60);
+ if(hrs < 24) return `${hrs}h ago`;
+ return `${Math.floor(hrs / 24)}d ago`;
 }
 
 function renderTiles(){
  const c=document.getElementById("brandTiles");
  c.innerHTML="";
  brands.forEach(b=>{
-  const s=getBrandStats(b.name);
+  const items=allData.filter(p=>p.brand===b.name);
+  const critical=items.filter(p=>stockClass(p)==="stock-critical").length;
   const t=document.createElement("div");
   t.className=`tile ${b.key} ${activeBrand===b.name?"active":""}`;
   t.onclick=()=>{activeBrand=b.name;renderTiles();renderTable();}
@@ -366,7 +328,7 @@ function renderTiles(){
    <div>
      <strong>${b.name}</strong>
      <div style="font-size:12px;color:var(--muted);margin-top:6px">
-       ${s.total} parts • ${s.critical} critical
+       ${items.length} parts • ${critical} critical
      </div>
    </div>`;
   c.appendChild(t);
@@ -382,14 +344,14 @@ function renderTable(){
  body.innerHTML="";
 
  allData.filter(p=>p.brand===activeBrand).forEach(p=>{
-  const eta=estimateTimeToZero(p.id);
+  const updated = p.updated_at ? timeAgo(p.updated_at) : "—";
   body.innerHTML+=`
    <tr>
     <td>${p.name}</td>
     <td>${p.brand}</td>
     <td class="${stockClass(p)}">
       ${p.stock}
-      ${eta?`<div style="font-size:11px;color:var(--muted)">~${eta} days left</div>`:""}
+      <div style="font-size:11px;color:var(--muted)">Updated ${updated}</div>
     </td>
     <td><button class="action-btn" onclick="startEdit(this,${p.id},${p.stock})">Edit</button></td>
    </tr>`;
@@ -418,24 +380,18 @@ async function saveEdit(btn,id){
  const row=btn.closest("tr");
  const val=parseInt(row.querySelector("input").value);
 
- await client.from("products").update({stock:val}).eq("id",id);
+ await client.from("products")
+  .update({stock:val, updated_at:new Date().toISOString()})
+  .eq("id",id);
 
  const item=allData.find(p=>p.id===id);
  if(item){
-  if(!stockHistory[id])stockHistory[id]=[];
-  stockHistory[id].push({stock:val,time:Date.now()});
   item.stock=val;
+  item.updated_at=new Date().toISOString();
  }
 
  renderTable();
  renderTiles();
-
- const rows=[...document.querySelectorAll("#tableBody tr")];
- const r=rows.find(x=>x.innerText.includes(item.name));
- if(r){
-  r.classList.add("saved-row");
-  r.children[2].innerHTML+=`<span class="save-badge">✔ Saved</span>`;
- }
 }
 
 async function loadStock(){
@@ -444,24 +400,7 @@ async function loadStock(){
  renderTiles();
 }
 
-function updateConnectionStatus(){
- const el=document.getElementById("connectionStatus");
- if(navigator.onLine){
-  el.className="status live";
-  el.querySelector(".label").innerText="LIVE";
- }else{
-  el.className="status offline";
-  el.querySelector(".label").innerText="OFFLINE";
- }
-}
-
-window.addEventListener("online",updateConnectionStatus);
-window.addEventListener("offline",updateConnectionStatus);
-
-updateConnectionStatus();
 loadStock();
 </script>
 </body>
 </html>
-
-

@@ -279,20 +279,21 @@ tbody tr:hover{background:#f8fafc}
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-const SUPABASE_URL="https://thvbweemnzdvwyaxvwbz.supabase.co";
-const SUPABASE_KEY="sb_publishable_U6Nsj6HClebAVWOx7MLhng_3t2z6w1G";
-const EDIT_PASSWORD="BeckyStock";
+const SUPABASE_URL = "https://thvbweemnzdvwyaxvwbz.supabase.co";
+const SUPABASE_KEY = "sb_publishable_U6Nsj6HClebAVWOx7MLhng_3t2z6w1G";
+const EDIT_PASSWORD = "BeckyStock";
 
-const client=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-let allData=[],activeBrand=null,editingUnlocked=false;
-const stockHistory={};
+let allData = [];
+let activeBrand = null;
+let editingUnlocked = false;
 
-const brands=[
- {name:"PlayStation",key:"ps",logo:"https://w7.pngwing.com/pngs/576/731/png-transparent-playstation-4-playstation-3-playstation-blue-angle-electronics-thumbnail.png"},
- {name:"Xbox",key:"xbox",logo:"https://toppng.com/uploads/preview/xbox-logo-png-1518x1490-117357646030uslcz65ud.webp"},
- {name:"Nintendo",key:"nintendo",logo:"https://w7.pngwing.com/pngs/638/371/png-transparent-nintendo-logo-nintendo-cdr-text-rectangle.png"},
- {name:"iPad",key:"ipad",logo:"https://www.freepnglogos.com/uploads/apple-logo-png/apple-logo-icon-16.png"}
+const brands = [
+ { name:"PlayStation", key:"ps", logo:"https://w7.pngwing.com/pngs/576/731/png-transparent-playstation-4-playstation-3-playstation-blue-angle-electronics-thumbnail.png" },
+ { name:"Xbox", key:"xbox", logo:"https://toppng.com/uploads/preview/xbox-logo-png-1518x1490-117357646030uslcz65ud.webp" },
+ { name:"Nintendo", key:"nintendo", logo:"https://w7.pngwing.com/pngs/638/371/png-transparent-nintendo-logo-nintendo-cdr-text-rectangle.png" },
+ { name:"iPad", key:"ipad", logo:"https://www.freepnglogos.com/uploads/apple-logo-png/apple-logo-icon-16.png" }
 ];
 
 function stockClass(item){
@@ -303,7 +304,6 @@ function stockClass(item){
  return "stock-ok";
 }
 
-/* ---------- NEW: time formatting ---------- */
 function timeAgo(date){
  const d = new Date(date);
  const mins = Math.floor((Date.now() - d) / 60000);
@@ -315,79 +315,116 @@ function timeAgo(date){
 }
 
 function renderTiles(){
- const c=document.getElementById("brandTiles");
- c.innerHTML="";
- brands.forEach(b=>{
-  const items=allData.filter(p=>p.brand===b.name);
-  const critical=items.filter(p=>stockClass(p)==="stock-critical").length;
-  const t=document.createElement("div");
-  t.className=`tile ${b.key} ${activeBrand===b.name?"active":""}`;
-  t.onclick=()=>{activeBrand=b.name;renderTiles();renderTable();}
-  t.innerHTML=`
-   <div class="tile-logo"><img src="${b.logo}"></div>
-   <div>
-     <strong>${b.name}</strong>
-     <div style="font-size:12px;color:var(--muted);margin-top:6px">
-       ${items.length} parts • ${critical} critical
-     </div>
-   </div>`;
+ const c = document.getElementById("brandTiles");
+ c.innerHTML = "";
+
+ brands.forEach(b => {
+  const items = allData.filter(p => p.brand === b.name);
+  const critical = items.filter(p => stockClass(p) === "stock-critical").length;
+
+  const t = document.createElement("div");
+  t.className = `tile ${b.key} ${activeBrand === b.name ? "active" : ""}`;
+  t.onclick = () => {
+    activeBrand = b.name;
+    renderTiles();
+    renderTable();
+  };
+
+  t.innerHTML = `
+    <div class="tile-logo"><img src="${b.logo}"></div>
+    <div>
+      <strong>${b.name}</strong>
+      <div style="font-size:12px;color:var(--muted);margin-top:6px">
+        ${items.length} parts • ${critical} critical
+      </div>
+    </div>
+  `;
   c.appendChild(t);
  });
 }
 
 function renderTable(){
- if(!activeBrand)return;
- document.querySelector(".panel").dataset.brand=activeBrand;
- document.getElementById("tableTitle").innerText=`${activeBrand} Parts`;
+ if(!activeBrand) return;
 
- const body=document.getElementById("tableBody");
- body.innerHTML="";
+ document.querySelector(".panel").dataset.brand = activeBrand;
+ document.getElementById("tableTitle").innerText = `${activeBrand} Parts`;
 
- allData.filter(p=>p.brand===activeBrand).forEach(p=>{
+ const body = document.getElementById("tableBody");
+ body.innerHTML = "";
+
+ allData.filter(p => p.brand === activeBrand).forEach(p => {
   const updated = p.updated_at ? timeAgo(p.updated_at) : "—";
-  body.innerHTML+=`
-   <tr>
-    <td>${p.name}</td>
-    <td>${p.brand}</td>
-    <td class="${stockClass(p)}">
-      ${p.stock}
-      <div style="font-size:11px;color:var(--muted)">Updated ${updated}</div>
-    </td>
-    <td><button class="action-btn" onclick="startEdit(this,${p.id},${p.stock})">Edit</button></td>
-   </tr>`;
+
+  body.innerHTML += `
+    <tr>
+      <td>${p.name}</td>
+      <td>${p.brand}</td>
+      <td class="${stockClass(p)}">
+        ${p.stock}
+        <div style="font-size:11px;color:var(--muted)">Updated ${updated}</div>
+      </td>
+      <td>
+        <button class="action-btn" onclick="startEdit(this, ${p.id}, ${p.stock})">Edit</button>
+      </td>
+    </tr>
+  `;
  });
 }
 
 function unlockEditing(){
- if(prompt("Password")==EDIT_PASSWORD){
-  editingUnlocked=true;
-  const b=document.getElementById("unlockBtn");
-  b.innerText="Unlocked";
-  b.style.background="#16a34a";
-  b.style.color="#fff";
-  b.disabled=true;
+ if(prompt("Password") === EDIT_PASSWORD){
+  editingUnlocked = true;
+  const b = document.getElementById("unlockBtn");
+  b.innerText = "Unlocked";
+  b.style.background = "#16a34a";
+  b.style.color = "#fff";
+  b.disabled = true;
  }
 }
 
-function startEdit(btn,id,stock){
- if(!editingUnlocked)return;
- const row=btn.closest("tr");
- row.children[2].innerHTML=`<input class="stock-input" value="${stock}">`;
- btn.parentElement.innerHTML=`<button class="action-btn" onclick="saveEdit(this,${id})">Save</button>`;
+function startEdit(btn, id, stock){
+ if(!editingUnlocked) return;
+
+ const row = btn.closest("tr");
+ row.children[2].innerHTML = `<input class="stock-input" type="number" value="${stock}">`;
+ btn.parentElement.innerHTML =
+   `<button class="action-btn" onclick="saveEdit(this, ${id})">Save</button>`;
 }
 
-async function saveEdit(btn,id){
- const row=btn.closest("tr");
- const val=parseInt(row.querySelector("input").value);
+async function saveEdit(btn, id){
+ const row = btn.closest("tr");
+ const val = parseInt(row.querySelector("input").value, 10);
 
- await client.from("products")
-  .update({stock:val, updated_at:new Date().toISOString()})
-  .eq("id",id);
+ if (Number.isNaN(val)) {
+  alert("Invalid number");
+  return;
+ }
 
- const item=allData.find(p=>p.id===id);
- if(item){
-  item.stock=val;
-  item.updated_at=new Date().toISOString();
+ btn.disabled = true;
+ btn.innerText = "Saving…";
+
+ const { data, error } = await client
+  .from("products")
+  .update({
+    stock: val,
+    updated_at: new Date().toISOString()
+  })
+  .eq("id", id)
+  .select();
+
+ if (error) {
+  alert("Save failed: " + error.message);
+  console.error(error);
+  btn.disabled = false;
+  btn.innerText = "Save";
+  return;
+ }
+
+ // update local cache ONLY after DB success
+ const item = allData.find(p => p.id === id);
+ if (item) {
+  item.stock = val;
+  item.updated_at = new Date().toISOString();
  }
 
  renderTable();
@@ -395,13 +432,25 @@ async function saveEdit(btn,id){
 }
 
 async function loadStock(){
- const {data}=await client.from("products").select("*");
- allData=data||[];
+ const { data, error } = await client
+  .from("products")
+  .select("*")
+  .order("brand");
+
+ if (error) {
+  alert("Load failed");
+  console.error(error);
+  return;
+ }
+
+ allData = data;
  renderTiles();
 }
 
 loadStock();
 </script>
+
 </body>
 </html>
+
 

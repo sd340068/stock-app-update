@@ -14,6 +14,7 @@
   --muted:#64748b;
   --amber:#f59e0b;
   --green:#16a34a;
+  --red:#dc2626;
 }
 
 *{box-sizing:border-box}
@@ -24,52 +25,30 @@ body{
   background:
     radial-gradient(1200px 400px at top center,#e0e7ff 0%,transparent 60%),
     var(--bg);
-  background-repeat:no-repeat;
   background-attachment:fixed;
-  color:var(--text);
   padding:36px 20px;
 }
 
-.wrapper{
-  max-width:900px;
-  margin:auto;
-}
+.wrapper{max-width:900px;margin:auto;}
 
-/* PANEL */
 .panel{
   background:var(--panel);
   border-radius:22px;
-  overflow:hidden;
   box-shadow:0 30px 60px rgba(0,0,0,.12);
   padding:28px 24px;
 }
 
-/* PANEL HEADER */
-.panel-header{
-  text-align:center;
-  margin-bottom:20px;
-}
+.panel-header{text-align:center;margin-bottom:20px;}
+.panel-header h1{margin:0;font-size:20px;}
+.panel-header p{margin:4px 0 0;font-size:13px;color:var(--muted);}
 
-.panel-header h1{
-  margin:0;
-  font-size:20px;
-}
-
-.panel-header p{
-  margin:4px 0 0;
-  font-size:13px;
-  color:var(--muted);
-}
-
-/* HEADER BUTTONS */
 .header-right{
   display:flex;
   justify-content:flex-end;
-  gap:12px;
   margin-bottom:20px;
 }
 
-/* BUTTONS */
+/* Buttons */
 .action-btn{
   background:#2563eb;
   color:#fff;
@@ -79,12 +58,10 @@ body{
   cursor:pointer;
 }
 
-.secondary{
-  background:#e5e7eb;
-  color:#0f172a;
-}
+.secondary{background:#e5e7eb;color:#0f172a;}
+.danger{background:var(--red);}
 
-/* TABLE */
+/* Table */
 table{
   width:100%;
   border-collapse:collapse;
@@ -100,22 +77,11 @@ th{
   background:#f8fafc;
   font-size:12px;
   color:var(--muted);
-  position:sticky;
-  top:0;
 }
 
 tbody tr:hover{background:#f8fafc}
 
-/* FORM */
-input, select{
-  padding:6px;
-  border-radius:8px;
-  border:1px solid var(--border);
-  margin-right:8px;
-  flex:1;
-  min-width:120px;
-}
-
+/* Form */
 form{
   display:flex;
   flex-wrap:wrap;
@@ -123,21 +89,28 @@ form{
   margin-bottom:20px;
 }
 
-/* Status colors */
+input,select{
+  padding:6px;
+  border-radius:8px;
+  border:1px solid var(--border);
+  min-width:120px;
+}
+
+/* Status badges */
 .status-open{
   background:var(--amber);
   color:#fff;
-  font-weight:600;
-  border-radius:6px;
   padding:2px 6px;
+  border-radius:6px;
+  font-weight:600;
 }
 
 .status-completed{
   background:var(--green);
   color:#fff;
-  font-weight:600;
-  border-radius:6px;
   padding:2px 6px;
+  border-radius:6px;
+  font-weight:600;
 }
 
 .edit-input{
@@ -151,26 +124,26 @@ form{
 
 <body>
 <div class="wrapper">
-
   <div class="panel">
+
     <div class="panel-header">
       <h1>Daily Repairs Check-In</h1>
-      <p>Track items and status notes for each user</p>
+      <p>Track and manage repairs</p>
     </div>
 
     <div class="header-right">
-      <button class="action-btn secondary" onclick="window.location.href='index.html'">⬅ Back to Inventory</button>
+      <button class="action-btn secondary" onclick="location.href='index.html'">⬅ Back</button>
     </div>
 
     <form id="repair-form">
-      <input type="text" id="username" placeholder="Username" required>
-      <input type="text" id="item" placeholder="Item" required>
-      <input type="text" id="status-notes" placeholder="Status notes" required>
-      <select id="status" required>
+      <input id="username" placeholder="Username" required>
+      <input id="item" placeholder="Item" required>
+      <input id="notes" placeholder="Status notes" required>
+      <select id="status">
         <option value="open">Open</option>
         <option value="completed">Completed</option>
       </select>
-      <button type="submit" class="action-btn">Add Entry</button>
+      <button class="action-btn">Add</button>
     </form>
 
     <table>
@@ -180,98 +153,91 @@ form{
           <th>Item</th>
           <th>Status Notes</th>
           <th>Status</th>
-          <th>Action</th>
+          <th>Actions</th>
         </tr>
       </thead>
-      <tbody id="repair-entries"></tbody>
+      <tbody id="rows"></tbody>
     </table>
-  </div>
 
+  </div>
 </div>
 
 <script>
+const tbody = document.getElementById('rows');
 const form = document.getElementById('repair-form');
-const tbody = document.getElementById('repair-entries');
 
 let repairs = JSON.parse(localStorage.getItem('repairs') || '[]');
 
-// Render table with inline editing capability
-function renderRepairs(){
-  tbody.innerHTML = '';
-  repairs.forEach((r, index) => {
-    const statusClass = r.status === 'completed' ? 'status-completed' : 'status-open';
-
-    const row = document.createElement('tr');
-    row.setAttribute('data-index', index);
-    row.innerHTML = `
-      <td class="cell-username">${r.username}</td>
-      <td class="cell-item">${r.item}</td>
-      <td class="cell-notes">${r.statusNotes}</td>
-      <td class="cell-status"><span class="${statusClass}">${r.status}</span></td>
-      <td class="cell-action">
-        <button class="action-btn" onclick="editRow(${index})">Edit</button>
-      </td>
-    `;
-    tbody.appendChild(row);
+function render(){
+  tbody.innerHTML='';
+  repairs.forEach((r,i)=>{
+    const statusClass = r.status==='completed'?'status-completed':'status-open';
+    tbody.innerHTML += `
+      <tr data-i="${i}">
+        <td>${r.username}</td>
+        <td>${r.item}</td>
+        <td>${r.notes}</td>
+        <td><span class="${statusClass}">${r.status}</span></td>
+        <td>
+          <button class="action-btn" onclick="edit(${i})">Edit</button>
+          <button class="action-btn danger" onclick="del(${i})">Delete</button>
+        </td>
+      </tr>`;
   });
 }
 
-// Edit a row inline
-function editRow(idx){
-  const row = tbody.querySelector(`tr[data-index='${idx}']`);
-  const r = repairs[idx];
-
+function edit(i){
+  const r = repairs[i];
+  const row = document.querySelector(`tr[data-i='${i}']`);
   row.innerHTML = `
-    <td><input class="edit-input" value="${r.username}" /></td>
-    <td><input class="edit-input" value="${r.item}" /></td>
-    <td><input class="edit-input" value="${r.statusNotes}" /></td>
+    <td><input class="edit-input" value="${r.username}"></td>
+    <td><input class="edit-input" value="${r.item}"></td>
+    <td><input class="edit-input" value="${r.notes}"></td>
     <td>
       <select class="edit-input">
-        <option value="open" ${r.status === 'open' ? 'selected' : ''}>Open</option>
-        <option value="completed" ${r.status === 'completed' ? 'selected' : ''}>Completed</option>
+        <option value="open" ${r.status==='open'?'selected':''}>Open</option>
+        <option value="completed" ${r.status==='completed'?'selected':''}>Completed</option>
       </select>
     </td>
     <td>
-      <button class="action-btn" onclick="saveRow(${idx})">Save</button>
-    </td>
-  `;
+      <button class="action-btn" onclick="save(${i})">Save</button>
+    </td>`;
 }
 
-// Save the edited row
-function saveRow(idx){
-  const row = tbody.querySelector(`tr[data-index='${idx}']`);
-  const inputs = row.querySelectorAll('input, select');
-
-  repairs[idx] = {
-    username: inputs[0].value.trim(),
-    item: inputs[1].value.trim(),
-    statusNotes: inputs[2].value.trim(),
-    status: inputs[3].value
+function save(i){
+  const row = document.querySelector(`tr[data-i='${i}']`);
+  const inputs = row.querySelectorAll('input,select');
+  repairs[i] = {
+    username:inputs[0].value,
+    item:inputs[1].value,
+    notes:inputs[2].value,
+    status:inputs[3].value
   };
-
-  localStorage.setItem('repairs', JSON.stringify(repairs));
-  renderRepairs();
+  localStorage.setItem('repairs',JSON.stringify(repairs));
+  render();
 }
 
-// Handle form submission
-form.addEventListener('submit', function(e){
+function del(i){
+  if(!confirm('Delete this entry?')) return;
+  repairs.splice(i,1);
+  localStorage.setItem('repairs',JSON.stringify(repairs));
+  render();
+}
+
+form.onsubmit=e=>{
   e.preventDefault();
-  const username = document.getElementById('username').value.trim();
-  const item = document.getElementById('item').value.trim();
-  const statusNotes = document.getElementById('status-notes').value.trim();
-  const status = document.getElementById('status').value;
-
-  if(!username || !item || !statusNotes) return;
-
-  repairs.push({username, item, statusNotes, status});
-  localStorage.setItem('repairs', JSON.stringify(repairs));
-  renderRepairs();
+  repairs.push({
+    username:username.value,
+    item:item.value,
+    notes:notes.value,
+    status:status.value
+  });
+  localStorage.setItem('repairs',JSON.stringify(repairs));
   form.reset();
-});
+  render();
+};
 
-// Initial render
-renderRepairs();
+render();
 </script>
-
 </body>
 </html>

@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Daily Repairs</title>
+  <link rel="stylesheet" href="style.css"> <!-- if you have a CSS file -->
+</head>
+<body>
+  <h1>Daily Repairs Check-In</h1>
+
+  <table border="1">
+    <thead>
+      <tr>
+        <th>Username</th>
+        <th>Item</th>
+        <th>Status Notes</th>
+      </tr>
+    </thead>
+    <tbody id="repair-entries">
+      <!-- Entries will appear here -->
+    </tbody>
+  </table>
+
+  <h2>Add New Entry</h2>
+  <form id="repair-form">
+    <input type="text" id="username" placeholder="Username" required>
+    <input type="text" id="item" placeholder="Item" required>
+    <input type="text" id="status" placeholder="Status notes" required>
+    <button type="submit">Add Entry</button>
+  </form>
+
+  <script>
+    const form = document.getElementById('repair-form');
+    const tbody = document.getElementById('repair-entries');
+
+    form.addEventListener('submit', function(e) {
+      e.preventDefault();
+
+      const username = document.getElementById('username').value;
+      const item = document.getElementById('item').value;
+      const status = document.getElementById('status').value;
+
+      const row = document.createElement('tr');
+      row.innerHTML = `<td>${username}</td><td>${item}</td><td>${status}</td>`;
+      tbody.appendChild(row);
+
+      // Clear form
+      form.reset();
+    });
+  </script>
+</body>
+</html>

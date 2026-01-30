@@ -12,6 +12,8 @@
   --border:#e5e7eb;
   --text:#0f172a;
   --muted:#64748b;
+  --amber:#f59e0b;
+  --green:#16a34a;
 }
 
 *{box-sizing:border-box}
@@ -86,6 +88,7 @@ body{
 table{
   width:100%;
   border-collapse:collapse;
+  text-align:center; /* center all cells */
 }
 
 th,td{
@@ -118,6 +121,23 @@ form{
   flex-wrap:wrap;
   gap:8px;
   margin-bottom:20px;
+}
+
+/* Status colors */
+.status-open{
+  background:var(--amber);
+  color:#fff;
+  font-weight:600;
+  border-radius:6px;
+  padding:2px 6px;
+}
+
+.status-completed{
+  background:var(--green);
+  color:#fff;
+  font-weight:600;
+  border-radius:6px;
+  padding:2px 6px;
 }
 </style>
 </head>
@@ -174,12 +194,15 @@ function renderRepairs(){
   repairs.forEach((r, index) => {
     const row = document.createElement('tr');
 
+    // Determine status class for color
+    const statusClass = r.status === 'completed' ? 'status-completed' : 'status-open';
+
     row.innerHTML = `
       <td>${r.username}</td>
       <td>${r.item}</td>
       <td>${r.statusNotes}</td>
       <td>
-        <select data-index="${index}">
+        <select data-index="${index}" class="${statusClass}">
           <option value="open" ${r.status === 'open' ? 'selected' : ''}>Open</option>
           <option value="completed" ${r.status === 'completed' ? 'selected' : ''}>Completed</option>
         </select>
@@ -188,12 +211,15 @@ function renderRepairs(){
     tbody.appendChild(row);
   });
 
-  // Add event listeners to dropdowns for inline status editing
+  // Add event listeners to dropdowns for inline editing
   document.querySelectorAll('#repair-entries select').forEach(sel => {
     sel.addEventListener('change', function(){
       const idx = this.getAttribute('data-index');
       repairs[idx].status = this.value;
       localStorage.setItem('repairs', JSON.stringify(repairs));
+
+      // Update color class
+      this.className = this.value === 'completed' ? 'status-completed' : 'status-open';
     });
   });
 }
@@ -212,16 +238,9 @@ form.addEventListener('submit', function(e){
 
   if(!username || !item || !statusNotes) return;
 
-  // Add new entry
   repairs.push({username, item, statusNotes, status});
-
-  // Save to LocalStorage
   localStorage.setItem('repairs', JSON.stringify(repairs));
-
-  // Update table
   renderRepairs();
-
-  // Reset form
   form.reset();
 });
 </script>

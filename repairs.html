@@ -13,6 +13,7 @@
   --text:#0f172a;
   --muted:#64748b;
   --red:#dc2626;
+  --blue:#2563eb;
 }
 
 *{box-sizing:border-box}
@@ -55,7 +56,14 @@ body{
   font-size:13px;
   color:var(--muted);
 }
+#repairCount{
+  margin-top:8px;
+  font-size:13px;
+  font-weight:600;
+  color:var(--blue);
+}
 
+/* Top right */
 .header-right{
   display:flex;
   justify-content:flex-end;
@@ -64,7 +72,7 @@ body{
 
 /* Buttons */
 .action-btn{
-  background:#2563eb;
+  background:var(--blue);
   color:#fff;
   border:none;
   border-radius:8px;
@@ -136,10 +144,13 @@ tbody tr:hover{
   <div class="panel-header">
     <h1>Daily Repairs</h1>
     <p>Active repair tracking (delete = completed)</p>
+    <div id="repairCount">Active Repairs: 0</div>
   </div>
 
   <div class="header-right">
-    <button class="action-btn secondary" onclick="location.href='index.html'">⬅ Back to Inventory</button>
+    <button class="action-btn secondary" onclick="location.href='index.html'">
+      ⬅ Back to Inventory
+    </button>
   </div>
 
   <!-- Add Form -->
@@ -175,6 +186,7 @@ const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 const tbody = document.getElementById('rows');
 const form = document.getElementById('repairForm');
 
+/* Load repairs */
 async function load(){
   const { data, error } = await client
     .from('repairs')
@@ -186,8 +198,10 @@ async function load(){
     return;
   }
   render(data);
+  updateRepairCount();
 }
 
+/* Render table */
 function render(data){
   tbody.innerHTML='';
   data.forEach(r=>{
@@ -204,6 +218,17 @@ function render(data){
   });
 }
 
+/* Update counter */
+async function updateRepairCount(){
+  const { count } = await client
+    .from('repairs')
+    .select('*',{count:'exact',head:true});
+
+  document.getElementById('repairCount').innerText =
+    `Active Repairs: ${count ?? 0}`;
+}
+
+/* Inline edit */
 async function edit(id){
   const { data } = await client
     .from('repairs')
@@ -223,6 +248,7 @@ async function edit(id){
     </td>`;
 }
 
+/* Save edit */
 async function save(id,btn){
   const row = btn.closest('tr');
   const inputs = row.querySelectorAll('input');
@@ -236,12 +262,14 @@ async function save(id,btn){
   load();
 }
 
+/* Delete = completed */
 async function del(id){
   if(!confirm('Mark this repair as completed and remove it?')) return;
   await client.from('repairs').delete().eq('id',id);
   load();
 }
 
+/* Add */
 form.onsubmit = async e =>{
   e.preventDefault();
 

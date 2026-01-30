@@ -25,21 +25,38 @@ body{
   background:
     radial-gradient(1200px 400px at top center,#e0e7ff 0%,transparent 60%),
     var(--bg);
+  background-attachment:fixed;
   padding:36px 20px;
+  color:var(--text);
 }
 
-.wrapper{max-width:900px;margin:auto;}
+.wrapper{
+  max-width:950px;
+  margin:auto;
+}
 
 .panel{
   background:var(--panel);
   border-radius:22px;
   box-shadow:0 30px 60px rgba(0,0,0,.12);
-  padding:28px 24px;
+  padding:28px 26px;
 }
 
-.panel-header{text-align:center;margin-bottom:20px;}
-.panel-header h1{margin:0;font-size:20px;}
-.panel-header p{margin:4px 0 0;font-size:13px;color:var(--muted);}
+/* Header */
+.panel-header{
+  text-align:center;
+  margin-bottom:22px;
+}
+.panel-header h1{
+  margin:0;
+  font-size:20px;
+  font-weight:600;
+}
+.panel-header p{
+  margin:6px 0 0;
+  font-size:13px;
+  color:var(--muted);
+}
 
 .header-right{
   display:flex;
@@ -47,6 +64,7 @@ body{
   margin-bottom:20px;
 }
 
+/* Buttons */
 .action-btn{
   background:#2563eb;
   color:#fff;
@@ -54,10 +72,33 @@ body{
   border-radius:8px;
   padding:6px 14px;
   cursor:pointer;
+  font-size:13px;
 }
-.secondary{background:#e5e7eb;color:#0f172a;}
-.danger{background:var(--red);}
+.secondary{
+  background:#e5e7eb;
+  color:#0f172a;
+}
+.danger{
+  background:var(--red);
+}
 
+/* Form */
+form{
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+  margin-bottom:22px;
+}
+
+input,select{
+  padding:6px 8px;
+  border-radius:8px;
+  border:1px solid var(--border);
+  min-width:140px;
+  font-size:13px;
+}
+
+/* Table */
 table{
   width:100%;
   border-collapse:collapse;
@@ -65,7 +106,7 @@ table{
 }
 
 th,td{
-  padding:12px 16px;
+  padding:14px 18px;
   border-bottom:1px solid var(--border);
 }
 
@@ -75,42 +116,35 @@ th{
   color:var(--muted);
 }
 
-tbody tr:hover{background:#f8fafc}
-
-form{
-  display:flex;
-  flex-wrap:wrap;
-  gap:8px;
-  margin-bottom:20px;
+tbody tr:hover{
+  background:#f8fafc;
 }
 
-input,select{
-  padding:6px;
-  border-radius:8px;
-  border:1px solid var(--border);
-  min-width:120px;
-}
-
+/* Status pills */
 .status-open{
   background:var(--amber);
   color:#fff;
-  padding:2px 6px;
-  border-radius:6px;
+  padding:3px 8px;
+  border-radius:8px;
   font-weight:600;
+  font-size:12px;
 }
 .status-completed{
   background:var(--green);
   color:#fff;
-  padding:2px 6px;
-  border-radius:6px;
+  padding:3px 8px;
+  border-radius:8px;
   font-weight:600;
+  font-size:12px;
 }
 
+/* Inline edit */
 .edit-input{
   width:100%;
-  padding:4px 6px;
-  border-radius:6px;
+  padding:6px 8px;
+  border-radius:8px;
   border:1px solid var(--border);
+  font-size:13px;
 }
 </style>
 </head>
@@ -125,20 +159,22 @@ input,select{
   </div>
 
   <div class="header-right">
-    <button class="action-btn secondary" onclick="location.href='index.html'">⬅ Back</button>
+    <button class="action-btn secondary" onclick="location.href='index.html'">⬅ Back to Inventory</button>
   </div>
 
+  <!-- Add Form -->
   <form id="repairForm">
     <input id="username" placeholder="Username" required>
     <input id="item" placeholder="Item" required>
     <input id="notes" placeholder="Status notes" required>
     <select id="status">
-      <option value="open">Open</option>
+      <option value="open" selected>Open</option>
       <option value="completed">Completed</option>
     </select>
     <button class="action-btn">Add</button>
   </form>
 
+  <!-- Table -->
   <table>
     <thead>
       <tr>
@@ -170,20 +206,27 @@ async function load(){
     .select('*')
     .order('created_at',{ascending:false});
 
-  if(error){alert(error.message);return;}
+  if(error){
+    alert(error.message);
+    return;
+  }
   render(data);
 }
 
 function render(data){
   tbody.innerHTML='';
   data.forEach(r=>{
-    const cls = r.status==='completed'?'status-completed':'status-open';
+    const safeStatus = r.status || 'open';
+    const cls = safeStatus === 'completed'
+      ? 'status-completed'
+      : 'status-open';
+
     tbody.innerHTML += `
       <tr>
         <td>${r.username}</td>
         <td>${r.item}</td>
         <td>${r.notes}</td>
-        <td><span class="${cls}">${r.status}</span></td>
+        <td><span class="${cls}">${safeStatus}</span></td>
         <td>
           <button class="action-btn" onclick="edit(${r.id})">Edit</button>
           <button class="action-btn danger" onclick="del(${r.id})">Delete</button>
@@ -193,8 +236,14 @@ function render(data){
 }
 
 async function edit(id){
-  const { data } = await client.from('repairs').select('*').eq('id',id).single();
-  const row = [...tbody.children].find(r=>r.innerHTML.includes(`edit(${id})`));
+  const { data } = await client
+    .from('repairs')
+    .select('*')
+    .eq('id',id)
+    .single();
+
+  const row = [...tbody.children]
+    .find(r => r.innerHTML.includes(`edit(${id})`));
 
   row.innerHTML = `
     <td><input class="edit-input" value="${data.username}"></td>
@@ -202,7 +251,7 @@ async function edit(id){
     <td><input class="edit-input" value="${data.notes}"></td>
     <td>
       <select class="edit-input">
-        <option value="open" ${data.status==='open'?'selected':''}>Open</option>
+        <option value="open" ${data.status!=='completed'?'selected':''}>Open</option>
         <option value="completed" ${data.status==='completed'?'selected':''}>Completed</option>
       </select>
     </td>
@@ -216,10 +265,10 @@ async function save(id,btn){
   const inputs = row.querySelectorAll('input,select');
 
   await client.from('repairs').update({
-    username:inputs[0].value,
-    item:inputs[1].value,
-    notes:inputs[2].value,
-    status:inputs[3].value
+    username: inputs[0].value,
+    item: inputs[1].value,
+    notes: inputs[2].value,
+    status: inputs[3].value || 'open'
   }).eq('id',id);
 
   load();
@@ -233,12 +282,14 @@ async function del(id){
 
 form.onsubmit = async e =>{
   e.preventDefault();
+
   await client.from('repairs').insert({
-    username:username.value,
-    item:item.value,
-    notes:notes.value,
-    status:status.value
+    username: username.value,
+    item: item.value,
+    notes: notes.value,
+    status: status.value || 'open'
   });
+
   form.reset();
   load();
 };

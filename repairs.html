@@ -39,7 +39,7 @@ body{
   border-radius:22px;
   overflow:hidden;
   box-shadow:0 30px 60px rgba(0,0,0,.12);
-  padding:28px 24px; /* Added padding for spacing */
+  padding:28px 24px;
 }
 
 /* PANEL HEADER */
@@ -168,17 +168,33 @@ const tbody = document.getElementById('repair-entries');
 // Load existing entries from LocalStorage
 let repairs = JSON.parse(localStorage.getItem('repairs') || '[]');
 
+// Render table
 function renderRepairs(){
   tbody.innerHTML = '';
-  repairs.forEach(r => {
+  repairs.forEach((r, index) => {
     const row = document.createElement('tr');
+
     row.innerHTML = `
       <td>${r.username}</td>
       <td>${r.item}</td>
       <td>${r.statusNotes}</td>
-      <td>${r.status}</td>
+      <td>
+        <select data-index="${index}">
+          <option value="open" ${r.status === 'open' ? 'selected' : ''}>Open</option>
+          <option value="completed" ${r.status === 'completed' ? 'selected' : ''}>Completed</option>
+        </select>
+      </td>
     `;
     tbody.appendChild(row);
+  });
+
+  // Add event listeners to dropdowns for inline status editing
+  document.querySelectorAll('#repair-entries select').forEach(sel => {
+    sel.addEventListener('change', function(){
+      const idx = this.getAttribute('data-index');
+      repairs[idx].status = this.value;
+      localStorage.setItem('repairs', JSON.stringify(repairs));
+    });
   });
 }
 

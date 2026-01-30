@@ -39,18 +39,13 @@ body{
   border-radius:22px;
   overflow:hidden;
   box-shadow:0 30px 60px rgba(0,0,0,.12);
-    background:var(--panel);
-  border-radius:22px;
-  overflow:hidden;
-  box-shadow:0 30px 60px rgba(0,0,0,.12);
-  padding:28px 24px; /* Added padding inside panel */
+  padding:28px 24px; /* Added padding for spacing */
 }
 
 /* PANEL HEADER */
 .panel-header{
-  padding:28px 20px 12px;
   text-align:center;
-  border-bottom:1px solid var(--border);
+  margin-bottom:20px;
 }
 
 .panel-header h1{
@@ -69,7 +64,7 @@ body{
   display:flex;
   justify-content:flex-end;
   gap:12px;
-  padding:0 20px 20px;
+  margin-bottom:20px;
 }
 
 /* BUTTONS */
@@ -109,12 +104,13 @@ th{
 tbody tr:hover{background:#f8fafc}
 
 /* FORM */
-input{
+input, select{
   padding:6px;
   border-radius:8px;
   border:1px solid var(--border);
-  width:calc(33% - 12px);
   margin-right:8px;
+  flex:1;
+  min-width:120px;
 }
 
 form{
@@ -142,7 +138,11 @@ form{
     <form id="repair-form">
       <input type="text" id="username" placeholder="Username" required>
       <input type="text" id="item" placeholder="Item" required>
-      <input type="text" id="status" placeholder="Status notes" required>
+      <input type="text" id="status-notes" placeholder="Status notes" required>
+      <select id="status" required>
+        <option value="open">Open</option>
+        <option value="completed">Completed</option>
+      </select>
       <button type="submit" class="action-btn">Add Entry</button>
     </form>
 
@@ -152,6 +152,7 @@ form{
           <th>Username</th>
           <th>Item</th>
           <th>Status Notes</th>
+          <th>Status</th>
         </tr>
       </thead>
       <tbody id="repair-entries"></tbody>
@@ -164,14 +165,19 @@ form{
 const form = document.getElementById('repair-form');
 const tbody = document.getElementById('repair-entries');
 
-// Load from localStorage if available
+// Load existing entries from LocalStorage
 let repairs = JSON.parse(localStorage.getItem('repairs') || '[]');
 
 function renderRepairs(){
   tbody.innerHTML = '';
   repairs.forEach(r => {
     const row = document.createElement('tr');
-    row.innerHTML = `<td>${r.username}</td><td>${r.item}</td><td>${r.status}</td>`;
+    row.innerHTML = `
+      <td>${r.username}</td>
+      <td>${r.item}</td>
+      <td>${r.statusNotes}</td>
+      <td>${r.status}</td>
+    `;
     tbody.appendChild(row);
   });
 }
@@ -179,15 +185,27 @@ function renderRepairs(){
 // Initial render
 renderRepairs();
 
+// Handle form submission
 form.addEventListener('submit', function(e){
   e.preventDefault();
-  const username = document.getElementById('username').value;
-  const item = document.getElementById('item').value;
+
+  const username = document.getElementById('username').value.trim();
+  const item = document.getElementById('item').value.trim();
+  const statusNotes = document.getElementById('status-notes').value.trim();
   const status = document.getElementById('status').value;
 
-  repairs.push({username,item,status});
+  if(!username || !item || !statusNotes) return;
+
+  // Add new entry
+  repairs.push({username, item, statusNotes, status});
+
+  // Save to LocalStorage
   localStorage.setItem('repairs', JSON.stringify(repairs));
+
+  // Update table
   renderRepairs();
+
+  // Reset form
   form.reset();
 });
 </script>

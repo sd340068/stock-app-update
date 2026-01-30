@@ -25,7 +25,6 @@ body{
   background:
     radial-gradient(1200px 400px at top center,#e0e7ff 0%,transparent 60%),
     var(--bg);
-  background-attachment:fixed;
   padding:36px 20px;
 }
 
@@ -48,7 +47,6 @@ body{
   margin-bottom:20px;
 }
 
-/* Buttons */
 .action-btn{
   background:#2563eb;
   color:#fff;
@@ -57,11 +55,9 @@ body{
   padding:6px 14px;
   cursor:pointer;
 }
-
 .secondary{background:#e5e7eb;color:#0f172a;}
 .danger{background:var(--red);}
 
-/* Table */
 table{
   width:100%;
   border-collapse:collapse;
@@ -81,7 +77,6 @@ th{
 
 tbody tr:hover{background:#f8fafc}
 
-/* Form */
 form{
   display:flex;
   flex-wrap:wrap;
@@ -96,7 +91,6 @@ input,select{
   min-width:120px;
 }
 
-/* Status badges */
 .status-open{
   background:var(--amber);
   color:#fff;
@@ -104,7 +98,6 @@ input,select{
   border-radius:6px;
   font-weight:600;
 }
-
 .status-completed{
   background:var(--green);
   color:#fff;
@@ -124,120 +117,133 @@ input,select{
 
 <body>
 <div class="wrapper">
-  <div class="panel">
+<div class="panel">
 
-    <div class="panel-header">
-      <h1>Daily Repairs Check-In</h1>
-      <p>Track and manage repairs</p>
-    </div>
-
-    <div class="header-right">
-      <button class="action-btn secondary" onclick="location.href='index.html'">⬅ Back</button>
-    </div>
-
-    <form id="repair-form">
-      <input id="username" placeholder="Username" required>
-      <input id="item" placeholder="Item" required>
-      <input id="notes" placeholder="Status notes" required>
-      <select id="status">
-        <option value="open">Open</option>
-        <option value="completed">Completed</option>
-      </select>
-      <button class="action-btn">Add</button>
-    </form>
-
-    <table>
-      <thead>
-        <tr>
-          <th>Username</th>
-          <th>Item</th>
-          <th>Status Notes</th>
-          <th>Status</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody id="rows"></tbody>
-    </table>
-
+  <div class="panel-header">
+    <h1>Daily Repairs</h1>
+    <p>Live shared repair tracking</p>
   </div>
+
+  <div class="header-right">
+    <button class="action-btn secondary" onclick="location.href='index.html'">⬅ Back</button>
+  </div>
+
+  <form id="repairForm">
+    <input id="username" placeholder="Username" required>
+    <input id="item" placeholder="Item" required>
+    <input id="notes" placeholder="Status notes" required>
+    <select id="status">
+      <option value="open">Open</option>
+      <option value="completed">Completed</option>
+    </select>
+    <button class="action-btn">Add</button>
+  </form>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Username</th>
+        <th>Item</th>
+        <th>Status Notes</th>
+        <th>Status</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody id="rows"></tbody>
+  </table>
+
+</div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
+const SUPABASE_URL = "https://thvbweemnzdvwyaxvwbz.supabase.co";
+const SUPABASE_KEY = "sb_publishable_U6Nsj6HClebAVWOx7MLhng_3t2z6w1G";
+const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
 const tbody = document.getElementById('rows');
-const form = document.getElementById('repair-form');
+const form = document.getElementById('repairForm');
 
-let repairs = JSON.parse(localStorage.getItem('repairs') || '[]');
+async function load(){
+  const { data, error } = await client
+    .from('repairs')
+    .select('*')
+    .order('created_at',{ascending:false});
 
-function render(){
+  if(error){alert(error.message);return;}
+  render(data);
+}
+
+function render(data){
   tbody.innerHTML='';
-  repairs.forEach((r,i)=>{
-    const statusClass = r.status==='completed'?'status-completed':'status-open';
+  data.forEach(r=>{
+    const cls = r.status==='completed'?'status-completed':'status-open';
     tbody.innerHTML += `
-      <tr data-i="${i}">
+      <tr>
         <td>${r.username}</td>
         <td>${r.item}</td>
         <td>${r.notes}</td>
-        <td><span class="${statusClass}">${r.status}</span></td>
+        <td><span class="${cls}">${r.status}</span></td>
         <td>
-          <button class="action-btn" onclick="edit(${i})">Edit</button>
-          <button class="action-btn danger" onclick="del(${i})">Delete</button>
+          <button class="action-btn" onclick="edit(${r.id})">Edit</button>
+          <button class="action-btn danger" onclick="del(${r.id})">Delete</button>
         </td>
       </tr>`;
   });
 }
 
-function edit(i){
-  const r = repairs[i];
-  const row = document.querySelector(`tr[data-i='${i}']`);
+async function edit(id){
+  const { data } = await client.from('repairs').select('*').eq('id',id).single();
+  const row = [...tbody.children].find(r=>r.innerHTML.includes(`edit(${id})`));
+
   row.innerHTML = `
-    <td><input class="edit-input" value="${r.username}"></td>
-    <td><input class="edit-input" value="${r.item}"></td>
-    <td><input class="edit-input" value="${r.notes}"></td>
+    <td><input class="edit-input" value="${data.username}"></td>
+    <td><input class="edit-input" value="${data.item}"></td>
+    <td><input class="edit-input" value="${data.notes}"></td>
     <td>
       <select class="edit-input">
-        <option value="open" ${r.status==='open'?'selected':''}>Open</option>
-        <option value="completed" ${r.status==='completed'?'selected':''}>Completed</option>
+        <option value="open" ${data.status==='open'?'selected':''}>Open</option>
+        <option value="completed" ${data.status==='completed'?'selected':''}>Completed</option>
       </select>
     </td>
     <td>
-      <button class="action-btn" onclick="save(${i})">Save</button>
+      <button class="action-btn" onclick="save(${id},this)">Save</button>
     </td>`;
 }
 
-function save(i){
-  const row = document.querySelector(`tr[data-i='${i}']`);
+async function save(id,btn){
+  const row = btn.closest('tr');
   const inputs = row.querySelectorAll('input,select');
-  repairs[i] = {
+
+  await client.from('repairs').update({
     username:inputs[0].value,
     item:inputs[1].value,
     notes:inputs[2].value,
     status:inputs[3].value
-  };
-  localStorage.setItem('repairs',JSON.stringify(repairs));
-  render();
+  }).eq('id',id);
+
+  load();
 }
 
-function del(i){
+async function del(id){
   if(!confirm('Delete this entry?')) return;
-  repairs.splice(i,1);
-  localStorage.setItem('repairs',JSON.stringify(repairs));
-  render();
+  await client.from('repairs').delete().eq('id',id);
+  load();
 }
 
-form.onsubmit=e=>{
+form.onsubmit = async e =>{
   e.preventDefault();
-  repairs.push({
+  await client.from('repairs').insert({
     username:username.value,
     item:item.value,
     notes:notes.value,
     status:status.value
   });
-  localStorage.setItem('repairs',JSON.stringify(repairs));
   form.reset();
-  render();
+  load();
 };
 
-render();
+load();
 </script>
 </body>
 </html>

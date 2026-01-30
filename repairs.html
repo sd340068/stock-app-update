@@ -88,7 +88,7 @@ body{
 table{
   width:100%;
   border-collapse:collapse;
-  text-align:center; /* center all cells */
+  text-align:center;
 }
 
 th,td{
@@ -139,6 +139,13 @@ form{
   border-radius:6px;
   padding:2px 6px;
 }
+
+.edit-input{
+  width:100%;
+  padding:4px 6px;
+  border-radius:6px;
+  border:1px solid var(--border);
+}
 </style>
 </head>
 
@@ -173,6 +180,7 @@ form{
           <th>Item</th>
           <th>Status Notes</th>
           <th>Status</th>
+          <th>Action</th>
         </tr>
       </thead>
       <tbody id="repair-entries"></tbody>
@@ -185,52 +193,69 @@ form{
 const form = document.getElementById('repair-form');
 const tbody = document.getElementById('repair-entries');
 
-// Load existing entries from LocalStorage
 let repairs = JSON.parse(localStorage.getItem('repairs') || '[]');
 
-// Render table
+// Render table with inline editing capability
 function renderRepairs(){
   tbody.innerHTML = '';
   repairs.forEach((r, index) => {
-    const row = document.createElement('tr');
-
-    // Determine status class for color
     const statusClass = r.status === 'completed' ? 'status-completed' : 'status-open';
 
+    const row = document.createElement('tr');
+    row.setAttribute('data-index', index);
     row.innerHTML = `
-      <td>${r.username}</td>
-      <td>${r.item}</td>
-      <td>${r.statusNotes}</td>
-      <td>
-        <select data-index="${index}" class="${statusClass}">
-          <option value="open" ${r.status === 'open' ? 'selected' : ''}>Open</option>
-          <option value="completed" ${r.status === 'completed' ? 'selected' : ''}>Completed</option>
-        </select>
+      <td class="cell-username">${r.username}</td>
+      <td class="cell-item">${r.item}</td>
+      <td class="cell-notes">${r.statusNotes}</td>
+      <td class="cell-status"><span class="${statusClass}">${r.status}</span></td>
+      <td class="cell-action">
+        <button class="action-btn" onclick="editRow(${index})">Edit</button>
       </td>
     `;
     tbody.appendChild(row);
   });
-
-  // Add event listeners to dropdowns for inline editing
-  document.querySelectorAll('#repair-entries select').forEach(sel => {
-    sel.addEventListener('change', function(){
-      const idx = this.getAttribute('data-index');
-      repairs[idx].status = this.value;
-      localStorage.setItem('repairs', JSON.stringify(repairs));
-
-      // Update color class
-      this.className = this.value === 'completed' ? 'status-completed' : 'status-open';
-    });
-  });
 }
 
-// Initial render
-renderRepairs();
+// Edit a row inline
+function editRow(idx){
+  const row = tbody.querySelector(`tr[data-index='${idx}']`);
+  const r = repairs[idx];
+
+  row.innerHTML = `
+    <td><input class="edit-input" value="${r.username}" /></td>
+    <td><input class="edit-input" value="${r.item}" /></td>
+    <td><input class="edit-input" value="${r.statusNotes}" /></td>
+    <td>
+      <select class="edit-input">
+        <option value="open" ${r.status === 'open' ? 'selected' : ''}>Open</option>
+        <option value="completed" ${r.status === 'completed' ? 'selected' : ''}>Completed</option>
+      </select>
+    </td>
+    <td>
+      <button class="action-btn" onclick="saveRow(${idx})">Save</button>
+    </td>
+  `;
+}
+
+// Save the edited row
+function saveRow(idx){
+  const row = tbody.querySelector(`tr[data-index='${idx}']`);
+  const inputs = row.querySelectorAll('input, select');
+
+  repairs[idx] = {
+    username: inputs[0].value.trim(),
+    item: inputs[1].value.trim(),
+    statusNotes: inputs[2].value.trim(),
+    status: inputs[3].value
+  };
+
+  localStorage.setItem('repairs', JSON.stringify(repairs));
+  renderRepairs();
+}
 
 // Handle form submission
 form.addEventListener('submit', function(e){
   e.preventDefault();
-
   const username = document.getElementById('username').value.trim();
   const item = document.getElementById('item').value.trim();
   const statusNotes = document.getElementById('status-notes').value.trim();
@@ -243,6 +268,9 @@ form.addEventListener('submit', function(e){
   renderRepairs();
   form.reset();
 });
+
+// Initial render
+renderRepairs();
 </script>
 
 </body>

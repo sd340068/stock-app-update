@@ -20,19 +20,6 @@
 
 *{box-sizing:border-box}
 
-#repairBadge {
-  margin-right: 10px;      /* space from next button */
-  min-width: 120px;
-  text-align: center;
-  color: #fff;             /* text white by default */
-}
-
-#repairBadge:hover {
-  background: #1d4ed8;     /* darker blue on hover */
-  color: #fff;             /* ensure text stays white */
-}
-
-
 body{
   margin:0;
   font-family:Inter,system-ui;
@@ -143,18 +130,46 @@ body{
 .header-right{
   display:flex;
   align-items:center;
-  gap:14px;
+  gap:10px;
 }
 
-/* Repairs badge */
-#repairBadge{
+/* Repairs button */
+#repairBadge {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap:6px;
+  min-width:130px;
   font-size:13px;
   font-weight:600;
-  color:#2563eb;
-  background:#e0e7ff;
-  padding:6px 12px;
-  border-radius:999px;
+  color:#fff;
+  background: var(--ps);
+  border: none;
+  border-radius:8px;
+  padding:6px 14px;
   cursor:pointer;
+  transition: background .2s;
+}
+
+#repairBadge:hover {
+  background:#1d4ed8;
+  color:#fff;
+}
+
+/* Small badge on button */
+#repairCountBadge {
+  background: #f59e0b;
+  color: #fff;
+  font-size: 12px;
+  font-weight:600;
+  border-radius:999px;
+  padding:2px 8px;
+  line-height:1;
+  position: absolute;
+  top:-6px;
+  right:-6px;
+  box-shadow:0 2px 4px rgba(0,0,0,0.2);
 }
 
 /* STATUS */
@@ -275,10 +290,10 @@ tbody tr:hover{background:#f8fafc}
     <div class="header">
       <h2 id="tableTitle">Select a brand</h2>
       <div class="header-right">
-        <button id="repairBadge" class="action-btn" onclick="location.href='repairs.html'">
-  🛠 Repairs: —
-</button>
-
+        <button id="repairBadge" onclick="location.href='repairs.html'">
+          🛠 Repairs
+          <span id="repairCountBadge">0</span>
+        </button>
         <div id="connectionStatus" class="status live">
           <span class="dot"></span>
           <span class="label">LIVE</span>
@@ -454,6 +469,7 @@ async function saveEdit(btn, id){
  renderTiles();
 }
 
+/* Load stock and repair count */
 async function loadStock(){
  const { data, error } = await client
   .from("products")
@@ -472,17 +488,15 @@ async function loadStock(){
  loadRepairCount();
 }
 
-/* Load repair count for badge */
+/* Repair badge count */
 async function loadRepairCount(){
   const { count } = await client.from('repairs')
     .select('*', { count:'exact', head:true });
-  document.getElementById('repairBadge').innerText = `🛠 Repairs: ${count ?? 0}`;
+  
+  document.getElementById('repairCountBadge').innerText = count ?? 0;
 }
 
 loadStock();
 </script>
-
 </body>
 </html>
-
-

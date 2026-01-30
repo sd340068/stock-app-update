@@ -20,6 +20,16 @@
 
 *{box-sizing:border-box}
 
+  #repairBadge {
+  margin-right: 10px; /* space from next button */
+  min-width:120px;
+  text-align:center;
+}
+#repairBadge:hover {
+  background:#1d4ed8; /* slightly darker on hover */
+}
+
+
 body{
   margin:0;
   font-family:Inter,system-ui;
@@ -262,7 +272,10 @@ tbody tr:hover{background:#f8fafc}
     <div class="header">
       <h2 id="tableTitle">Select a brand</h2>
       <div class="header-right">
-        <div id="repairBadge" onclick="location.href='repairs.html'">🛠 Repairs: —</div>
+        <button id="repairBadge" class="action-btn" onclick="location.href='repairs.html'">
+  🛠 Repairs: —
+</button>
+
         <div id="connectionStatus" class="status live">
           <span class="dot"></span>
           <span class="label">LIVE</span>
@@ -468,3 +481,4 @@ loadStock();
 
 </body>
 </html>
+

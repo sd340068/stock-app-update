@@ -38,7 +38,6 @@ body{
 }
 
 /* ---------- TILES ---------- */
-
 .tiles{
   display:grid;
   grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
@@ -85,7 +84,6 @@ body{
 }
 
 /* ---------- PANEL ---------- */
-
 .panel{
   background:var(--panel);
   border-radius:22px;
@@ -121,7 +119,6 @@ body{
 }
 
 /* ---------- HEADER ---------- */
-
 .header{
   padding:20px 30px;
   display:flex;
@@ -134,6 +131,17 @@ body{
   display:flex;
   align-items:center;
   gap:14px;
+}
+
+/* Repairs badge */
+#repairBadge{
+  font-size:13px;
+  font-weight:600;
+  color:#2563eb;
+  background:#e0e7ff;
+  padding:6px 12px;
+  border-radius:999px;
+  cursor:pointer;
 }
 
 /* STATUS */
@@ -167,10 +175,10 @@ body{
 }
 
 /* ---------- TABLE ---------- */
-
 table{
   width:100%;
   border-collapse:collapse;
+  text-align:center;
 }
 
 th,td{
@@ -218,7 +226,6 @@ tbody tr:hover{background:#f8fafc}
 }
 
 /* SAVE FEEDBACK */
-
 .saved-row{animation:savedFlash .8s}
 @keyframes savedFlash{
   0%{background:#dcfce7}
@@ -255,14 +262,12 @@ tbody tr:hover{background:#f8fafc}
     <div class="header">
       <h2 id="tableTitle">Select a brand</h2>
       <div class="header-right">
+        <div id="repairBadge" onclick="location.href='repairs.html'">🛠 Repairs: —</div>
         <div id="connectionStatus" class="status live">
           <span class="dot"></span>
           <span class="label">LIVE</span>
         </div>
         <button id="unlockBtn" onclick="unlockEditing()">🔒 Unlock Editing</button>
-        <button class="action-btn secondary" onclick="window.location.href='repairs.html'">
-          🛠 Repairs
-        </button>
       </div>
     </div>
 
@@ -423,7 +428,6 @@ async function saveEdit(btn, id){
   return;
  }
 
- // update local cache ONLY after DB success
  const item = allData.find(p => p.id === id);
  if (item) {
   item.stock = val;
@@ -448,6 +452,15 @@ async function loadStock(){
 
  allData = data;
  renderTiles();
+ renderTable();
+ loadRepairCount();
+}
+
+/* Load repair count for badge */
+async function loadRepairCount(){
+  const { count } = await client.from('repairs')
+    .select('*', { count:'exact', head:true });
+  document.getElementById('repairBadge').innerText = `🛠 Repairs: ${count ?? 0}`;
 }
 
 loadStock();

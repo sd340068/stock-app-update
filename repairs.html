@@ -12,8 +12,6 @@
   --border:#e5e7eb;
   --text:#0f172a;
   --muted:#64748b;
-  --amber:#f59e0b;
-  --green:#16a34a;
   --red:#dc2626;
 }
 
@@ -90,11 +88,11 @@ form{
   margin-bottom:22px;
 }
 
-input,select{
+input{
   padding:6px 8px;
   border-radius:8px;
   border:1px solid var(--border);
-  min-width:140px;
+  min-width:160px;
   font-size:13px;
 }
 
@@ -120,24 +118,6 @@ tbody tr:hover{
   background:#f8fafc;
 }
 
-/* Status pills */
-.status-open{
-  background:var(--amber);
-  color:#fff;
-  padding:3px 8px;
-  border-radius:8px;
-  font-weight:600;
-  font-size:12px;
-}
-.status-completed{
-  background:var(--green);
-  color:#fff;
-  padding:3px 8px;
-  border-radius:8px;
-  font-weight:600;
-  font-size:12px;
-}
-
 /* Inline edit */
 .edit-input{
   width:100%;
@@ -155,7 +135,7 @@ tbody tr:hover{
 
   <div class="panel-header">
     <h1>Daily Repairs</h1>
-    <p>Live shared repair tracking</p>
+    <p>Active repair tracking (delete = completed)</p>
   </div>
 
   <div class="header-right">
@@ -167,10 +147,6 @@ tbody tr:hover{
     <input id="username" placeholder="Username" required>
     <input id="item" placeholder="Item" required>
     <input id="notes" placeholder="Status notes" required>
-    <select id="status">
-      <option value="open" selected>Open</option>
-      <option value="completed">Completed</option>
-    </select>
     <button class="action-btn">Add</button>
   </form>
 
@@ -181,7 +157,6 @@ tbody tr:hover{
         <th>Username</th>
         <th>Item</th>
         <th>Status Notes</th>
-        <th>Status</th>
         <th>Actions</th>
       </tr>
     </thead>
@@ -203,7 +178,7 @@ const form = document.getElementById('repairForm');
 async function load(){
   const { data, error } = await client
     .from('repairs')
-    .select('*')
+    .select('id, username, item, notes')
     .order('created_at',{ascending:false});
 
   if(error){
@@ -216,17 +191,11 @@ async function load(){
 function render(data){
   tbody.innerHTML='';
   data.forEach(r=>{
-    const safeStatus = r.status || 'open';
-    const cls = safeStatus === 'completed'
-      ? 'status-completed'
-      : 'status-open';
-
     tbody.innerHTML += `
       <tr>
         <td>${r.username}</td>
         <td>${r.item}</td>
         <td>${r.notes}</td>
-        <td><span class="${cls}">${safeStatus}</span></td>
         <td>
           <button class="action-btn" onclick="edit(${r.id})">Edit</button>
           <button class="action-btn danger" onclick="del(${r.id})">Delete</button>
@@ -250,32 +219,25 @@ async function edit(id){
     <td><input class="edit-input" value="${data.item}"></td>
     <td><input class="edit-input" value="${data.notes}"></td>
     <td>
-      <select class="edit-input">
-        <option value="open" ${data.status!=='completed'?'selected':''}>Open</option>
-        <option value="completed" ${data.status==='completed'?'selected':''}>Completed</option>
-      </select>
-    </td>
-    <td>
       <button class="action-btn" onclick="save(${id},this)">Save</button>
     </td>`;
 }
 
 async function save(id,btn){
   const row = btn.closest('tr');
-  const inputs = row.querySelectorAll('input,select');
+  const inputs = row.querySelectorAll('input');
 
   await client.from('repairs').update({
     username: inputs[0].value,
     item: inputs[1].value,
-    notes: inputs[2].value,
-    status: inputs[3].value || 'open'
+    notes: inputs[2].value
   }).eq('id',id);
 
   load();
 }
 
 async function del(id){
-  if(!confirm('Delete this entry?')) return;
+  if(!confirm('Mark this repair as completed and remove it?')) return;
   await client.from('repairs').delete().eq('id',id);
   load();
 }
@@ -286,8 +248,7 @@ form.onsubmit = async e =>{
   await client.from('repairs').insert({
     username: username.value,
     item: item.value,
-    notes: notes.value,
-    status: status.value || 'open'
+    notes: notes.value
   });
 
   form.reset();

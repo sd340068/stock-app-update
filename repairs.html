@@ -81,6 +81,11 @@ button.secondary{
   color:#0f172a;
 }
 
+button.back-btn{
+  background:#64748b;
+  margin-bottom:12px;
+}
+
 /* TABLE */
 table{
   width:100%;
@@ -173,7 +178,7 @@ th{
   <div class="card">
 
     <div class="header">
-      <h1>🛠 Repairs</h1>
+      <h1>🛠 Repairs <span id="openCounter" style="color:var(--red)">0 open</span></h1>
       <div class="controls">
         <select id="deviceFilter">
           <option value="">All Devices</option>
@@ -192,6 +197,8 @@ th{
         <button onclick="openAddModal()">+ Add Repair</button>
       </div>
     </div>
+
+    <button class="back-btn" onclick="window.location.href='index.html'">← Back to Inventory</button>
 
     <table>
       <thead>
@@ -278,7 +285,6 @@ function render(){
     if(filter && r.device !== filter) return;
 
     const days = daysOpen(r.checked_in);
-
     const row = document.createElement("tr");
     row.innerHTML = `
       <td>${r.customer}</td>
@@ -287,12 +293,19 @@ function render(){
       <td class="days ${daysClass(days)}">${days}</td>
       <td>
         <button onclick="viewDetails(${r.id})">Details</button>
-        <button onclick="completeRepair(${r.id})">Complete</button>
+        ${r.completed ? '' : `<button onclick="completeRepair(${r.id})">Complete</button>`}
         <button onclick="editRepair(${r.id})">Edit</button>
       </td>
     `;
     body.appendChild(row);
   });
+
+  updateOpenRepairCounter();
+}
+
+function updateOpenRepairCounter(){
+  const openCount = repairs.filter(r => !r.completed).length;
+  document.getElementById("openCounter").innerText = `${openCount} open`;
 }
 
 function openAddModal(){

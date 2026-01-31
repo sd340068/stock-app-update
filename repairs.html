@@ -342,12 +342,13 @@ async function saveRepair(){
     repairId = data[0].id;
   }
 
-  // Upload photos with status
+  // Upload photos safely
   for(const file of uploadedFiles){
     try{
+      const safeName = file.name.replace(/\s+/g,"_");
       const { data, error } = await client.storage
         .from('repairs')
-        .upload(`repair_${repairId}/${file.name}`, file, {upsert:true});
+        .upload(`repair_${repairId}/${Date.now()}_${safeName}`, file, {upsert:true});
       if(error){
         console.error(error);
         statusDiv.innerHTML += `<div style="color:red">❌ ${file.name} failed</div>`;
@@ -367,28 +368,23 @@ async function saveRepair(){
   uploadedFiles = [];
   document.getElementById("photoInput").value = "";
 
-  // Close modal after short delay
+  // Close modal after showing status
   setTimeout(()=>{
     closeAddModal();
     loadRepairs();
   }, 500);
 }
 
-// Complete repair function
+// Complete repair
 async function completeRepair(id){
   const r = repairs.find(x=>x.id===id);
   if(!r) return;
-
   if(!confirm(`Mark repair for ${r.customer} as complete?`)) return;
 
   const { data, error } = await client.from("repairs")
     .update({ completed:true })
     .eq("id", id);
-
-  if(error){
-    alert("Failed to mark complete: "+error.message);
-    return;
-  }
+  if(error){ alert("Failed: "+error.message); return; }
 
   await loadRepairs();
 }

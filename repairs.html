@@ -225,13 +225,13 @@ function renderRepairs(){
   tbody.innerHTML = "";
   repairs.forEach(r=>{
     if(!showCompleted && r.completed) return;
-    if(filterDevice && r.device !== filterDevice) return;
+    if(filterDevice && r.item !== filterDevice) return;
 
     const days = daysOpen(r.checked_in);
     const tr = document.createElement("tr");
     tr.innerHTML = `
       <td>${r.username}</td>
-      <td>${r.device}</td>
+      <td>${r.item}</td>
       <td>${new Date(r.checked_in).toLocaleDateString()}</td>
       <td>${days}</td>
       <td class="actions">

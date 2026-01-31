@@ -141,38 +141,7 @@ th{
   border:1px solid var(--border);
 }
 
-/* COMPLETE MODAL TABS */
-.tabs{
-  display:flex;
-  gap:6px;
-  margin-bottom:12px;
-}
-
-.tab-btn{
-  padding:6px 12px;
-  border:none;
-  border-radius:8px;
-  background:#e5e7eb;
-  cursor:pointer;
-}
-
-.tab-btn.active{
-  background:#2563eb;
-  color:#fff;
-}
-
-.tab-content{
-  display:none;
-  max-height:250px;
-  overflow-y:auto;
-  margin-bottom:12px;
-}
-
-.tab-content label{
-  display:block;
-  margin-bottom:6px;
-}
-
+/* IMAGE THUMB */
 .image-thumb{
   width:60px;
   height:60px;
@@ -245,6 +214,7 @@ th{
     <label>Upload photos (optional)</label>
     <input type="file" id="photoInput" multiple accept="image/*" /><br>
     <div id="photoPreview" style="display:flex; flex-wrap:wrap;"></div>
+    <div id="photoStatus" style="margin-top:8px; font-size:14px;"></div>
 
     <button id="saveBtn" onclick="saveRepair()">Save</button>
     <button class="secondary" onclick="closeAddModal()">Cancel</button>
@@ -321,6 +291,7 @@ function openAddModal(){
   document.getElementById("checkedIn").value = new Date().toISOString().slice(0,10);
   document.getElementById("notes").value = "";
   document.getElementById("photoPreview").innerHTML = "";
+  document.getElementById("photoStatus").innerHTML = "";
   document.getElementById("photoInput").value = "";
   document.getElementById("addModal").style.display="flex";
 }
@@ -344,6 +315,8 @@ async function saveRepair(){
   const deviceInput = document.getElementById("deviceType").value;
   const checkedInInput = document.getElementById("checkedIn").value;
   const notesInput = document.getElementById("notes").value;
+  const statusDiv = document.getElementById("photoStatus");
+  statusDiv.innerHTML = ""; // clear previous messages
 
   let repairId = editingId;
 
@@ -367,16 +340,26 @@ async function saveRepair(){
     repairId = data[0].id;
   }
 
-  // Upload photos
+  // Upload photos with status
   for(const file of uploadedFiles){
-    const { data, error } = await client.storage
-      .from('repairs')
-      .upload(`repair_${repairId}/${file.name}`, file, {upsert:true});
-    if(error){ console.error(error); continue; }
-    await client.from("repair_photos").insert({
-      repair_id: repairId,
-      file_path: data.path
-    });
+    try{
+      const { data, error } = await client.storage
+        .from('repairs')
+        .upload(`repair_${repairId}/${file.name}`, file, {upsert:true});
+      if(error){
+        console.error(error);
+        statusDiv.innerHTML += `<div style="color:red">❌ ${file.name} failed to upload</div>`;
+        continue;
+      }
+      await client.from("repair_photos").insert({
+        repair_id: repairId,
+        file_path: data.path
+      });
+      statusDiv.innerHTML += `<div style="color:green">✅ ${file.name} uploaded</div>`;
+    } catch(e){
+      console.error(e);
+      statusDiv.innerHTML += `<div style="color:red">❌ ${file.name} error</div>`;
+    }
   }
 
   closeAddModal();
@@ -423,6 +406,7 @@ function editRepair(id){
   document.getElementById("checkedIn").value = r.checked_in;
   document.getElementById("notes").value = r.notes || "";
   document.getElementById("photoPreview").innerHTML = "";
+  document.getElementById("photoStatus").innerHTML = "";
   uploadedFiles = [];
   document.getElementById("photoInput").value = "";
   document.getElementById("addModal").style.display="flex";

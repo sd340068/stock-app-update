@@ -346,7 +346,7 @@ async function saveRepair(){
   }
 
   closeAddModal();
-  loadRepairs();
+  await loadRepairs();
 }
 
 function viewDetails(id){
@@ -445,7 +445,8 @@ async function confirmComplete(){
   if(error){ alert(error.message); return; }
 
   closeCompleteModal();
-  loadRepairs();
+  completingId = null;
+  await loadRepairs(); // fetch fresh data so completed repair disappears
 }
 
 document.getElementById("deviceFilter").onchange = render;

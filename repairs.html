@@ -262,7 +262,7 @@ function render(){
 
 function openAddModal(){
   document.getElementById("addModal").style.display="flex";
-  checkedIn.value = new Date().toISOString().slice(0,10);
+  document.getElementById("checkedIn").value = new Date().toISOString().slice(0,10);
 }
 
 function closeAddModal(){
@@ -270,13 +270,26 @@ function closeAddModal(){
 }
 
 async function saveRepair(){
+  // Reference inputs correctly
+  const customerInput = document.getElementById("custName");
+  const deviceInput = document.getElementById("deviceType");
+  const checkedInInput = document.getElementById("checkedIn");
+  const notesInput = document.getElementById("notes");
+
   await client.from("repairs").insert({
-    customer: custName.value,
-    device: deviceType.value,
-    checked_in: checkedIn.value,
-    notes: notes.value,
-    completed:false
+    customer: customerInput.value,
+    device: deviceInput.value,
+    checked_in: checkedInInput.value,
+    notes: notesInput.value,
+    completed: false
   });
+
+  // Clear modal inputs
+  customerInput.value = "";
+  deviceInput.value = "PlayStation";
+  checkedInInput.value = new Date().toISOString().slice(0,10);
+  notesInput.value = "";
+
   closeAddModal();
   loadRepairs();
 }
@@ -290,11 +303,11 @@ function viewDetails(id){
     <p><strong>Notes:</strong><br>${r.notes || "—"}</p>
     <button onclick="closeDetails()">Close</button>
   `;
-  detailsModal.style.display="flex";
+  document.getElementById("detailsModal").style.display="flex";
 }
 
 function closeDetails(){
-  detailsModal.style.display="none";
+  document.getElementById("detailsModal").style.display="none";
 }
 
 async function deleteRepair(id){
@@ -303,8 +316,9 @@ async function deleteRepair(id){
   loadRepairs();
 }
 
+const deviceFilter = document.getElementById("deviceFilter");
 deviceFilter.onchange = render;
-showCompleted.onchange = render;
+document.getElementById("showCompleted").onchange = render;
 
 loadRepairs();
 </script>

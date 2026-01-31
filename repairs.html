@@ -28,6 +28,7 @@ body{
 }
 
 .wrapper{max-width:1200px;margin:auto;}
+
 .card{
   background:var(--panel);
   border-radius:22px;
@@ -43,6 +44,7 @@ body{
 }
 
 .controls{display:flex;gap:12px;align-items:center;}
+
 select,input,textarea{
   padding:8px;
   border-radius:8px;
@@ -103,21 +105,9 @@ th{
   background:#fff;
   border-radius:20px;
   padding:24px;
-  width:620px;
+  width:520px;
   max-width:95%;
-  max-height:90%;
-  overflow-y:auto;
 }
-
-.image-thumb{
-  width:70px;
-  height:70px;
-  object-fit:cover;
-  border-radius:8px;
-  margin:4px;
-}
-
-.status-box div{margin-top:4px;font-size:14px}
 </style>
 </head>
 
@@ -128,7 +118,7 @@ th{
       <h2>🛠 Repairs <span id="openCounter" style="color:var(--red)">0 open</span></h2>
       <div class="controls">
         <label><input type="checkbox" id="showCompleted"> Show completed</label>
-        <button onclick="openModal()">+ Add Repair</button>
+        <button type="button" onclick="openModal()">+ Add Repair</button>
       </div>
     </div>
 
@@ -153,6 +143,7 @@ th{
 <div class="modal" id="editModal">
   <div class="modal-content">
     <h3 id="modalTitle">Add Repair</h3>
+
     <input id="customer" placeholder="Customer name">
     <select id="device">
       <option>PlayStation</option>
@@ -162,15 +153,10 @@ th{
       <option>Laptop</option>
     </select>
     <input type="date" id="checkedIn">
-    <textarea id="notes" placeholder="Notes"></textarea>
+    <textarea id="notes" placeholder="Notes (internal)"></textarea>
 
-    <label>Photos (optional)</label>
-    <input type="file" id="photoInput" multiple accept="image/*">
-    <div id="photoPreview" style="display:flex;flex-wrap:wrap;"></div>
-    <div id="photoStatus" class="status-box"></div>
-
-<button type="button" onclick="saveRepair()">Save</button>
-<button type="button" class="secondary" onclick="closeModal()">Cancel</button>
+    <button type="button" onclick="saveRepair()">Save</button>
+    <button type="button" class="secondary" onclick="closeModal()">Cancel</button>
   </div>
 </div>
 
@@ -184,7 +170,7 @@ const SUPABASE_URL = "https://thvbweemnzdvwyaxvwbz.supabase.co";
 const SUPABASE_KEY = "sb_publishable_U6Nsj6HClebAVWOx7MLhng_3t2z6w1G";
 const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-let repairs=[], editingId=null, files=[];
+let repairs=[], editingId=null;
 
 const daysOpen = d => Math.floor((Date.now()-new Date(d))/86400000);
 const dayClass = n => n<=2?"green":n<=5?"amber":"red";
@@ -210,9 +196,9 @@ function render(){
         <td>${r.checked_in}</td>
         <td class="days ${dayClass(days)}">${days}</td>
         <td>
-          <button onclick="details(${r.id})">Details</button>
-          ${r.completed?'':`<button onclick="complete(${r.id})">Complete</button>`}
-          <button onclick="edit(${r.id})">Edit</button>
+          <button type="button" onclick="details(${r.id})">Details</button>
+          ${r.completed?'':`<button type="button" onclick="complete(${r.id})">Complete</button>`}
+          <button type="button" onclick="edit(${r.id})">Edit</button>
         </td>
       </tr>`;
   });
@@ -223,28 +209,15 @@ function render(){
 
 function openModal(){
   editingId=null;
+  modalTitle.innerText="Add Repair";
   customer.value="";
   device.value="PlayStation";
   checkedIn.value=new Date().toISOString().slice(0,10);
   notes.value="";
-  photoPreview.innerHTML="";
-  photoStatus.innerHTML="";
-  files=[];
   editModal.style.display="flex";
 }
 
 function closeModal(){editModal.style.display="none"}
-
-photoInput.onchange=e=>{
-  files=[...e.target.files];
-  photoPreview.innerHTML="";
-  files.forEach(f=>{
-    const img=document.createElement("img");
-    img.src=URL.createObjectURL(f);
-    img.className="image-thumb";
-    photoPreview.appendChild(img);
-  });
-};
 
 async function saveRepair(){
   const payload={
@@ -255,41 +228,14 @@ async function saveRepair(){
     completed:false
   };
 
-  let repairId=editingId;
   if(editingId){
     await client.from("repairs").update(payload).eq("id",editingId);
   }else{
-    const {data}=await client.from("repairs").insert(payload).select();
-    repairId=data[0].id;
+    await client.from("repairs").insert(payload);
   }
 
-  for(const file of files){
-    if(file.size>5*1024*1024){
-      photoStatus.innerHTML+=`<div style="color:red">❌ ${file.name} too large</div>`;
-      continue;
-    }
-
-    const safe=file.name.toLowerCase().replace(/[^a-z0-9._-]/g,"");
-    const path=`repair_${repairId}/${Date.now()}_${safe}`;
-
-    const {data, error}=await client.storage
-      .from("repairs")
-      .upload(path,file,{upsert:true,contentType:file.type});
-
-    if(error){
-      photoStatus.innerHTML+=`<div style="color:red">❌ ${file.name} failed</div>`;
-      continue;
-    }
-
-    await client.from("repair_photos").insert({
-      repair_id:repairId,
-      file_path:data.path
-    });
-
-    photoStatus.innerHTML+=`<div style="color:green">✅ ${file.name} uploaded</div>`;
-  }
-
-  setTimeout(()=>{closeModal();load();},500);
+  closeModal();
+  load();
 }
 
 async function complete(id){
@@ -297,22 +243,15 @@ async function complete(id){
   load();
 }
 
-async function details(id){
+function details(id){
   const r=repairs.find(x=>x.id===id);
-  const {data:photos}=await client.from("repair_photos").select("*").eq("repair_id",id);
-
-  let imgs="";
-  photos?.forEach(p=>{
-    const url=client.storage.from("repairs").getPublicUrl(p.file_path).data.publicUrl;
-    imgs+=`<img src="${url}" class="image-thumb">`;
-  });
-
   detailsContent.innerHTML=`
     <h3>${r.customer}</h3>
     <p><b>Device:</b> ${r.device}</p>
+    <p><b>Checked in:</b> ${r.checked_in}</p>
     <p><b>Notes:</b><br>${r.notes||"—"}</p>
-    ${imgs?`<p><b>Photos:</b><br>${imgs}</p>`:""}
-    <button onclick="detailsModal.style.display='none'">Close</button>
+    <p><b>Status:</b> ${r.completed?"Completed":"Open"}</p>
+    <button type="button" onclick="detailsModal.style.display='none'">Close</button>
   `;
   detailsModal.style.display="flex";
 }
@@ -320,13 +259,11 @@ async function details(id){
 function edit(id){
   const r=repairs.find(x=>x.id===id);
   editingId=id;
+  modalTitle.innerText="Edit Repair";
   customer.value=r.customer;
   device.value=r.device;
   checkedIn.value=r.checked_in;
   notes.value=r.notes||"";
-  photoPreview.innerHTML="";
-  photoStatus.innerHTML="";
-  files=[];
   editModal.style.display="flex";
 }
 

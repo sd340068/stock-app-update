@@ -203,6 +203,11 @@ th{
   <div class="modal-content" id="detailsContent"></div>
 </div>
 
+<!-- COMPLETE MODAL -->
+<div class="modal" id="completeModal">
+  <div class="modal-content" id="completeContent"></div>
+</div>
+
 <script>
 const SUPABASE_URL = "https://thvbweemnzdvwyaxvwbz.supabase.co";
 const SUPABASE_KEY = "sb_publishable_U6Nsj6HClebAVWOx7MLhng_3t2z6w1G";
@@ -210,6 +215,7 @@ const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 let repairs = [];
 let editingId = null;
+let completingId = null;
 
 function daysOpen(date){
   return Math.floor((Date.now() - new Date(date)) / 86400000);
@@ -223,10 +229,7 @@ function daysClass(days){
 
 async function loadRepairs(){
   const { data, error } = await client.from("repairs").select("*").order("checked_in");
-  if(error){
-    console.error(error);
-    return;
-  }
+  if(error){ console.error(error); return; }
   repairs = data || [];
   render();
 }
@@ -270,9 +273,7 @@ function openAddModal(){
   document.getElementById("addModal").style.display="flex";
 }
 
-function closeAddModal(){
-  document.getElementById("addModal").style.display="none";
-}
+function closeAddModal(){ document.getElementById("addModal").style.display="none"; }
 
 async function saveRepair(){
   const customerInput = document.getElementById("custName");
@@ -281,7 +282,6 @@ async function saveRepair(){
   const notesInput = document.getElementById("notes");
 
   if(editingId){
-    // Update existing repair
     const { error } = await client.from("repairs").update({
       customer: customerInput.value,
       device: deviceInput.value,
@@ -290,7 +290,6 @@ async function saveRepair(){
     }).eq("id", editingId);
     if(error){ alert(error.message); return; }
   } else {
-    // Insert new repair
     const { error } = await client.from("repairs").insert({
       customer: customerInput.value,
       device: deviceInput.value,
@@ -318,9 +317,7 @@ function viewDetails(id){
   document.getElementById("detailsModal").style.display="flex";
 }
 
-function closeDetails(){
-  document.getElementById("detailsModal").style.display="none";
-}
+function closeDetails(){ document.getElementById("detailsModal").style.display="none"; }
 
 function editRepair(id){
   const r = repairs.find(x => x.id===id);
@@ -336,10 +333,50 @@ function editRepair(id){
 }
 
 async function completeRepair(id){
-  const { error } = await client.from("repairs").update({
-    completed:true
-  }).eq("id",id);
+  const repair = repairs.find(r => r.id===id);
+  if(!repair) return;
+  completingId = id;
+
+  const { data: products } = await client.from("products").select("*").order("name");
+
+  let html = `<h2>Complete Repair: ${repair.customer}</h2>`;
+  html += `<p><strong>Device:</strong> ${repair.device}</p>`;
+  html += `<p><strong>Notes:</strong> ${repair.notes || "—"}</p>`;
+  html += `<h3>Parts used (optional)</h3>`;
+
+  products.forEach(p=>{
+    html += `<label>${p.name} (Stock: ${p.stock})
+      <input type="number" min="0" max="${p.stock}" value="0" data-part-id="${p.id}" class="part-input" />
+    </label><br>`;
+  });
+
+  html += `<br>
+    <button onclick="confirmComplete()">Confirm</button>
+    <button class="secondary" onclick="closeCompleteModal()">Cancel</button>`;
+
+  document.getElementById("completeContent").innerHTML = html;
+  document.getElementById("completeModal").style.display = "flex";
+}
+
+function closeCompleteModal(){ document.getElementById("completeModal").style.display="none"; }
+
+async function confirmComplete(){
+  const inputs = document.querySelectorAll(".part-input");
+
+  for(const inp of inputs){
+    const id = parseInt(inp.dataset.partId,10);
+    const used = parseInt(inp.value,10);
+    if(used > 0){
+      const { data } = await client.from("products").select("*").eq("id",id).single();
+      const newStock = Math.max(0, data.stock - used);
+      await client.from("products").update({stock:newStock}).eq("id",id);
+    }
+  }
+
+  const { error } = await client.from("repairs").update({completed:true}).eq("id",completingId);
   if(error){ alert(error.message); return; }
+
+  closeCompleteModal();
   loadRepairs();
 }
 

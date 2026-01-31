@@ -2,39 +2,62 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Repairs</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+<title>Repairs</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
+:root{
+  --bg:#f1f5f9;
+  --panel:#ffffff;
+  --border:#e5e7eb;
+  --text:#0f172a;
+  --muted:#64748b;
+  --green:#16a34a;
+  --amber:#f59e0b;
+  --red:#dc2626;
+  --blue:#2563eb;
+}
+
 body{
   margin:0;
   font-family:Inter,system-ui;
-  background:#f1f5f9;
-  padding:30px;
+  background:var(--bg);
+  padding:36px 20px;
+  color:var(--text);
 }
 
-.wrapper{
-  max-width:1200px;
-  margin:auto;
+.wrapper{max-width:1200px;margin:auto;}
+
+.card{
+  background:var(--panel);
+  border-radius:22px;
+  padding:28px;
+  box-shadow:0 30px 60px rgba(0,0,0,.12);
 }
 
-.top-bar{
+.header{
   display:flex;
   justify-content:space-between;
   align-items:center;
-  margin-bottom:20px;
+  margin-bottom:18px;
+}
+
+.controls{display:flex;gap:12px;align-items:center;}
+
+select,input,textarea{
+  padding:8px;
+  border-radius:8px;
+  border:1px solid var(--border);
 }
 
 button{
-  padding:8px 14px;
-  border-radius:8px;
-  border:none;
-  cursor:pointer;
-  background:#2563eb;
+  background:var(--blue);
   color:#fff;
-  font-weight:600;
+  border:none;
+  border-radius:10px;
+  padding:8px 14px;
+  cursor:pointer;
 }
 
 button.secondary{
@@ -49,27 +72,23 @@ button.danger{
 table{
   width:100%;
   border-collapse:collapse;
-  background:#fff;
-  border-radius:14px;
-  overflow:hidden;
-  box-shadow:0 12px 30px rgba(0,0,0,.08);
 }
 
 th,td{
-  padding:16px;
-  border-bottom:1px solid #e5e7eb;
+  padding:14px;
+  border-bottom:1px solid var(--border);
   text-align:center;
 }
 
 th{
   background:#f8fafc;
-  font-size:13px;
-  color:#64748b;
+  font-size:12px;
+  color:var(--muted);
 }
 
 .actions{
   display:flex;
-  gap:8px;
+  gap:6px;
   justify-content:center;
 }
 
@@ -81,162 +100,176 @@ th{
   display:none;
   align-items:center;
   justify-content:center;
+  z-index:50;
 }
 
 .modal-content{
   background:#fff;
-  padding:22px;
-  width:420px;
-  border-radius:14px;
+  border-radius:20px;
+  padding:24px;
+  width:520px;
+  max-width:95%;
 }
-
 .modal-content h2{
   margin-top:0;
 }
-
 .modal-content label{
   display:block;
-  margin-top:12px;
-  font-size:13px;
-  font-weight:600;
+  margin-top:10px;
 }
-
 .modal-content input,
-.modal-content textarea{
+.modal-content textarea,
+.modal-content select{
   width:100%;
-  padding:8px;
+  padding:6px;
   border-radius:8px;
-  border:1px solid #cbd5f5;
+  border:1px solid var(--border);
   margin-top:4px;
 }
-
 .modal-actions{
   display:flex;
   justify-content:flex-end;
   gap:10px;
-  margin-top:18px;
+  margin-top:15px;
 }
 </style>
 </head>
 
 <body>
 <div class="wrapper">
-
-  <div class="top-bar">
-    <h2>Open Repairs</h2>
-    <div>
-      <button onclick="openModal()">Add Repair</button>
-      <button class="secondary" onclick="location.href='index.html'">Back to Inventory</button>
+  <div class="card">
+    <div class="header">
+      <h2>🛠 Repairs <span id="openCounter" style="color:var(--red)">0 open</span></h2>
+      <div class="controls">
+        <label><input type="checkbox" id="showCompleted"> Show completed</label>
+        <select id="filterDevice">
+          <option value="">All Devices</option>
+          <option>PlayStation</option>
+          <option>Xbox</option>
+          <option>Nintendo</option>
+          <option>iPad</option>
+          <option>Laptop</option>
+        </select>
+        <button type="button" onclick="openModal()">+ Add Repair</button>
+        <button type="button" class="secondary" onclick="window.location.href='index.html'">Back to Inventory</button>
+      </div>
     </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Customer</th>
+          <th>Device</th>
+          <th>Checked In</th>
+          <th>Days Open</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="repairsBody"></tbody>
+    </table>
   </div>
-
-  <table>
-    <thead>
-      <tr>
-        <th>Customer</th>
-        <th>Item</th>
-        <th>Days Open</th>
-        <th>Actions</th>
-      </tr>
-    </thead>
-    <tbody id="repairsBody"></tbody>
-  </table>
-
 </div>
 
-<!-- MODAL -->
-<div class="modal" id="repairModal">
+<!-- Add/Edit Modal -->
+<div class="modal" id="editModal">
   <div class="modal-content">
     <h2 id="modalTitle">Add Repair</h2>
     <input type="hidden" id="repairId">
 
-    <label>Customer</label>
+    <label>Customer Name</label>
     <input id="username">
 
-    <label>Item</label>
-    <input id="item">
+    <label>Device</label>
+    <select id="device">
+      <option>PlayStation</option>
+      <option>Xbox</option>
+      <option>Nintendo</option>
+      <option>iPad</option>
+      <option>Laptop</option>
+    </select>
 
     <label>Notes</label>
     <textarea id="notes"></textarea>
 
     <div class="modal-actions">
-      <button class="secondary" onclick="closeModal()">Cancel</button>
-      <button onclick="saveRepair()">Save</button>
+      <button type="button" class="secondary" onclick="closeModal()">Cancel</button>
+      <button type="button" onclick="saveRepair()">Save</button>
     </div>
   </div>
 </div>
 
 <script>
-const client = supabase.createClient(
-  "YOUR_SUPABASE_URL",
-  "YOUR_SUPABASE_ANON_KEY"
-);
+const SUPABASE_URL = "YOUR_SUPABASE_URL";
+const SUPABASE_KEY = "YOUR_SUPABASE_ANON_KEY";
+const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+let repairs = [];
+let editingId = null;
+
+const daysOpen = date => Math.floor((Date.now() - new Date(date))/86400000);
+const dayClass = n => n<=2?"green":n<=5?"amber":"red";
 
 async function loadRepairs(){
-  const { data, error } = await client
-    .from("repairs")
-    .select("*")
-    .eq("completed", false)
-    .order("checked_in", { ascending:true });
+  const { data, error } = await client.from("repairs").select("*").order("checked_in");
+  if(error){console.error(error); return;}
+  repairs = data || [];
+  renderRepairs();
+}
 
-  if(error){
-    console.error(error);
-    return;
-  }
+function renderRepairs(){
+  const tbody = document.getElementById("repairsBody");
+  const showCompleted = document.getElementById("showCompleted").checked;
+  const filterDevice = document.getElementById("filterDevice").value;
 
-  const body = document.getElementById("repairsBody");
-  body.innerHTML = "";
+  tbody.innerHTML = "";
+  repairs.forEach(r=>{
+    if(!showCompleted && r.completed) return;
+    if(filterDevice && r.device !== filterDevice) return;
 
-  data.forEach(r => {
-    const days = Math.floor((Date.now() - new Date(r.checked_in)) / 86400000);
-
-    body.innerHTML += `
-      <tr>
-        <td>${r.username}</td>
-        <td>${r.item}</td>
-        <td>${days}</td>
-        <td class="actions">
-          <button onclick="editRepair(${r.id})">Edit</button>
-          <button onclick="completeRepair(${r.id})">Complete</button>
-          <button class="danger" onclick="deleteRepair(${r.id})">Delete</button>
-        </td>
-      </tr>
+    const days = daysOpen(r.checked_in);
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${r.customer}</td>
+      <td>${r.device}</td>
+      <td>${r.checked_in}</td>
+      <td class="${dayClass(days)}">${days}</td>
+      <td class="actions">
+        <button type="button" onclick="editRepair(${r.id})">Edit</button>
+        ${r.completed?'':`<button type="button" onclick="completeRepair(${r.id})">Complete</button>`}
+        <button type="button" class="danger" onclick="deleteRepair(${r.id})">Delete</button>
+      </td>
     `;
+    tbody.appendChild(tr);
   });
+
+  document.getElementById("openCounter").innerText =
+    repairs.filter(r=>!r.completed).length+" open";
 }
 
 function openModal(){
+  editingId = null;
+  document.getElementById("modalTitle").innerText = "Add Repair";
   document.getElementById("repairId").value = "";
   document.getElementById("username").value = "";
-  document.getElementById("item").value = "";
+  document.getElementById("device").value = "PlayStation";
   document.getElementById("notes").value = "";
-  document.getElementById("modalTitle").innerText = "Add Repair";
-  document.getElementById("repairModal").style.display = "flex";
+  document.getElementById("editModal").style.display = "flex";
 }
 
-function closeModal(){
-  document.getElementById("repairModal").style.display = "none";
-}
+function closeModal(){document.getElementById("editModal").style.display = "none";}
 
 async function saveRepair(){
-  const id = document.getElementById("repairId").value;
   const payload = {
-    username: username.value,
-    item: item.value,
-    notes: notes.value
+    customer: document.getElementById("username").value,
+    device: document.getElementById("device").value,
+    notes: document.getElementById("notes").value,
+    completed: false
   };
 
-  let error;
-  if(id){
-    ({ error } = await client.from("repairs").update(payload).eq("id", id));
+  if(editingId){
+    await client.from("repairs").update(payload).eq("id", editingId);
   } else {
-    ({ error } = await client.from("repairs").insert(payload));
-  }
-
-  if(error){
-    alert("Save failed");
-    console.error(error);
-    return;
+    await client.from("repairs").insert(payload);
   }
 
   closeModal();
@@ -245,39 +278,29 @@ async function saveRepair(){
 
 async function editRepair(id){
   const { data } = await client.from("repairs").select("*").eq("id", id).single();
-
-  repairId.value = data.id;
-  username.value = data.username;
-  item.value = data.item;
-  notes.value = data.notes;
-
-  modalTitle.innerText = "Edit Repair";
-  repairModal.style.display = "flex";
+  editingId = data.id;
+  document.getElementById("modalTitle").innerText = "Edit Repair";
+  document.getElementById("repairId").value = data.id;
+  document.getElementById("username").value = data.customer;
+  document.getElementById("device").value = data.device;
+  document.getElementById("notes").value = data.notes || "";
+  document.getElementById("editModal").style.display = "flex";
 }
 
 async function completeRepair(id){
   if(!confirm("Mark this repair complete?")) return;
-
-  await client.from("repairs")
-    .update({ completed:true })
-    .eq("id", id);
-
+  await client.from("repairs").update({completed:true}).eq("id",id);
   loadRepairs();
 }
 
 async function deleteRepair(id){
   if(!confirm("Delete this repair permanently?")) return;
-
-  const { error } = await client.from("repairs").delete().eq("id", id);
-
-  if(error){
-    alert("Delete failed");
-    console.error(error);
-    return;
-  }
-
+  await client.from("repairs").delete().eq("id",id);
   loadRepairs();
 }
+
+document.getElementById("showCompleted").onchange = renderRepairs;
+document.getElementById("filterDevice").onchange = renderRepairs;
 
 loadRepairs();
 </script>

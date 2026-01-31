@@ -43,7 +43,6 @@ body{
 }
 
 /* HEADER */
-
 .header{
   display:flex;
   justify-content:space-between;
@@ -83,7 +82,6 @@ button.secondary{
 }
 
 /* TABLE */
-
 table{
   width:100%;
   border-collapse:collapse;
@@ -106,7 +104,6 @@ th{
 .days.red{color:var(--red);font-weight:700}
 
 /* MODAL */
-
 .modal{
   position:fixed;
   inset:0;
@@ -129,11 +126,11 @@ th{
   margin-top:0;
 }
 
-.modal textarea{
+.modal textarea, .modal input, .modal select{
   width:100%;
-  min-height:80px;
-  padding:10px;
-  border-radius:10px;
+  margin-bottom:10px;
+  padding:8px;
+  border-radius:8px;
   border:1px solid var(--border);
 }
 </style>
@@ -180,26 +177,23 @@ th{
   </div>
 </div>
 
-<!-- ADD MODAL -->
+<!-- ADD / EDIT MODAL -->
 <div class="modal" id="addModal">
   <div class="modal-content">
-    <h2>Add Repair</h2>
+    <h2 id="modalTitle">Add Repair</h2>
 
-    <input id="custName" placeholder="Customer name" /><br><br>
-
+    <input id="custName" placeholder="Customer name" /><br>
     <select id="deviceType">
       <option>PlayStation</option>
       <option>Xbox</option>
       <option>Nintendo</option>
       <option>iPad</option>
       <option>Laptop</option>
-    </select><br><br>
+    </select><br>
+    <input type="date" id="checkedIn" /><br>
+    <textarea id="notes" placeholder="Notes (optional)"></textarea><br>
 
-    <input type="date" id="checkedIn" /><br><br>
-
-    <textarea id="notes" placeholder="Notes (optional)"></textarea><br><br>
-
-    <button onclick="saveRepair()">Save</button>
+    <button id="saveBtn" onclick="saveRepair()">Save</button>
     <button class="secondary" onclick="closeAddModal()">Cancel</button>
   </div>
 </div>
@@ -215,10 +209,10 @@ const SUPABASE_KEY = "sb_publishable_U6Nsj6HClebAVWOx7MLhng_3t2z6w1G";
 const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 let repairs = [];
+let editingId = null;
 
 function daysOpen(date){
-  const d = new Date(date);
-  return Math.floor((Date.now() - d) / 86400000);
+  return Math.floor((Date.now() - new Date(date)) / 86400000);
 }
 
 function daysClass(days){
@@ -230,11 +224,10 @@ function daysClass(days){
 async function loadRepairs(){
   const { data, error } = await client.from("repairs").select("*").order("checked_in");
   if(error){
-    console.error("Load error:", error);
+    console.error(error);
     return;
   }
   repairs = data || [];
-  console.log("Loaded repairs:", repairs); // Debug: see what's loaded
   render();
 }
 
@@ -246,8 +239,8 @@ function render(){
   const showCompleted = document.getElementById("showCompleted").checked;
 
   repairs.forEach(r => {
-    if (!showCompleted && r.completed) return;
-    if (filter && r.device !== filter) return;
+    if(!showCompleted && r.completed) return;
+    if(filter && r.device !== filter) return;
 
     const days = daysOpen(r.checked_in);
 
@@ -259,7 +252,8 @@ function render(){
       <td class="days ${daysClass(days)}">${days}</td>
       <td>
         <button onclick="viewDetails(${r.id})">Details</button>
-        <button class="secondary" onclick="deleteRepair(${r.id})">Delete</button>
+        <button onclick="completeRepair(${r.id})">Complete</button>
+        <button onclick="editRepair(${r.id})">Edit</button>
       </td>
     `;
     body.appendChild(row);
@@ -267,8 +261,13 @@ function render(){
 }
 
 function openAddModal(){
-  document.getElementById("addModal").style.display="flex";
+  editingId = null;
+  document.getElementById("modalTitle").innerText = "Add Repair";
+  document.getElementById("custName").value = "";
+  document.getElementById("deviceType").value = "PlayStation";
   document.getElementById("checkedIn").value = new Date().toISOString().slice(0,10);
+  document.getElementById("notes").value = "";
+  document.getElementById("addModal").style.display="flex";
 }
 
 function closeAddModal(){
@@ -281,39 +280,39 @@ async function saveRepair(){
   const checkedInInput = document.getElementById("checkedIn");
   const notesInput = document.getElementById("notes");
 
-  const { data, error } = await client.from("repairs").insert({
-    customer: customerInput.value,
-    device: deviceInput.value,
-    checked_in: checkedInInput.value,
-    notes: notesInput.value,
-    completed: false
-  }).select();
-
-  if(error){
-    alert("Insert failed: " + error.message);
-    console.error(error);
-    return;
+  if(editingId){
+    // Update existing repair
+    const { error } = await client.from("repairs").update({
+      customer: customerInput.value,
+      device: deviceInput.value,
+      checked_in: checkedInInput.value,
+      notes: notesInput.value
+    }).eq("id", editingId);
+    if(error){ alert(error.message); return; }
+  } else {
+    // Insert new repair
+    const { error } = await client.from("repairs").insert({
+      customer: customerInput.value,
+      device: deviceInput.value,
+      checked_in: checkedInInput.value,
+      notes: notesInput.value,
+      completed:false
+    });
+    if(error){ alert(error.message); return; }
   }
-
-  console.log("Inserted repair:", data);
-
-  // Clear modal inputs
-  customerInput.value = "";
-  deviceInput.value = "PlayStation";
-  checkedInInput.value = new Date().toISOString().slice(0,10);
-  notesInput.value = "";
 
   closeAddModal();
   loadRepairs();
 }
 
 function viewDetails(id){
-  const r = repairs.find(x => x.id === id);
-  detailsContent.innerHTML = `
+  const r = repairs.find(x => x.id===id);
+  document.getElementById("detailsContent").innerHTML = `
     <h2>${r.customer}</h2>
     <p><strong>Device:</strong> ${r.device}</p>
     <p><strong>Checked in:</strong> ${r.checked_in}</p>
     <p><strong>Notes:</strong><br>${r.notes || "—"}</p>
+    <p><strong>Completed:</strong> ${r.completed ? "Yes" : "No"}</p>
     <button onclick="closeDetails()">Close</button>
   `;
   document.getElementById("detailsModal").style.display="flex";
@@ -323,22 +322,30 @@ function closeDetails(){
   document.getElementById("detailsModal").style.display="none";
 }
 
-async function deleteRepair(id){
-  if(!confirm("Delete this repair?")) return;
-  const { error } = await client.from("repairs").delete().eq("id",id);
-  if(error){
-    alert("Delete failed: " + error.message);
-    console.error(error);
-    return;
-  }
+function editRepair(id){
+  const r = repairs.find(x => x.id===id);
+  if(!r) return;
+
+  editingId = id;
+  document.getElementById("modalTitle").innerText = "Edit Repair";
+  document.getElementById("custName").value = r.customer;
+  document.getElementById("deviceType").value = r.device;
+  document.getElementById("checkedIn").value = r.checked_in;
+  document.getElementById("notes").value = r.notes;
+  document.getElementById("addModal").style.display="flex";
+}
+
+async function completeRepair(id){
+  const { error } = await client.from("repairs").update({
+    completed:true
+  }).eq("id",id);
+  if(error){ alert(error.message); return; }
   loadRepairs();
 }
 
-// Event listeners
 document.getElementById("deviceFilter").onchange = render;
 document.getElementById("showCompleted").onchange = render;
 
-// Initial load
 loadRepairs();
 </script>
 </body>

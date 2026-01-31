@@ -199,8 +199,8 @@ th{
 </div>
 
 <script>
-const SUPABASE_URL = "YOUR_SUPABASE_URL";
-const SUPABASE_KEY = "YOUR_SUPABASE_ANON_KEY";
+const SUPABASE_URL = "https://thxyrmscrwstcyhifijv.supabase.co";
+const SUPABASE_KEY = "sb_publishable_U1nguijT4zbVmfkZ-RP29Q_X2Tr-WoE";
 const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 let repairs = [];
@@ -210,6 +210,7 @@ function daysOpen(date){
   return Math.floor((Date.now() - new Date(date)) / 86400000);
 }
 
+// Load repairs from Supabase
 async function loadRepairs(){
   const { data, error } = await client.from("repairs").select("*").order("checked_in");
   if(error){console.error(error); return;}
@@ -217,6 +218,7 @@ async function loadRepairs(){
   renderRepairs();
 }
 
+// Render table rows
 function renderRepairs(){
   const tbody = document.getElementById("repairsBody");
   const showCompleted = document.getElementById("showCompleted").checked;
@@ -247,6 +249,7 @@ function renderRepairs(){
     repairs.filter(r=>!r.completed).length+" open";
 }
 
+// Open Add/Edit Modal
 function openModal(){
   editingId = null;
   document.getElementById("modalTitle").innerText = "Add Repair";
@@ -257,10 +260,12 @@ function openModal(){
   document.getElementById("editModal").style.display = "flex";
 }
 
+// Close modal
 function closeModal(){
   document.getElementById("editModal").style.display = "none";
 }
 
+// Save new repair or update existing
 async function saveRepair(){
   const payload = {
     customer: document.getElementById("customer").value,
@@ -280,6 +285,7 @@ async function saveRepair(){
   loadRepairs();
 }
 
+// Edit repair
 async function editRepair(id){
   const { data } = await client.from("repairs").select("*").eq("id", id).single();
   editingId = data.id;
@@ -291,21 +297,25 @@ async function editRepair(id){
   document.getElementById("editModal").style.display = "flex";
 }
 
+// Complete repair
 async function completeRepair(id){
   if(!confirm("Mark this repair complete?")) return;
   await client.from("repairs").update({completed:true}).eq("id",id);
   loadRepairs();
 }
 
+// Delete repair
 async function deleteRepair(id){
   if(!confirm("Delete this repair permanently?")) return;
   await client.from("repairs").delete().eq("id",id);
   loadRepairs();
 }
 
+// Filters
 document.getElementById("showCompleted").onchange = renderRepairs;
 document.getElementById("filterDevice").onchange = renderRepairs;
 
+// Initial load
 loadRepairs();
 </script>
 </body>

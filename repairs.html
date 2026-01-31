@@ -133,6 +133,38 @@ th{
   border-radius:8px;
   border:1px solid var(--border);
 }
+
+/* COMPLETE MODAL TABS */
+.tabs{
+  display:flex;
+  gap:6px;
+  margin-bottom:12px;
+}
+
+.tab-btn{
+  padding:6px 12px;
+  border:none;
+  border-radius:8px;
+  background:#e5e7eb;
+  cursor:pointer;
+}
+
+.tab-btn.active{
+  background:#2563eb;
+  color:#fff;
+}
+
+.tab-content{
+  display:none;
+  max-height:250px;
+  overflow-y:auto;
+  margin-bottom:12px;
+}
+
+.tab-content label{
+  display:block;
+  margin-bottom:6px;
+}
 </style>
 </head>
 
@@ -339,30 +371,53 @@ async function completeRepair(id){
 
   const { data: products } = await client.from("products").select("*").order("name");
 
+  const categories = ["PlayStation","Xbox","Nintendo","iPad","Laptop"];
   let html = `<h2>Complete Repair: ${repair.customer}</h2>`;
   html += `<p><strong>Device:</strong> ${repair.device}</p>`;
   html += `<p><strong>Notes:</strong> ${repair.notes || "—"}</p>`;
-  html += `<h3>Parts used (optional)</h3>`;
 
-  products.forEach(p=>{
-    html += `<label>${p.name} (Stock: ${p.stock})
-      <input type="number" min="0" max="${p.stock}" value="0" data-part-id="${p.id}" class="part-input" />
-    </label><br>`;
+  // Tabs
+  html += `<div class="tabs">`;
+  categories.forEach((c,i)=>{
+    html += `<button class="tab-btn ${i===0?'active':''}" data-tab="${c}">${c}</button>`;
+  });
+  html += `</div>`;
+
+  categories.forEach((c,i)=>{
+    html += `<div class="tab-content" data-tab="${c}" style="display:${i===0?'block':'none'}">`;
+    products.filter(p=>p.brand===c).forEach(p=>{
+      html += `<label>${p.name} (Stock: ${p.stock})
+        <input type="number" min="0" max="${p.stock}" value="0" data-part-id="${p.id}" class="part-input" />
+      </label>`;
+    });
+    html += `</div>`;
   });
 
-  html += `<br>
-    <button onclick="confirmComplete()">Confirm</button>
-    <button class="secondary" onclick="closeCompleteModal()">Cancel</button>`;
+  html += `<button onclick="confirmComplete()">Confirm</button>
+           <button class="secondary" onclick="closeCompleteModal()">Cancel</button>`;
 
   document.getElementById("completeContent").innerHTML = html;
   document.getElementById("completeModal").style.display = "flex";
+  setupTabs();
 }
 
 function closeCompleteModal(){ document.getElementById("completeModal").style.display="none"; }
 
+function setupTabs(){
+  const buttons = document.querySelectorAll(".tab-btn");
+  const contents = document.querySelectorAll(".tab-content");
+  buttons.forEach(btn => {
+    btn.onclick = () => {
+      buttons.forEach(b=>b.classList.remove("active"));
+      btn.classList.add("active");
+      const tab = btn.dataset.tab;
+      contents.forEach(c=>c.style.display = c.dataset.tab === tab ? "block" : "none");
+    }
+  });
+}
+
 async function confirmComplete(){
   const inputs = document.querySelectorAll(".part-input");
-
   for(const inp of inputs){
     const id = parseInt(inp.dataset.partId,10);
     const used = parseInt(inp.value,10);

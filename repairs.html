@@ -441,9 +441,10 @@ async function confirmComplete(){
     }
   }
 
-  // Update Supabase
-  const { error } = await client.from("repairs").update({completed:true}).eq("id",completingId);
-  if(error){ alert(error.message); return; }
+  // Update Supabase with logging
+  const { data, error } = await client.from("repairs").update({completed:true}).eq("id",completingId);
+  console.log("Complete Update:", {data, error}); // <-- check here for RLS errors
+  if(error){ alert("Failed to mark complete. See console for details."); return; }
 
   // Immediately update local array to hide
   const index = repairs.findIndex(r => r.id === completingId);

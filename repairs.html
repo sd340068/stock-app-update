@@ -31,6 +31,7 @@ th{font-size:12px; color:var(--muted); background:#f8fafc;}
 .modal h2{margin-top:0;}
 .modal textarea, .modal input, .modal select{width:100%; margin-bottom:10px; padding:8px; border-radius:8px; border:1px solid var(--border);}
 .image-thumb{width:60px; height:60px; object-fit:cover; margin:4px; border-radius:8px; cursor:pointer;}
+.status-box{margin-top:8px; font-size:14px;}
 </style>
 </head>
 <body>
@@ -84,7 +85,7 @@ th{font-size:12px; color:var(--muted); background:#f8fafc;}
     <label>Upload photos (optional)</label>
     <input type="file" id="photoInput" multiple accept="image/*" /><br>
     <div id="photoPreview" style="display:flex; flex-wrap:wrap;"></div>
-    <div id="photoStatus" style="margin-top:8px; font-size:14px;"></div>
+    <div id="photoStatus" class="status-box"></div>
     <button id="saveBtn" onclick="saveRepair()">Save</button>
     <button class="secondary" onclick="closeAddModal()">Cancel</button>
   </div>
@@ -188,7 +189,7 @@ async function saveRepair(){
     repairId = data[0].id;
   }
 
-  // Upload photos
+  // Upload photos to public bucket
   for(const file of uploadedFiles){
     try{
       const safeName=file.name.replace(/\s+/g,"_");

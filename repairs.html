@@ -66,7 +66,7 @@ button.secondary{
 }
 
 button.danger{
-  background:#dc2626;
+  background:var(--red);
 }
 
 table{
@@ -206,8 +206,9 @@ const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 let repairs = [];
 let editingId = null;
 
-const daysOpen = date => Math.floor((Date.now() - new Date(date))/86400000);
-const dayClass = n => n<=2?"green":n<=5?"amber":"red";
+function daysOpen(date){
+  return Math.floor((Date.now() - new Date(date)) / 86400000);
+}
 
 async function loadRepairs(){
   const { data, error } = await client.from("repairs").select("*").order("checked_in");
@@ -229,10 +230,10 @@ function renderRepairs(){
     const days = daysOpen(r.checked_in);
     const tr = document.createElement("tr");
     tr.innerHTML = `
-      <td>${r.customer}</td>
+      <td>${r.username}</td>
       <td>${r.device}</td>
-      <td>${r.checked_in}</td>
-      <td class="${dayClass(days)}">${days}</td>
+      <td>${new Date(r.checked_in).toLocaleDateString()}</td>
+      <td>${days}</td>
       <td class="actions">
         <button type="button" onclick="editRepair(${r.id})">Edit</button>
         ${r.completed?'':`<button type="button" onclick="completeRepair(${r.id})">Complete</button>`}
@@ -256,14 +257,17 @@ function openModal(){
   document.getElementById("editModal").style.display = "flex";
 }
 
-function closeModal(){document.getElementById("editModal").style.display = "none";}
+function closeModal(){
+  document.getElementById("editModal").style.display = "none";
+}
 
 async function saveRepair(){
   const payload = {
-    customer: document.getElementById("username").value,
-    device: document.getElementById("device").value,
+    username: document.getElementById("username").value,
+    item: document.getElementById("device").value,
     notes: document.getElementById("notes").value,
-    completed: false
+    completed: false,
+    checked_in: new Date().toISOString()
   };
 
   if(editingId){
@@ -281,8 +285,8 @@ async function editRepair(id){
   editingId = data.id;
   document.getElementById("modalTitle").innerText = "Edit Repair";
   document.getElementById("repairId").value = data.id;
-  document.getElementById("username").value = data.customer;
-  document.getElementById("device").value = data.device;
+  document.getElementById("username").value = data.username;
+  document.getElementById("device").value = data.item;
   document.getElementById("notes").value = data.notes || "";
   document.getElementById("editModal").style.display = "flex";
 }

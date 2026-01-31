@@ -1,162 +1,42 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Repairs</title>
-
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
 <style>
 :root{
-  --bg:#f1f5f9;
-  --panel:#ffffff;
-  --border:#e5e7eb;
-  --text:#0f172a;
-  --muted:#64748b;
-  --green:#16a34a;
-  --amber:#f59e0b;
-  --red:#dc2626;
-  --blue:#2563eb;
+  --bg:#f1f5f9; --panel:#ffffff; --border:#e5e7eb; --text:#0f172a;
+  --muted:#64748b; --green:#16a34a; --amber:#f59e0b; --red:#dc2626; --blue:#2563eb;
 }
-
 *{box-sizing:border-box}
-
-body{
-  margin:0;
-  font-family:Inter,system-ui;
-  background:var(--bg);
-  padding:36px 20px;
-  color:var(--text);
-}
-
-.wrapper{
-  max-width:1200px;
-  margin:auto;
-}
-
-.card{
-  background:var(--panel);
-  border-radius:22px;
-  padding:28px;
-  box-shadow:0 30px 60px rgba(0,0,0,.12);
-}
-
-/* HEADER */
-.header{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  margin-bottom:20px;
-}
-
-.header h1{
-  margin:0;
-  font-size:22px;
-}
-
-.controls{
-  display:flex;
-  gap:12px;
-  align-items:center;
-}
-
-select, input[type="date"], input[type="file"]{
-  padding:6px 10px;
-  border-radius:8px;
-  border:1px solid var(--border);
-}
-
-button{
-  background:var(--blue);
-  color:#fff;
-  border:none;
-  border-radius:10px;
-  padding:8px 14px;
-  cursor:pointer;
-}
-
-button.secondary{
-  background:#e5e7eb;
-  color:#0f172a;
-}
-
-button.back-btn{
-  background:#64748b;
-  margin-bottom:12px;
-}
-
-/* TABLE */
-table{
-  width:100%;
-  border-collapse:collapse;
-}
-
-th, td{
-  padding:14px;
-  border-bottom:1px solid var(--border);
-  text-align:center;
-}
-
-th{
-  font-size:12px;
-  color:var(--muted);
-  background:#f8fafc;
-}
-
-.days.green{color:var(--green);font-weight:600}
-.days.amber{color:var(--amber);font-weight:600}
-.days.red{color:var(--red);font-weight:700}
-
-/* MODAL */
-.modal{
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,.45);
-  display:none;
-  align-items:center;
-  justify-content:center;
-  z-index:10;
-}
-
-.modal-content{
-  background:#fff;
-  border-radius:20px;
-  padding:24px;
-  width:600px;
-  max-width:95%;
-  max-height:90%;
-  overflow-y:auto;
-}
-
-.modal h2{
-  margin-top:0;
-}
-
-.modal textarea, .modal input, .modal select{
-  width:100%;
-  margin-bottom:10px;
-  padding:8px;
-  border-radius:8px;
-  border:1px solid var(--border);
-}
-
-/* IMAGE THUMB */
-.image-thumb{
-  width:60px;
-  height:60px;
-  object-fit:cover;
-  margin:4px;
-  border-radius:8px;
-  cursor:pointer;
-}
+body{margin:0; font-family:Inter,system-ui; background:var(--bg); padding:36px 20px; color:var(--text);}
+.wrapper{max-width:1200px; margin:auto;}
+.card{background:var(--panel); border-radius:22px; padding:28px; box-shadow:0 30px 60px rgba(0,0,0,.12);}
+.header{display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;}
+.header h1{margin:0; font-size:22px;}
+.controls{display:flex; gap:12px; align-items:center;}
+select,input[type="date"],input[type="file"]{padding:6px 10px; border-radius:8px; border:1px solid var(--border);}
+button{background:var(--blue); color:#fff; border:none; border-radius:10px; padding:8px 14px; cursor:pointer;}
+button.secondary{background:#e5e7eb; color:#0f172a;}
+button.back-btn{background:#64748b; margin-bottom:12px;}
+table{width:100%; border-collapse:collapse;}
+th, td{padding:14px; border-bottom:1px solid var(--border); text-align:center;}
+th{font-size:12px; color:var(--muted); background:#f8fafc;}
+.days.green{color:var(--green); font-weight:600;}
+.days.amber{color:var(--amber); font-weight:600;}
+.days.red{color:var(--red); font-weight:700;}
+.modal{position:fixed; inset:0; background:rgba(0,0,0,.45); display:none; align-items:center; justify-content:center; z-index:10;}
+.modal-content{background:#fff; border-radius:20px; padding:24px; width:600px; max-width:95%; max-height:90%; overflow-y:auto;}
+.modal h2{margin-top:0;}
+.modal textarea, .modal input, .modal select{width:100%; margin-bottom:10px; padding:8px; border-radius:8px; border:1px solid var(--border);}
+.image-thumb{width:60px; height:60px; object-fit:cover; margin:4px; border-radius:8px; cursor:pointer;}
 </style>
 </head>
-
 <body>
 <div class="wrapper">
   <div class="card">
-
     <div class="header">
       <h1>🛠 Repairs <span id="openCounter" style="color:var(--red)">0 open</span></h1>
       <div class="controls">
@@ -168,18 +48,11 @@ th{
           <option>iPad</option>
           <option>Laptop</option>
         </select>
-
-        <label>
-          <input type="checkbox" id="showCompleted" />
-          Show completed
-        </label>
-
+        <label><input type="checkbox" id="showCompleted" /> Show completed</label>
         <button onclick="openAddModal()">+ Add Repair</button>
       </div>
     </div>
-
     <button class="back-btn" onclick="window.location.href='index.html'">← Back to Inventory</button>
-
     <table>
       <thead>
         <tr>
@@ -192,7 +65,6 @@ th{
       </thead>
       <tbody id="repairsBody"></tbody>
     </table>
-
   </div>
 </div>
 
@@ -200,7 +72,6 @@ th{
 <div class="modal" id="addModal">
   <div class="modal-content">
     <h2 id="modalTitle">Add Repair</h2>
-
     <input id="custName" placeholder="Customer name" /><br>
     <select id="deviceType">
       <option>PlayStation</option>
@@ -215,7 +86,6 @@ th{
     <input type="file" id="photoInput" multiple accept="image/*" /><br>
     <div id="photoPreview" style="display:flex; flex-wrap:wrap;"></div>
     <div id="photoStatus" style="margin-top:8px; font-size:14px;"></div>
-
     <button id="saveBtn" onclick="saveRepair()">Save</button>
     <button class="secondary" onclick="closeAddModal()">Cancel</button>
   </div>
@@ -231,21 +101,15 @@ const SUPABASE_URL = "https://thvbweemnzdvwyaxvwbz.supabase.co";
 const SUPABASE_KEY = "sb_publishable_U6Nsj6HClebAVWOx7MLhng_3t2z6w1G";
 const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-let repairs = [];
-let editingId = null;
-let uploadedFiles = [];
+let repairs = [], editingId=null, uploadedFiles=[];
 
-function daysOpen(date){ return Math.floor((Date.now() - new Date(date)) / 86400000); }
-function daysClass(days){
-  if(days <= 2) return "green";
-  if(days <= 5) return "amber";
-  return "red";
-}
+function daysOpen(date){ return Math.floor((Date.now()-new Date(date))/86400000); }
+function daysClass(days){ if(days<=2) return "green"; if(days<=5) return "amber"; return "red"; }
 
 async function loadRepairs(){
   const { data, error } = await client.from("repairs").select("*").order("checked_in");
   if(error){ console.error(error); return; }
-  repairs = data || [];
+  repairs = data||[];
   render();
 }
 
@@ -257,7 +121,7 @@ function render(){
 
   repairs.forEach(r=>{
     if(!showCompleted && r.completed) return;
-    if(filter && r.device !== filter) return;
+    if(filter && r.device!==filter) return;
     const days = daysOpen(r.checked_in);
     const row = document.createElement("tr");
     row.innerHTML = `
@@ -267,150 +131,108 @@ function render(){
       <td class="days ${daysClass(days)}">${days}</td>
       <td>
         <button onclick="viewDetails(${r.id})">Details</button>
-        ${r.completed ? '' : `<button onclick="completeRepair(${r.id})">Complete</button>`}
+        ${r.completed?'':`<button onclick="completeRepair(${r.id})">Complete</button>`}
         <button onclick="editRepair(${r.id})">Edit</button>
       </td>
     `;
     body.appendChild(row);
   });
-
   updateOpenRepairCounter();
 }
 
 function updateOpenRepairCounter(){
-  const openCount = repairs.filter(r => !r.completed).length;
+  const openCount = repairs.filter(r=>!r.completed).length;
   document.getElementById("openCounter").innerText = `${openCount} open`;
 }
 
 function openAddModal(){
-  editingId = null;
-  uploadedFiles = [];
-  document.getElementById("modalTitle").innerText = "Add Repair";
-  document.getElementById("custName").value = "";
-  document.getElementById("deviceType").value = "PlayStation";
-  document.getElementById("checkedIn").value = new Date().toISOString().slice(0,10);
-  document.getElementById("notes").value = "";
-  document.getElementById("photoPreview").innerHTML = "";
-  document.getElementById("photoStatus").innerHTML = "";
-  document.getElementById("photoInput").value = "";
+  editingId=null; uploadedFiles=[];
+  document.getElementById("modalTitle").innerText="Add Repair";
+  document.getElementById("custName").value="";
+  document.getElementById("deviceType").value="PlayStation";
+  document.getElementById("checkedIn").value=new Date().toISOString().slice(0,10);
+  document.getElementById("notes").value="";
+  document.getElementById("photoPreview").innerHTML="";
+  document.getElementById("photoStatus").innerHTML="";
+  document.getElementById("photoInput").value="";
   document.getElementById("addModal").style.display="flex";
 }
 
 function closeAddModal(){ document.getElementById("addModal").style.display="none"; }
 
-document.getElementById("photoInput").addEventListener('change', (e)=>{
-  uploadedFiles = Array.from(e.target.files);
-  const preview = document.getElementById("photoPreview");
-  preview.innerHTML = "";
-  uploadedFiles.forEach(file=>{
-    const img = document.createElement("img");
-    img.src = URL.createObjectURL(file);
-    img.className = "image-thumb";
-    preview.appendChild(img);
+document.getElementById("photoInput").addEventListener('change', e=>{
+  uploadedFiles=Array.from(e.target.files);
+  const preview=document.getElementById("photoPreview");
+  preview.innerHTML="";
+  uploadedFiles.forEach(f=>{
+    const img=document.createElement("img");
+    img.src=URL.createObjectURL(f); img.className="image-thumb"; preview.appendChild(img);
   });
 });
 
 async function saveRepair(){
-  const customerInput = document.getElementById("custName").value;
-  const deviceInput = document.getElementById("deviceType").value;
-  const checkedInInput = document.getElementById("checkedIn").value;
-  const notesInput = document.getElementById("notes").value;
-  const statusDiv = document.getElementById("photoStatus");
-  statusDiv.innerHTML = ""; // clear previous messages
+  const customer=document.getElementById("custName").value;
+  const device=document.getElementById("deviceType").value;
+  const checkedIn=document.getElementById("checkedIn").value;
+  const notes=document.getElementById("notes").value;
+  const statusDiv=document.getElementById("photoStatus"); statusDiv.innerHTML="";
 
-  if(!customerInput || !deviceInput) { alert("Customer and Device are required."); return; }
+  if(!customer||!device){ alert("Customer and Device required"); return; }
 
   let repairId = editingId;
-
   if(editingId){
-    const { error } = await client.from("repairs").update({
-      customer: customerInput,
-      device: deviceInput,
-      checked_in: checkedInInput,
-      notes: notesInput
-    }).eq("id", editingId);
+    const { error } = await client.from("repairs").update({customer,device,checked_in:checkedIn,notes}).eq("id",editingId);
     if(error){ alert(error.message); return; }
   } else {
-    const { data, error } = await client.from("repairs").insert({
-      customer: customerInput,
-      device: deviceInput,
-      checked_in: checkedInInput,
-      notes: notesInput,
-      completed:false
-    }).select();
+    const { data, error } = await client.from("repairs").insert({customer,device,checked_in:checkedIn,notes,completed:false}).select();
     if(error){ alert(error.message); return; }
     repairId = data[0].id;
   }
 
-  // Upload photos safely
+  // Upload photos
   for(const file of uploadedFiles){
     try{
-      const safeName = file.name.replace(/\s+/g,"_");
-      const { data, error } = await client.storage
-        .from('repairs')
-        .upload(`repair_${repairId}/${Date.now()}_${safeName}`, file, {upsert:true});
-      if(error){
-        console.error(error);
-        statusDiv.innerHTML += `<div style="color:red">❌ ${file.name} failed</div>`;
-        continue;
-      }
-      await client.from("repair_photos").insert({
-        repair_id: repairId,
-        file_path: data.path
-      });
-      statusDiv.innerHTML += `<div style="color:green">✅ ${file.name} uploaded</div>`;
-    } catch(e){
-      console.error(e);
-      statusDiv.innerHTML += `<div style="color:red">❌ ${file.name} error</div>`;
-    }
+      const safeName=file.name.replace(/\s+/g,"_");
+      const { data: uploadData, error: uploadError } = await client.storage.from('repairs').upload(
+        `repair_${repairId}/${Date.now()}_${safeName}`, file, {upsert:true});
+      if(uploadError){ statusDiv.innerHTML+=`<div style="color:red">❌ ${file.name} failed</div>`; continue; }
+      await client.from("repair_photos").insert({repair_id:repairId,file_path:uploadData.path});
+      statusDiv.innerHTML+=`<div style="color:green">✅ ${file.name} uploaded</div>`;
+    } catch(e){ console.error(e); statusDiv.innerHTML+=`<div style="color:red">❌ ${file.name} error</div>`; }
   }
 
-  uploadedFiles = [];
-  document.getElementById("photoInput").value = "";
-
-  // Close modal after showing status
-  setTimeout(()=>{
-    closeAddModal();
-    loadRepairs();
-  }, 500);
+  uploadedFiles=[]; document.getElementById("photoInput").value="";
+  setTimeout(()=>{ closeAddModal(); loadRepairs(); },500);
 }
 
-// Complete repair
 async function completeRepair(id){
-  const r = repairs.find(x=>x.id===id);
-  if(!r) return;
+  const r=repairs.find(x=>x.id===id); if(!r) return;
   if(!confirm(`Mark repair for ${r.customer} as complete?`)) return;
-
-  const { data, error } = await client.from("repairs")
-    .update({ completed:true })
-    .eq("id", id);
+  const { error } = await client.from("repairs").update({completed:true}).eq("id",id);
   if(error){ alert("Failed: "+error.message); return; }
-
-  await loadRepairs();
+  loadRepairs();
 }
 
-// DETAILS modal
 async function viewDetails(id){
-  const r = repairs.find(x=>x.id===id);
+  const r=repairs.find(x=>x.id===id);
   const { data: photos } = await client.from("repair_photos").select("*").eq("repair_id",id);
 
-  let photoHtml = '';
+  let photoHtml='';
   if(photos && photos.length){
     for(const p of photos){
-      const { data: signedUrlData } = await client.storage.from('repairs')
-        .createSignedUrl(p.file_path, 60);
-      const url = signedUrlData.signedUrl;
-      photoHtml += `<img src="${url}" class="image-thumb" />`;
+      // Public bucket, just use path
+      const url = client.storage.from('repairs').getPublicUrl(p.file_path).data.publicUrl;
+      photoHtml+=`<img src="${url}" class="image-thumb"/>`;
     }
   }
 
-  document.getElementById("detailsContent").innerHTML = `
+  document.getElementById("detailsContent").innerHTML=`
     <h2>${r.customer}</h2>
     <p><strong>Device:</strong> ${r.device}</p>
     <p><strong>Checked in:</strong> ${r.checked_in}</p>
-    <p><strong>Notes:</strong><br>${r.notes || "—"}</p>
-    ${photoHtml ? `<p><strong>Photos:</strong><br>${photoHtml}</p>` : ''}
-    <p><strong>Completed:</strong> ${r.completed ? "Yes" : "No"}</p>
+    <p><strong>Notes:</strong><br>${r.notes||"—"}</p>
+    ${photoHtml?`<p><strong>Photos:</strong><br>${photoHtml}</p>`:""}
+    <p><strong>Completed:</strong> ${r.completed?"Yes":"No"}</p>
     <button onclick="closeDetails()">Close</button>
   `;
   document.getElementById("detailsModal").style.display="flex";
@@ -418,25 +240,22 @@ async function viewDetails(id){
 
 function closeDetails(){ document.getElementById("detailsModal").style.display="none"; }
 
-// Edit repair
 function editRepair(id){
-  const r = repairs.find(x => x.id===id);
-  if(!r) return;
-  editingId = id;
-  document.getElementById("modalTitle").innerText = "Edit Repair";
-  document.getElementById("custName").value = r.customer;
-  document.getElementById("deviceType").value = r.device;
-  document.getElementById("checkedIn").value = r.checked_in;
-  document.getElementById("notes").value = r.notes || "";
-  document.getElementById("photoPreview").innerHTML = "";
-  document.getElementById("photoStatus").innerHTML = "";
-  uploadedFiles = [];
-  document.getElementById("photoInput").value = "";
+  const r=repairs.find(x=>x.id===id); if(!r) return;
+  editingId=id;
+  document.getElementById("modalTitle").innerText="Edit Repair";
+  document.getElementById("custName").value=r.customer;
+  document.getElementById("deviceType").value=r.device;
+  document.getElementById("checkedIn").value=r.checked_in;
+  document.getElementById("notes").value=r.notes||"";
+  document.getElementById("photoPreview").innerHTML="";
+  document.getElementById("photoStatus").innerHTML="";
+  uploadedFiles=[]; document.getElementById("photoInput").value="";
   document.getElementById("addModal").style.display="flex";
 }
 
-document.getElementById("deviceFilter").onchange = render;
-document.getElementById("showCompleted").onchange = render;
+document.getElementById("deviceFilter").onchange=render;
+document.getElementById("showCompleted").onchange=render;
 
 loadRepairs();
 </script>

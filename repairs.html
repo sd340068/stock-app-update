@@ -1,128 +1,132 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>Repairs</title>
+<meta charset="UTF-8">
+<title>Repairs</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f4f6f8;
-      margin: 0;
-      padding: 20px;
-    }
+<style>
+body{
+  margin:0;
+  font-family:Inter,system-ui;
+  background:#f1f5f9;
+  padding:30px;
+}
 
-    h1 {
-      margin-bottom: 10px;
-    }
+.wrapper{
+  max-width:1200px;
+  margin:auto;
+}
 
-    .top-bar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 15px;
-    }
+.top-bar{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:20px;
+}
 
-    button {
-      padding: 6px 12px;
-      border-radius: 4px;
-      border: none;
-      cursor: pointer;
-      background: #2c3e50;
-      color: white;
-    }
+button{
+  padding:8px 14px;
+  border-radius:8px;
+  border:none;
+  cursor:pointer;
+  background:#2563eb;
+  color:#fff;
+  font-weight:600;
+}
 
-    button:hover {
-      opacity: 0.9;
-    }
+button.secondary{
+  background:#e5e7eb;
+  color:#0f172a;
+}
 
-    button.secondary {
-      background: #7f8c8d;
-    }
+button.danger{
+  background:#dc2626;
+}
 
-    button.danger {
-      background: #c0392b;
-    }
+table{
+  width:100%;
+  border-collapse:collapse;
+  background:#fff;
+  border-radius:14px;
+  overflow:hidden;
+  box-shadow:0 12px 30px rgba(0,0,0,.08);
+}
 
-    button.danger:hover {
-      background: #e74c3c;
-    }
+th,td{
+  padding:16px;
+  border-bottom:1px solid #e5e7eb;
+  text-align:center;
+}
 
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      background: white;
-    }
+th{
+  background:#f8fafc;
+  font-size:13px;
+  color:#64748b;
+}
 
-    th, td {
-      padding: 10px;
-      border-bottom: 1px solid #ddd;
-      text-align: center;
-    }
+.actions{
+  display:flex;
+  gap:8px;
+  justify-content:center;
+}
 
-    th {
-      background: #34495e;
-      color: white;
-    }
+/* MODAL */
+.modal{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.45);
+  display:none;
+  align-items:center;
+  justify-content:center;
+}
 
-    .actions {
-      display: flex;
-      gap: 6px;
-      justify-content: center;
-    }
+.modal-content{
+  background:#fff;
+  padding:22px;
+  width:420px;
+  border-radius:14px;
+}
 
-    /* Modal */
-    .modal {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.5);
-      justify-content: center;
-      align-items: center;
-    }
+.modal-content h2{
+  margin-top:0;
+}
 
-    .modal-content {
-      background: white;
-      padding: 20px;
-      width: 400px;
-      border-radius: 6px;
-    }
+.modal-content label{
+  display:block;
+  margin-top:12px;
+  font-size:13px;
+  font-weight:600;
+}
 
-    .modal-content h2 {
-      margin-top: 0;
-    }
+.modal-content input,
+.modal-content textarea{
+  width:100%;
+  padding:8px;
+  border-radius:8px;
+  border:1px solid #cbd5f5;
+  margin-top:4px;
+}
 
-    .modal-content label {
-      display: block;
-      margin-top: 10px;
-    }
-
-    .modal-content input,
-    .modal-content textarea {
-      width: 100%;
-      padding: 6px;
-      margin-top: 4px;
-    }
-
-    .modal-actions {
-      display: flex;
-      justify-content: flex-end;
-      gap: 10px;
-      margin-top: 15px;
-    }
-  </style>
+.modal-actions{
+  display:flex;
+  justify-content:flex-end;
+  gap:10px;
+  margin-top:18px;
+}
+</style>
 </head>
+
 <body>
+<div class="wrapper">
 
   <div class="top-bar">
-    <h1>Open Repairs</h1>
+    <h2>Open Repairs</h2>
     <div>
       <button onclick="openModal()">Add Repair</button>
-      <button class="secondary" onclick="window.location.href='index.html'">
-        Back to Inventory
-      </button>
+      <button class="secondary" onclick="location.href='index.html'">Back to Inventory</button>
     </div>
   </div>
 
@@ -138,157 +142,144 @@
     <tbody id="repairsBody"></tbody>
   </table>
 
-  <!-- Modal -->
-  <div class="modal" id="repairModal">
-    <div class="modal-content">
-      <h2 id="modalTitle">Add Repair</h2>
+</div>
 
-      <input type="hidden" id="repairId">
+<!-- MODAL -->
+<div class="modal" id="repairModal">
+  <div class="modal-content">
+    <h2 id="modalTitle">Add Repair</h2>
+    <input type="hidden" id="repairId">
 
-      <label>Customer Name</label>
-      <input id="username">
+    <label>Customer</label>
+    <input id="username">
 
-      <label>Item</label>
-      <input id="item">
+    <label>Item</label>
+    <input id="item">
 
-      <label>Notes</label>
-      <textarea id="notes"></textarea>
+    <label>Notes</label>
+    <textarea id="notes"></textarea>
 
-      <div class="modal-actions">
-        <button type="button" class="secondary" onclick="closeModal()">Cancel</button>
-        <button type="button" onclick="saveRepair()">Save</button>
-      </div>
+    <div class="modal-actions">
+      <button class="secondary" onclick="closeModal()">Cancel</button>
+      <button onclick="saveRepair()">Save</button>
     </div>
   </div>
+</div>
 
-  <script>
-    const client = supabase.createClient(
-      "YOUR_SUPABASE_URL",
-      "YOUR_SUPABASE_ANON_KEY"
-    );
+<script>
+const client = supabase.createClient(
+  "YOUR_SUPABASE_URL",
+  "YOUR_SUPABASE_ANON_KEY"
+);
 
-    async function loadRepairs() {
-      const { data, error } = await client
-        .from("repairs")
-        .select("*")
-        .eq("completed", false)
-        .order("checked_in", { ascending: true });
+async function loadRepairs(){
+  const { data, error } = await client
+    .from("repairs")
+    .select("*")
+    .eq("completed", false)
+    .order("checked_in", { ascending:true });
 
-      if (error) {
-        console.error(error);
-        return;
-      }
+  if(error){
+    console.error(error);
+    return;
+  }
 
-      const tbody = document.getElementById("repairsBody");
-      tbody.innerHTML = "";
+  const body = document.getElementById("repairsBody");
+  body.innerHTML = "";
 
-      data.forEach(repair => {
-        const daysOpen = Math.floor(
-          (Date.now() - new Date(repair.checked_in)) / 86400000
-        );
+  data.forEach(r => {
+    const days = Math.floor((Date.now() - new Date(r.checked_in)) / 86400000);
 
-        const tr = document.createElement("tr");
-        tr.innerHTML = `
-          <td>${repair.username}</td>
-          <td>${repair.item}</td>
-          <td>${daysOpen}</td>
-          <td class="actions">
-            <button onclick="viewDetails(${repair.id})">Details</button>
-            <button onclick="editRepair(${repair.id})">Edit</button>
-            <button onclick="completeRepair(${repair.id})">Complete</button>
-            <button class="danger" onclick="deleteRepair(${repair.id})">Delete</button>
-          </td>
-        `;
-        tbody.appendChild(tr);
-      });
-    }
+    body.innerHTML += `
+      <tr>
+        <td>${r.username}</td>
+        <td>${r.item}</td>
+        <td>${days}</td>
+        <td class="actions">
+          <button onclick="editRepair(${r.id})">Edit</button>
+          <button onclick="completeRepair(${r.id})">Complete</button>
+          <button class="danger" onclick="deleteRepair(${r.id})">Delete</button>
+        </td>
+      </tr>
+    `;
+  });
+}
 
-    function openModal() {
-      document.getElementById("repairId").value = "";
-      document.getElementById("username").value = "";
-      document.getElementById("item").value = "";
-      document.getElementById("notes").value = "";
-      document.getElementById("modalTitle").textContent = "Add Repair";
-      document.getElementById("repairModal").style.display = "flex";
-    }
+function openModal(){
+  document.getElementById("repairId").value = "";
+  document.getElementById("username").value = "";
+  document.getElementById("item").value = "";
+  document.getElementById("notes").value = "";
+  document.getElementById("modalTitle").innerText = "Add Repair";
+  document.getElementById("repairModal").style.display = "flex";
+}
 
-    function closeModal() {
-      document.getElementById("repairModal").style.display = "none";
-    }
+function closeModal(){
+  document.getElementById("repairModal").style.display = "none";
+}
 
-    async function saveRepair() {
-      const id = document.getElementById("repairId").value;
-      const payload = {
-        username: document.getElementById("username").value,
-        item: document.getElementById("item").value,
-        notes: document.getElementById("notes").value
-      };
+async function saveRepair(){
+  const id = document.getElementById("repairId").value;
+  const payload = {
+    username: username.value,
+    item: item.value,
+    notes: notes.value
+  };
 
-      let error;
-      if (id) {
-        ({ error } = await client.from("repairs").update(payload).eq("id", id));
-      } else {
-        ({ error } = await client.from("repairs").insert(payload));
-      }
+  let error;
+  if(id){
+    ({ error } = await client.from("repairs").update(payload).eq("id", id));
+  } else {
+    ({ error } = await client.from("repairs").insert(payload));
+  }
 
-      if (error) {
-        alert("Save failed");
-        console.error(error);
-        return;
-      }
+  if(error){
+    alert("Save failed");
+    console.error(error);
+    return;
+  }
 
-      closeModal();
-      loadRepairs();
-    }
+  closeModal();
+  loadRepairs();
+}
 
-    async function editRepair(id) {
-      const { data } = await client.from("repairs").select("*").eq("id", id).single();
+async function editRepair(id){
+  const { data } = await client.from("repairs").select("*").eq("id", id).single();
 
-      document.getElementById("repairId").value = data.id;
-      document.getElementById("username").value = data.username;
-      document.getElementById("item").value = data.item;
-      document.getElementById("notes").value = data.notes;
-      document.getElementById("modalTitle").textContent = "Edit Repair";
-      document.getElementById("repairModal").style.display = "flex";
-    }
+  repairId.value = data.id;
+  username.value = data.username;
+  item.value = data.item;
+  notes.value = data.notes;
 
-    function viewDetails(id) {
-      editRepair(id);
-    }
+  modalTitle.innerText = "Edit Repair";
+  repairModal.style.display = "flex";
+}
 
-    async function completeRepair(id) {
-      if (!confirm("Mark this repair as complete?")) return;
+async function completeRepair(id){
+  if(!confirm("Mark this repair complete?")) return;
 
-      const { error } = await client
-        .from("repairs")
-        .update({ completed: true })
-        .eq("id", id);
+  await client.from("repairs")
+    .update({ completed:true })
+    .eq("id", id);
 
-      if (error) {
-        alert("Failed to complete repair");
-        console.error(error);
-        return;
-      }
+  loadRepairs();
+}
 
-      loadRepairs();
-    }
+async function deleteRepair(id){
+  if(!confirm("Delete this repair permanently?")) return;
 
-    async function deleteRepair(id) {
-      if (!confirm("Delete this repair permanently?")) return;
+  const { error } = await client.from("repairs").delete().eq("id", id);
 
-      const { error } = await client.from("repairs").delete().eq("id", id);
+  if(error){
+    alert("Delete failed");
+    console.error(error);
+    return;
+  }
 
-      if (error) {
-        alert("Delete failed");
-        console.error(error);
-        return;
-      }
+  loadRepairs();
+}
 
-      loadRepairs();
-    }
-
-    loadRepairs();
-  </script>
-
+loadRepairs();
+</script>
 </body>
 </html>

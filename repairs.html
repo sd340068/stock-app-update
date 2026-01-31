@@ -228,8 +228,13 @@ function daysClass(days){
 }
 
 async function loadRepairs(){
-  const { data } = await client.from("repairs").select("*").order("checked_in");
+  const { data, error } = await client.from("repairs").select("*").order("checked_in");
+  if(error){
+    console.error("Load error:", error);
+    return;
+  }
   repairs = data || [];
+  console.log("Loaded repairs:", repairs); // Debug: see what's loaded
   render();
 }
 
@@ -237,27 +242,28 @@ function render(){
   const body = document.getElementById("repairsBody");
   body.innerHTML = "";
 
-  const filter = deviceFilter.value;
+  const filter = document.getElementById("deviceFilter").value;
   const showCompleted = document.getElementById("showCompleted").checked;
 
-  repairs
-    .filter(r => showCompleted || !r.completed)
-    .filter(r => !filter || r.device === filter)
-    .forEach(r => {
-      const days = daysOpen(r.checked_in);
-      body.innerHTML += `
-        <tr>
-          <td>${r.customer}</td>
-          <td>${r.device}</td>
-          <td>${r.checked_in}</td>
-          <td class="days ${daysClass(days)}">${days}</td>
-          <td>
-            <button onclick="viewDetails(${r.id})">Details</button>
-            <button class="secondary" onclick="deleteRepair(${r.id})">Delete</button>
-          </td>
-        </tr>
-      `;
-    });
+  repairs.forEach(r => {
+    if (!showCompleted && r.completed) return;
+    if (filter && r.device !== filter) return;
+
+    const days = daysOpen(r.checked_in);
+
+    const row = document.createElement("tr");
+    row.innerHTML = `
+      <td>${r.customer}</td>
+      <td>${r.device}</td>
+      <td>${r.checked_in}</td>
+      <td class="days ${daysClass(days)}">${days}</td>
+      <td>
+        <button onclick="viewDetails(${r.id})">Details</button>
+        <button class="secondary" onclick="deleteRepair(${r.id})">Delete</button>
+      </td>
+    `;
+    body.appendChild(row);
+  });
 }
 
 function openAddModal(){
@@ -270,19 +276,26 @@ function closeAddModal(){
 }
 
 async function saveRepair(){
-  // Reference inputs correctly
   const customerInput = document.getElementById("custName");
   const deviceInput = document.getElementById("deviceType");
   const checkedInInput = document.getElementById("checkedIn");
   const notesInput = document.getElementById("notes");
 
-  await client.from("repairs").insert({
+  const { data, error } = await client.from("repairs").insert({
     customer: customerInput.value,
     device: deviceInput.value,
     checked_in: checkedInInput.value,
     notes: notesInput.value,
     completed: false
-  });
+  }).select();
+
+  if(error){
+    alert("Insert failed: " + error.message);
+    console.error(error);
+    return;
+  }
+
+  console.log("Inserted repair:", data);
 
   // Clear modal inputs
   customerInput.value = "";
@@ -312,14 +325,20 @@ function closeDetails(){
 
 async function deleteRepair(id){
   if(!confirm("Delete this repair?")) return;
-  await client.from("repairs").delete().eq("id",id);
+  const { error } = await client.from("repairs").delete().eq("id",id);
+  if(error){
+    alert("Delete failed: " + error.message);
+    console.error(error);
+    return;
+  }
   loadRepairs();
 }
 
-const deviceFilter = document.getElementById("deviceFilter");
-deviceFilter.onchange = render;
+// Event listeners
+document.getElementById("deviceFilter").onchange = render;
 document.getElementById("showCompleted").onchange = render;
 
+// Initial load
 loadRepairs();
 </script>
 </body>

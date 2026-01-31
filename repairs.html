@@ -256,11 +256,6 @@ th{
   <div class="modal-content" id="detailsContent"></div>
 </div>
 
-<!-- COMPLETE MODAL -->
-<div class="modal" id="completeModal">
-  <div class="modal-content" id="completeContent"></div>
-</div>
-
 <script>
 const SUPABASE_URL = "https://thvbweemnzdvwyaxvwbz.supabase.co";
 const SUPABASE_KEY = "sb_publishable_U6Nsj6HClebAVWOx7MLhng_3t2z6w1G";
@@ -268,7 +263,6 @@ const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 let repairs = [];
 let editingId = null;
-let completingId = null;
 let uploadedFiles = [];
 
 function daysOpen(date){ return Math.floor((Date.now() - new Date(date)) / 86400000); }
@@ -379,7 +373,6 @@ async function saveRepair(){
       .from('repairs')
       .upload(`repair_${repairId}/${file.name}`, file, {upsert:true});
     if(error){ console.error(error); continue; }
-    // Save path in repair_photos table
     await client.from("repair_photos").insert({
       repair_id: repairId,
       file_path: data.path
@@ -397,10 +390,12 @@ async function viewDetails(id){
 
   let photoHtml = '';
   if(photos && photos.length){
-    photos.forEach(p=>{
-      const url = client.storage.from('repairs').getPublicUrl(p.file_path).publicUrl;
+    for(const p of photos){
+      const { data: signedUrlData } = await client.storage.from('repairs')
+        .createSignedUrl(p.file_path, 60);
+      const url = signedUrlData.signedUrl;
       photoHtml += `<img src="${url}" class="image-thumb" />`;
-    });
+    }
   }
 
   document.getElementById("detailsContent").innerHTML = `
@@ -432,9 +427,6 @@ function editRepair(id){
   document.getElementById("photoInput").value = "";
   document.getElementById("addModal").style.display="flex";
 }
-
-// COMPLETE repair remains the same as previous, handling stock reduction
-// ... You can keep your completeRepair() and confirmComplete() functions as before
 
 document.getElementById("deviceFilter").onchange = render;
 document.getElementById("showCompleted").onchange = render;

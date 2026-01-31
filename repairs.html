@@ -177,7 +177,7 @@ th{
     <input type="hidden" id="repairId">
 
     <label>Customer Name</label>
-    <input id="username">
+    <input id="customer">
 
     <label>Device</label>
     <select id="device">
@@ -225,13 +225,13 @@ function renderRepairs(){
   tbody.innerHTML = "";
   repairs.forEach(r=>{
     if(!showCompleted && r.completed) return;
-    if(filterDevice && r.item !== filterDevice) return;
+    if(filterDevice && r.device !== filterDevice) return;
 
     const days = daysOpen(r.checked_in);
     const tr = document.createElement("tr");
     tr.innerHTML = `
-      <td>${r.username}</td>
-      <td>${r.item}</td>
+      <td>${r.customer}</td>
+      <td>${r.device}</td>
       <td>${new Date(r.checked_in).toLocaleDateString()}</td>
       <td>${days}</td>
       <td class="actions">
@@ -251,7 +251,7 @@ function openModal(){
   editingId = null;
   document.getElementById("modalTitle").innerText = "Add Repair";
   document.getElementById("repairId").value = "";
-  document.getElementById("username").value = "";
+  document.getElementById("customer").value = "";
   document.getElementById("device").value = "PlayStation";
   document.getElementById("notes").value = "";
   document.getElementById("editModal").style.display = "flex";
@@ -263,8 +263,8 @@ function closeModal(){
 
 async function saveRepair(){
   const payload = {
-    username: document.getElementById("username").value,
-    item: document.getElementById("device").value,
+    customer: document.getElementById("customer").value,
+    device: document.getElementById("device").value,
     notes: document.getElementById("notes").value,
     completed: false,
     checked_in: new Date().toISOString()
@@ -285,8 +285,8 @@ async function editRepair(id){
   editingId = data.id;
   document.getElementById("modalTitle").innerText = "Edit Repair";
   document.getElementById("repairId").value = data.id;
-  document.getElementById("username").value = data.username;
-  document.getElementById("device").value = data.item;
+  document.getElementById("customer").value = data.customer;
+  document.getElementById("device").value = data.device;
   document.getElementById("notes").value = data.notes || "";
   document.getElementById("editModal").style.display = "flex";
 }

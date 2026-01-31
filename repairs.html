@@ -441,12 +441,21 @@ async function confirmComplete(){
     }
   }
 
+  // Update Supabase
   const { error } = await client.from("repairs").update({completed:true}).eq("id",completingId);
   if(error){ alert(error.message); return; }
 
+  // Immediately update local array to hide
+  const index = repairs.findIndex(r => r.id === completingId);
+  if(index > -1){
+    repairs[index].completed = true;
+  }
+
   closeCompleteModal();
   completingId = null;
-  await loadRepairs(); // fetch fresh data so completed repair disappears
+
+  render();       // instantly hides completed repair
+  await loadRepairs(); // optional sync
 }
 
 document.getElementById("deviceFilter").onchange = render;

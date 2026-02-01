@@ -5,9 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Repairs</title>
 
-<!-- Use the full dist version to ensure supabase object loads -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.27.0/dist/supabase.min.js"></script>
-
 <style>
 :root{
   --bg:#f1f5f9;
@@ -199,21 +196,22 @@ th{
   </div>
 </div>
 
+<!-- 1️⃣ Load Supabase library BEFORE using it -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.34.0/dist/supabase.min.js"></script>
+
+<!-- 2️⃣ Our JS code -->
 <script>
-// --- Supabase Initialization ---
 const SUPABASE_URL = "https://thxyrmscrwstcyhifijv.supabase.co";
-const SUPABASE_KEY = "sb_publishable_U1nguijT4zbVmfkZ-RP29Q_X2Tr-WoE"; // replace with your anon key
+const SUPABASE_KEY = "sb_publishable_U1nguijT4zbVmfkZ-RP29Q_X2Tr-WoE"; // Use your project anon key
 const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 let repairs = [];
 let editingId = null;
 
-// --- Utilities ---
 function daysOpen(date){
   return Math.max(0, Math.floor((Date.now() - new Date(date)) / 86400000));
 }
 
-// --- Load Repairs ---
 async function loadRepairs(){
   const { data, error } = await client
     .from("repairs")
@@ -231,7 +229,6 @@ async function loadRepairs(){
   renderRepairs();
 }
 
-// --- Render Repairs Table ---
 function renderRepairs(){
   const tbody = document.getElementById("repairsBody");
   const showCompleted = document.getElementById("showCompleted").checked;
@@ -262,7 +259,6 @@ function renderRepairs(){
     repairs.filter(r=>!r.completed).length+" open";
 }
 
-// --- Modal ---
 function openModal(){
   editingId = null;
   document.getElementById("modalTitle").innerText = "Add Repair";
@@ -278,17 +274,14 @@ function closeModal(){
   document.getElementById("editModal").style.display = "none";
 }
 
-// Close modal on outside click
 document.getElementById("editModal").addEventListener("click", e => {
   if(e.target.id === "editModal") closeModal();
 });
 
-// Close modal on Escape key
 document.addEventListener("keydown", e => {
   if(e.key === "Escape") closeModal();
 });
 
-// --- Save Repair ---
 async function saveRepair(){
   const customer = document.getElementById("customer").value.trim();
   if(!customer){
@@ -321,7 +314,6 @@ async function saveRepair(){
   loadRepairs();
 }
 
-// --- Edit, Complete, Delete ---
 async function editRepair(id){
   const { data, error } = await client.from("repairs").select("*").eq("id", id).single();
   if(error){ alert("Failed to load repair."); console.error(error); return; }
@@ -350,11 +342,9 @@ async function deleteRepair(id){
   loadRepairs();
 }
 
-// --- Filters ---
 document.getElementById("showCompleted").onchange = renderRepairs;
 document.getElementById("filterDevice").onchange = renderRepairs;
 
-// --- Initial load ---
 loadRepairs();
 </script>
 </body>

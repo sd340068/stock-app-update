@@ -59,7 +59,6 @@ h1{text-align:center;margin-bottom:10px;}
 }
 
 .card-content{
-  /* wrapper for title, subtitle, info */
   display: flex;
   flex-direction: column;
   gap:4px;
@@ -124,7 +123,7 @@ h1{text-align:center;margin-bottom:10px;}
     <!-- LCD Screen Repair -->
     <div class="card">
       <div class="card-content">
-        <h2>LCD Screen Repair (+130%)</h2>
+        <h2>LCD Screen Repair</h2>
         <p class="card-subtitle">iPhone Only</p>
         <p class="card-info">Only use the red FX5 Screen option cost here</p>
       </div>
@@ -135,7 +134,7 @@ h1{text-align:center;margin-bottom:10px;}
     <!-- OLED Screen Repair -->
     <div class="card">
       <div class="card-content">
-        <h2>OLED Screen Repair (+45%)</h2>
+        <h2>OLED Screen Repair</h2>
         <p class="card-subtitle">&nbsp;</p>
         <p class="card-info">Only use the purple FX5 Screen option cost here - iPhone</p>
       </div>
@@ -146,7 +145,7 @@ h1{text-align:center;margin-bottom:10px;}
     <!-- Battery Repair -->
     <div class="card">
       <div class="card-content">
-        <h2>Battery Repair (+115%)</h2>
+        <h2>Battery Repair</h2>
         <p class="card-subtitle">&nbsp;</p>
         <p class="card-info">&nbsp;</p>
       </div>
@@ -157,7 +156,7 @@ h1{text-align:center;margin-bottom:10px;}
     <!-- Charging Port Repair -->
     <div class="card">
       <div class="card-content">
-        <h2>Charging Port Repair (+80%)</h2>
+        <h2>Charging Port Repair</h2>
         <p class="card-subtitle">&nbsp;</p>
         <p class="card-info">&nbsp;</p>
       </div>
@@ -178,7 +177,6 @@ document.querySelectorAll('.calc-input').forEach(input => {
   input.addEventListener('input', e => {
     const percent = parseFloat(e.target.dataset.percent);
     const cost = parseFloat(e.target.value) || 0;
-    // Add markup + shipping
     const final = cost + cost * (percent/100) + SHIPPING;
     const rounded = roundToNearest5(final);
     e.target.nextElementSibling.innerText = `£${rounded}.00`;

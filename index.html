@@ -409,9 +409,9 @@ function renderTable(){
         <div style="font-size:11px;color:var(--muted)">Updated ${updated}</div>
       </td>
       <td>
-    <button
+<button
   class="action-btn"
-  ${editingUnlocked ? "" : "disabled"}
+  ${editingUnlocked ? "" : "disabled title='Unlock editing to change stock'"}
   onclick="startEdit(this, ${p.id}, ${p.stock})"
 >
   Edit
@@ -522,5 +522,6 @@ loadStock();
 </script>
 </body>
 </html>
+
 
 

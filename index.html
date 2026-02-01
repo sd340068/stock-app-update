@@ -241,6 +241,12 @@ tbody tr:hover{background:#f8fafc}
   cursor:pointer;
 }
 
+  .action-btn[disabled]{
+  opacity: 0.45;
+  cursor: not-allowed;
+  background: #94a3b8; /* muted gray-blue */
+}
+
 .secondary{
   background:#e5e7eb;
   color:#0f172a;
@@ -403,7 +409,13 @@ function renderTable(){
         <div style="font-size:11px;color:var(--muted)">Updated ${updated}</div>
       </td>
       <td>
-        <button class="action-btn" onclick="startEdit(this, ${p.id}, ${p.stock})">Edit</button>
+    <button
+  class="action-btn"
+  ${editingUnlocked ? "" : "disabled"}
+  onclick="startEdit(this, ${p.id}, ${p.stock})"
+>
+  Edit
+</button>
       </td>
     </tr>
   `;
@@ -418,7 +430,9 @@ function unlockEditing(){
   b.style.background = "#16a34a";
   b.style.color = "#fff";
   b.disabled = true;
+   renderTable();
  }
+  
 }
 
 function startEdit(btn, id, stock){
@@ -508,4 +522,5 @@ loadStock();
 </script>
 </body>
 </html>
+
 

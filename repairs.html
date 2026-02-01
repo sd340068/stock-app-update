@@ -212,7 +212,8 @@ function daysOpen(date){
 
 // Load repairs
 async function loadRepairs(){
-  const { data, error } = await client.from('repairs').select('*').order('checked_in', { ascending:true });
+  const { data, error } = await client.from('public.repairs')
+.select('*').order('checked_in', { ascending:true });
   if(error){ console.error(error); alert("Failed to fetch repairs"); return; }
   repairs = data || [];
   renderRepairs();
@@ -283,10 +284,12 @@ document.getElementById("saveBtn").onclick = async () => {
   };
 
   if(editingId){
-    const { error } = await client.from('repairs').update(payload).eq('id', editingId);
+    const { error } = await client.from('public.repairs')
+.update(payload).eq('id', editingId);
     if(error){ console.error(error); alert("Update failed"); return; }
   } else {
-    const { error } = await client.from('repairs').insert(payload);
+    const { error } = await client.from('public.repairs')
+.insert(payload);
     if(error){ console.error(error); alert("Insert failed"); return; }
   }
 
@@ -296,7 +299,8 @@ document.getElementById("saveBtn").onclick = async () => {
 
 // Edit / Complete / Delete
 window.editRepair = async (id) => {
-  const { data, error } = await client.from('repairs').select('*').eq('id', id).single();
+  const { data, error } = await client.from('public.repairs')
+.select('*').eq('id', id).single();
   if(error){ console.error(error); alert("Load failed"); return; }
   editingId = data.id;
   document.getElementById("modalTitle").innerText = "Edit Repair";
@@ -307,13 +311,15 @@ window.editRepair = async (id) => {
 };
 window.completeRepair = async (id) => {
   if(!confirm("Mark complete?")) return;
-  const { error } = await client.from('repairs').update({ completed:true }).eq('id', id);
+  const { error } = await client.from('public.repairs')
+.update({ completed:true }).eq('id', id);
   if(error){ console.error(error); alert("Complete failed"); return; }
   loadRepairs();
 };
 window.deleteRepair = async (id) => {
   if(!confirm("Delete permanently?")) return;
-  const { error } = await client.from('repairs').delete().eq('id', id);
+  const { error } = await client.from('public.repairs')
+.delete().eq('id', id);
   if(error){ console.error(error); alert("Delete failed"); return; }
   loadRepairs();
 };

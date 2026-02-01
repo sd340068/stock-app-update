@@ -400,9 +400,31 @@ async function completeRepair(id){
   });
 }
 
-async function confirmComplete(){
-  await client.from("repairs").update({completed:true}).eq("id",completingId);
-  completeModal.style.display="none";
+async function confirmComplete() {
+  // Loop through part inputs and update stock
+  const inputs = document.querySelectorAll('.tab-content input[type="number"]');
+  for (const input of inputs) {
+    const used = parseInt(input.value, 10) || 0;
+    if (used > 0) {
+      const partId = input.dataset.id;
+      // Get current stock
+      const { data: part, error: fetchError } = await client.from('products').select('*').eq('id', partId).single();
+      if (fetchError) { console.error(fetchError); continue; }
+      const newStock = Math.max(0, part.stock - used);
+      // Update stock in Supabase
+      const { error: updateError } = await client.from('products').update({ stock: newStock }).eq('id', partId);
+      if (updateError) console.error(updateError);
+    }
+  }
+
+  // Mark repair as completed
+  const { error: completeError } = await client.from('repairs').update({ completed: true }).eq('id', completingId);
+  if (completeError) console.error(completeError);
+
+  completeModal.style.display = 'none';
+  completingId = null;
+
+  // Reload repairs and products so index.html will reflect stock change
   loadRepairs();
 }
 

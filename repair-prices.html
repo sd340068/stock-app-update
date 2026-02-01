@@ -50,8 +50,12 @@ h1{text-align:center;margin-bottom:10px;}
   padding:24px;
   box-shadow:0 10px 30px rgba(0,0,0,.1);
   text-align:center;
-  display:flex;
-  flex-direction: column;
+
+  /* Use grid layout internally */
+  display: grid;
+  grid-template-rows: auto auto auto 1fr auto; 
+  /* rows: title / subtitle / info / spacer / input+result */
+  row-gap:6px;
 }
 
 .card h2{
@@ -77,11 +81,11 @@ h1{text-align:center;margin-bottom:10px;}
 .card input{
   width:80%;
   padding:8px 12px;
-  margin-top:auto; /* ensures all inputs line up */
   border-radius:8px;
   border:1px solid var(--border);
   text-align:right;
   font-size:16px;
+  grid-row:5; /* force all inputs into the same grid row */
 }
 
 .result{
@@ -89,7 +93,7 @@ h1{text-align:center;margin-bottom:10px;}
   font-weight:600;
   margin-top:8px;
   color:var(--blue);
-  padding:8px 0;
+  grid-row:5; /* force result into same row as input */
 }
 
 .back-btn{
@@ -114,22 +118,21 @@ h1{text-align:center;margin-bottom:10px;}
 
   <div class="calculators">
     <!-- LCD Screen Repair -->
-    <div class="card">
-      <h2>LCD Screen Repair (+130%)</h2>
-      <p class="card-subtitle">iPhone Only</p>
-      <p class="card-info">Only use the red FX5 Screen option cost here</p>
-      <input type="number" placeholder="Parts cost" class="calc-input" data-percent="130">
-      <div class="result">—</div>
-    </div>
+<div class="card">
+  <h2>LCD Screen Repair (+130%)</h2>
+  <p class="card-subtitle">iPhone Only</p>
+  <p class="card-info">Only use the red FX5 Screen option cost here</p>
+  <input type="number" placeholder="Parts cost" class="calc-input" data-percent="130">
+  <div class="result">—</div>
+</div>
 
-    <!-- OLED Screen Repair -->
-    <div class="card">
-      <h2>OLED Screen Repair (+45%)</h2>
-      <p class="card-subtitle">&nbsp;</p>
-      <p class="card-info">Only use the purple FX5 Screen option cost here - iPhone</p>
-      <input type="number" placeholder="Parts cost" class="calc-input" data-percent="45">
-      <div class="result">—</div>
-    </div>
+<div class="card">
+  <h2>OLED Screen Repair (+45%)</h2>
+  <p class="card-subtitle">&nbsp;</p>
+  <p class="card-info">Only use the purple FX5 Screen option cost here - iPhone</p>
+  <input type="number" placeholder="Parts cost" class="calc-input" data-percent="45">
+  <div class="result">—</div>
+</div>
 
     <!-- Battery Repair -->
     <div class="card">

@@ -4,7 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Repairs</title>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<!-- Use the full dist version to ensure supabase object loads -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.27.0/dist/supabase.min.js"></script>
 
 <style>
 :root{
@@ -134,7 +136,6 @@ th{
 }
 </style>
 </head>
-
 <body>
 <div class="wrapper">
   <div class="card">
@@ -170,14 +171,14 @@ th{
   </div>
 </div>
 
-<!-- Add/Edit Modal -->
+<!-- Modal -->
 <div class="modal" id="editModal">
   <div class="modal-content">
     <h2 id="modalTitle">Add Repair</h2>
     <input type="hidden" id="repairId">
 
     <label>Customer Name</label>
-    <input id="customer">
+    <input id="customer" autofocus>
 
     <label>Device</label>
     <select id="device">
@@ -199,26 +200,38 @@ th{
 </div>
 
 <script>
+// --- Supabase Initialization ---
 const SUPABASE_URL = "https://thxyrmscrwstcyhifijv.supabase.co";
-const SUPABASE_KEY = "sb_publishable_U1nguijT4zbVmfkZ-RP29Q_X2Tr-WoE";
+const SUPABASE_KEY = "sb_publishable_U1nguijT4zbVmfkZ-RP29Q_X2Tr-WoE"; // replace with your anon key
 const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 let repairs = [];
 let editingId = null;
 
+// --- Utilities ---
 function daysOpen(date){
-  return Math.floor((Date.now() - new Date(date)) / 86400000);
+  return Math.max(0, Math.floor((Date.now() - new Date(date)) / 86400000));
 }
 
-// Load repairs from Supabase
+// --- Load Repairs ---
 async function loadRepairs(){
-  const { data, error } = await client.from("repairs").select("*").order("checked_in");
-  if(error){console.error(error); return;}
+  const { data, error } = await client
+    .from("repairs")
+    .select("*")
+    .order("checked_in", { ascending: true });
+
+  console.log("Supabase data:", data, "Error:", error);
+
+  if(error){
+    alert("Failed to load repairs. Check console.");
+    return;
+  }
+
   repairs = data || [];
   renderRepairs();
 }
 
-// Render table rows
+// --- Render Repairs Table ---
 function renderRepairs(){
   const tbody = document.getElementById("repairsBody");
   const showCompleted = document.getElementById("showCompleted").checked;
@@ -249,7 +262,7 @@ function renderRepairs(){
     repairs.filter(r=>!r.completed).length+" open";
 }
 
-// Open Add/Edit Modal
+// --- Modal ---
 function openModal(){
   editingId = null;
   document.getElementById("modalTitle").innerText = "Add Repair";
@@ -258,36 +271,61 @@ function openModal(){
   document.getElementById("device").value = "PlayStation";
   document.getElementById("notes").value = "";
   document.getElementById("editModal").style.display = "flex";
+  document.getElementById("customer").focus();
 }
 
-// Close modal
 function closeModal(){
   document.getElementById("editModal").style.display = "none";
 }
 
-// Save new repair or update existing
+// Close modal on outside click
+document.getElementById("editModal").addEventListener("click", e => {
+  if(e.target.id === "editModal") closeModal();
+});
+
+// Close modal on Escape key
+document.addEventListener("keydown", e => {
+  if(e.key === "Escape") closeModal();
+});
+
+// --- Save Repair ---
 async function saveRepair(){
+  const customer = document.getElementById("customer").value.trim();
+  if(!customer){
+    alert("Customer name cannot be empty.");
+    return;
+  }
+
   const payload = {
-    customer: document.getElementById("customer").value,
+    customer,
     device: document.getElementById("device").value,
     notes: document.getElementById("notes").value,
     completed: false,
     checked_in: new Date().toISOString()
   };
 
+  let res;
   if(editingId){
-    await client.from("repairs").update(payload).eq("id", editingId);
+    res = await client.from("repairs").update(payload).eq("id", editingId);
   } else {
-    await client.from("repairs").insert(payload);
+    res = await client.from("repairs").insert(payload);
+  }
+
+  if(res.error){
+    alert("Failed to save repair. Check console.");
+    console.error(res.error);
+    return;
   }
 
   closeModal();
   loadRepairs();
 }
 
-// Edit repair
+// --- Edit, Complete, Delete ---
 async function editRepair(id){
-  const { data } = await client.from("repairs").select("*").eq("id", id).single();
+  const { data, error } = await client.from("repairs").select("*").eq("id", id).single();
+  if(error){ alert("Failed to load repair."); console.error(error); return; }
+
   editingId = data.id;
   document.getElementById("modalTitle").innerText = "Edit Repair";
   document.getElementById("repairId").value = data.id;
@@ -295,27 +333,28 @@ async function editRepair(id){
   document.getElementById("device").value = data.device;
   document.getElementById("notes").value = data.notes || "";
   document.getElementById("editModal").style.display = "flex";
+  document.getElementById("customer").focus();
 }
 
-// Complete repair
 async function completeRepair(id){
   if(!confirm("Mark this repair complete?")) return;
-  await client.from("repairs").update({completed:true}).eq("id",id);
+  const { error } = await client.from("repairs").update({completed:true}).eq("id",id);
+  if(error){ alert("Failed to mark complete"); console.error(error); return; }
   loadRepairs();
 }
 
-// Delete repair
 async function deleteRepair(id){
   if(!confirm("Delete this repair permanently?")) return;
-  await client.from("repairs").delete().eq("id",id);
+  const { error } = await client.from("repairs").delete().eq("id",id);
+  if(error){ alert("Failed to delete repair"); console.error(error); return; }
   loadRepairs();
 }
 
-// Filters
+// --- Filters ---
 document.getElementById("showCompleted").onchange = renderRepairs;
 document.getElementById("filterDevice").onchange = renderRepairs;
 
-// Initial load
+// --- Initial load ---
 loadRepairs();
 </script>
 </body>

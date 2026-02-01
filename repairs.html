@@ -158,12 +158,19 @@ if(!sessionStorage.getItem("auth")){
   </div>
 </div>
 
+<!-- COMPLETE MODAL -->
+<div class="modal" id="completeModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);align-items:center;justify-content:center;z-index:10;">
+  <div style="background:#fff;border-radius:20px;padding:24px;width:520px;max-width:90%;display:flex;flex-direction:column;gap:12px;" id="completeContent">
+    <!-- Filled dynamically -->
+  </div>
+</div>
+
 <script>
 const SUPABASE_URL="https://thvbweemnzdvwyaxvwbz.supabase.co";
 const SUPABASE_KEY="sb_publishable_U6Nsj6HClebAVWOx7MLhng_3t2z6w1G";
 const client=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 
-let repairs=[],editingId=null;
+let repairs=[],editingId=null,completingId=null;
 const stages=["Checked-in","Awaiting parts","Completed"];
 
 function daysOpen(d){return Math.floor((Date.now()-new Date(d))/86400000);}
@@ -191,6 +198,7 @@ function render(){
   <td>${r.checked_in}</td>
   <td><span class="status-badge status-${r.status.replace(' ','\\ ')}">${r.status}</span></td>
   <td>
+    ${r.status!=="Completed"?`<button onclick="completeRepair(${r.id})">Complete</button>`:""}
     <button onclick="editRepair(${r.id})">Edit</button>
     <button class="danger" onclick="deleteRepair(${r.id})">Delete</button>
   </td>
@@ -246,6 +254,44 @@ function editRepair(id){
 async function deleteRepair(id){
   if(!confirm("Delete this repair?")) return;
   await client.from("repairs").delete().eq("id",id);
+  loadRepairs();
+}
+
+/* COMPLETE BUTTON LOGIC */
+async function completeRepair(id){
+  completingId=id;
+  const r=repairs.find(x=>x.id===id);
+  if(!r) return;
+
+  // Open a modal to reduce stock (similar to your old complete modal)
+  const { data:products } = await client.from("products").select("*");
+  let html=`<h2>Complete: ${r.customer}</h2><p>Device: ${r.device}</p>`;
+  html+=`<div>`;
+  products.filter(p=>p.brand===r.device).forEach(p=>{
+    html+=`<label>${p.name} (Stock ${p.stock}) <input type="number" min="0" max="${p.stock}" data-id="${p.id}"></label>`;
+  });
+  html+=`</div>`;
+  html+=`<button onclick="confirmComplete()">Confirm</button>`;
+  html+=`<button class="secondary" onclick="completeModal.style.display='none'">Cancel</button>`;
+  completeContent.innerHTML=html;
+  completeModal.style.display="flex";
+}
+
+async function confirmComplete(){
+  const inputs=document.querySelectorAll('#completeContent input[type="number"]');
+  for(const input of inputs){
+    const used=parseInt(input.value,10)||0;
+    if(used>0){
+      const partId=input.dataset.id;
+      const { data:part } = await client.from('products').select('*').eq('id',partId).single();
+      const newStock=Math.max(0,part.stock-used);
+      await client.from('products').update({stock:newStock}).eq('id',partId);
+    }
+  }
+
+  await client.from('repairs').update({ status:'Completed' }).eq('id',completingId);
+  completeModal.style.display='none';
+  completingId=null;
   loadRepairs();
 }
 

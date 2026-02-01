@@ -12,9 +12,7 @@
   --border:#e5e7eb;
   --text:#0f172a;
   --muted:#64748b;
-  --ps:#2563eb;
-  --xbox:#16a34a;
-  --nintendo:#dc2626;
+  --blue:#2563eb;
 }
 
 body{
@@ -67,14 +65,9 @@ h1{text-align:center;margin-bottom:30px;}
   font-size:24px;
   font-weight:600;
   margin-top:8px;
-  color:#fff;
+  color:var(--blue);
   padding:8px 0;
-  border-radius:12px;
 }
-
-.card.ps .result{background:var(--ps);}
-.card.xbox .result{background:var(--xbox);}
-.card.nintendo .result{background:var(--nintendo);}
 
 .back-btn{
   display:inline-block;
@@ -96,19 +89,19 @@ h1{text-align:center;margin-bottom:30px;}
   <h1>Repair Price Calculators</h1>
 
   <div class="calculators">
-    <div class="card ps">
+    <div class="card">
       <h2>Standard Repair (+20%)</h2>
       <input type="number" placeholder="Parts cost" class="calc-input" data-percent="20">
       <div class="result">—</div>
     </div>
 
-    <div class="card xbox">
+    <div class="card">
       <h2>Premium Repair (+35%)</h2>
       <input type="number" placeholder="Parts cost" class="calc-input" data-percent="35">
       <div class="result">—</div>
     </div>
 
-    <div class="card nintendo">
+    <div class="card">
       <h2>Express Repair (+50%)</h2>
       <input type="number" placeholder="Parts cost" class="calc-input" data-percent="50">
       <div class="result">—</div>

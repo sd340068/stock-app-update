@@ -518,7 +518,7 @@ async function loadStock(){
 
 /* Repair badge count (only active repairs) */
 async function loadRepairCount(){
-  const { data, error } = await client
+  const { count, error } = await client
     .from('repairs')
     .select('*', { count: 'exact', head: true })
     .in('status', ['Checked-in', 'Awaiting parts']); // Only count these statuses
@@ -529,13 +529,16 @@ async function loadRepairCount(){
     return;
   }
 
-  document.getElementById('repairCountBadge').innerText = data?.length ?? 0;
+  // Use the returned count, not data length
+  document.getElementById('repairCountBadge').innerText = count ?? 0;
 }
+
 
 loadStock();
 </script>
 </body>
 </html>
+
 
 
 

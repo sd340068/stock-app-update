@@ -83,6 +83,30 @@ th{font-size:12px;color:var(--muted);background:#f8fafc;}
 .status-Checked-in { background: var(--blue); }
 .status-Awaiting-parts { background: var(--amber); }
 .status-Completed { background: var(--green); }
+
+/* MODALS */
+.modal{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.45);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  z-index:10;
+}
+.modal-content{
+  background:#fff;
+  border-radius:20px;
+  padding:24px;
+  width:520px;
+  max-width:90%;
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
+.modal-content input, .modal-content select, .modal-content textarea{
+  width:100%;
+}
 </style>
 </head>
 <body>
@@ -134,8 +158,8 @@ if(!sessionStorage.getItem("auth")){
 </div>
 
 <!-- ADD / EDIT MODAL -->
-<div class="modal" id="addModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);align-items:center;justify-content:center;z-index:10;">
-  <div style="background:#fff;border-radius:20px;padding:24px;width:520px;max-width:90%;display:flex;flex-direction:column;gap:12px;">
+<div class="modal" id="addModal">
+  <div class="modal-content">
     <h2 id="modalTitle">Add Repair</h2>
     <input id="custName" placeholder="Customer name">
     <select id="deviceType">
@@ -159,10 +183,8 @@ if(!sessionStorage.getItem("auth")){
 </div>
 
 <!-- COMPLETE MODAL -->
-<div class="modal" id="completeModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);align-items:center;justify-content:center;z-index:10;">
-  <div style="background:#fff;border-radius:20px;padding:24px;width:520px;max-width:90%;display:flex;flex-direction:column;gap:12px;" id="completeContent">
-    <!-- Filled dynamically -->
-  </div>
+<div class="modal" id="completeModal">
+  <div class="modal-content" id="completeContent"></div>
 </div>
 
 <script>
@@ -171,7 +193,6 @@ const SUPABASE_KEY="sb_publishable_U6Nsj6HClebAVWOx7MLhng_3t2z6w1G";
 const client=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 
 let repairs=[],editingId=null,completingId=null;
-const stages=["Checked-in","Awaiting parts","Completed"];
 
 function daysOpen(d){return Math.floor((Date.now()-new Date(d))/86400000);}
 
@@ -191,22 +212,19 @@ function render(){
     if(!s && r.status==="Completed") return;
     if(q && !r.customer.toLowerCase().includes(q)) return;
 
-repairsBody.innerHTML += `
+    repairsBody.innerHTML+=`
 <tr>
   <td>${r.customer}</td>
   <td>${r.device}</td>
   <td>${r.checked_in}</td>
+  <td><span class="status-badge status-${r.status.replace(' ', '-')}">${r.status}</span></td>
   <td>
-    <span class="status-badge status-${r.status.replace(' ', '-')}">
-      ${r.status}
-    </span>
-  </td>
-  <td>
-    ${r.status !== "Completed" ? `<button onclick="completeRepair(${r.id})">Complete</button>` : ""}
+    ${r.status!=="Completed"?`<button onclick="completeRepair(${r.id})">Complete</button>`:""}
     <button onclick="editRepair(${r.id})">Edit</button>
     <button class="danger" onclick="deleteRepair(${r.id})">Delete</button>
   </td>
 </tr>`;
+  });
 
   openCounter.innerText=`${repairs.filter(r=>r.status!=="Completed").length} open`;
 }
@@ -266,7 +284,7 @@ async function completeRepair(id){
   const r=repairs.find(x=>x.id===id);
   if(!r) return;
 
-  // Open a modal to reduce stock (similar to your old complete modal)
+  // Open modal to reduce stock (similar to old complete modal)
   const { data:products } = await client.from("products").select("*");
   let html=`<h2>Complete: ${r.customer}</h2><p>Device: ${r.device}</p>`;
   html+=`<div>`;

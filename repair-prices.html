@@ -12,9 +12,9 @@
   --border:#e5e7eb;
   --text:#0f172a;
   --muted:#64748b;
-  --blue:#2563eb;
-  --green:#16a34a;
-  --amber:#f59e0b;
+  --ps:#2563eb;
+  --xbox:#16a34a;
+  --nintendo:#dc2626;
 }
 
 body{
@@ -41,6 +41,11 @@ h1{text-align:center;margin-bottom:30px;}
   padding:24px;
   box-shadow:0 10px 30px rgba(0,0,0,.1);
   text-align:center;
+  transition: transform .2s, box-shadow .2s;
+}
+.card:hover{
+  transform:translateY(-3px);
+  box-shadow:0 14px 36px rgba(0,0,0,.15);
 }
 
 .card h2{
@@ -61,9 +66,15 @@ h1{text-align:center;margin-bottom:30px;}
 .result{
   font-size:24px;
   font-weight:600;
-  color:var(--blue);
   margin-top:8px;
+  color:#fff;
+  padding:8px 0;
+  border-radius:12px;
 }
+
+.card.ps .result{background:var(--ps);}
+.card.xbox .result{background:var(--xbox);}
+.card.nintendo .result{background:var(--nintendo);}
 
 .back-btn{
   display:inline-block;
@@ -85,19 +96,19 @@ h1{text-align:center;margin-bottom:30px;}
   <h1>Repair Price Calculators</h1>
 
   <div class="calculators">
-    <div class="card">
+    <div class="card ps">
       <h2>Standard Repair (+20%)</h2>
       <input type="number" placeholder="Parts cost" class="calc-input" data-percent="20">
       <div class="result">—</div>
     </div>
 
-    <div class="card">
+    <div class="card xbox">
       <h2>Premium Repair (+35%)</h2>
       <input type="number" placeholder="Parts cost" class="calc-input" data-percent="35">
       <div class="result">—</div>
     </div>
 
-    <div class="card">
+    <div class="card nintendo">
       <h2>Express Repair (+50%)</h2>
       <input type="number" placeholder="Parts cost" class="calc-input" data-percent="50">
       <div class="result">—</div>

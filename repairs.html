@@ -4,6 +4,14 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Repairs</title>
+<script type="module">
+  import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+
+  // Supabase project config
+  const SUPABASE_URL = "https://thxyrmscrwstcyhifijv.supabase.co";
+  const SUPABASE_KEY = "sb_publishable_U1nguijT4zbVmfkZ-RP29Q_X2Tr-WoE";
+  window.supabaseClient = createClient(SUPABASE_URL, SUPABASE_KEY);
+</script>
 
 <style>
 :root{
@@ -166,7 +174,6 @@ th{
       </thead>
       <tbody id="repairsBody"></tbody>
     </table>
-
   </div>
 </div>
 
@@ -175,7 +182,7 @@ th{
     <h2 id="modalTitle">Add Repair</h2>
     <input type="hidden" id="repairId">
     <label>Customer Name</label>
-    <input id="customer" autofocus>
+    <input id="customer">
     <label>Device</label>
     <select id="device">
       <option>PlayStation</option>
@@ -193,37 +200,25 @@ th{
   </div>
 </div>
 
-<!-- ESM Script -->
 <script type="module">
-
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-
-const SUPABASE_URL = "https://thxyrmscrwstcyhifijv.supabase.co";
-const SUPABASE_KEY = "sb_publishable_U1nguijT4zbVmfkZ-RP29Q_X2Tr-WoE";
-const client = createClient(SUPABASE_URL, SUPABASE_KEY);
-
+const client = window.supabaseClient;
 let repairs = [];
 let editingId = null;
 
+// Helper: calculate days open
 function daysOpen(date){
   return Math.max(0, Math.floor((Date.now() - new Date(date)) / 86400000));
 }
 
+// Load repairs
 async function loadRepairs(){
-  const { data, error } = await client
-    .from('repairs')
-    .select('*')
-    .order('checked_in', { ascending: true });
-
-  if(error){
-    console.error(error);
-    alert("Failed to fetch repairs");
-    return;
-  }
+  const { data, error } = await client.from('repairs').select('*').order('checked_in', { ascending:true });
+  if(error){ console.error(error); alert("Failed to fetch repairs"); return; }
   repairs = data || [];
   renderRepairs();
 }
 
+// Render table
 function renderRepairs(){
   const tbody = document.getElementById("repairsBody");
   const showCompleted = document.getElementById("showCompleted").checked;
@@ -259,6 +254,7 @@ function renderRepairs(){
     repairs.filter(r => !r.completed).length + " open";
 }
 
+// Modal
 function openModal(){
   editingId = null;
   document.getElementById("modalTitle").innerText = "Add Repair";
@@ -269,20 +265,12 @@ function openModal(){
   document.getElementById("editModal").style.display = "flex";
   document.getElementById("customer").focus();
 }
+function closeModal(){ document.getElementById("editModal").style.display = "none"; }
+document.getElementById("editModal").addEventListener("click", e => { if(e.target.id==="editModal") closeModal(); });
+document.addEventListener("keydown", e => { if(e.key==="Escape") closeModal(); });
 
-function closeModal(){
-  document.getElementById("editModal").style.display = "none";
-}
-
-document.getElementById("editModal").addEventListener("click", e => {
-  if(e.target.id === "editModal") closeModal();
-});
-
-document.addEventListener("keydown", e => {
-  if(e.key === "Escape") closeModal();
-});
-
-async function saveRepair(){
+// Save
+document.getElementById("saveBtn").onclick = async () => {
   const customer = document.getElementById("customer").value.trim();
   if(!customer){ alert("Customer required"); return; }
 
@@ -304,11 +292,12 @@ async function saveRepair(){
 
   closeModal();
   loadRepairs();
-}
+};
 
+// Edit / Complete / Delete
 window.editRepair = async (id) => {
   const { data, error } = await client.from('repairs').select('*').eq('id', id).single();
-  if(error){ console.error(error); alert("Load for edit failed"); return; }
+  if(error){ console.error(error); alert("Load failed"); return; }
   editingId = data.id;
   document.getElementById("modalTitle").innerText = "Edit Repair";
   document.getElementById("customer").value = data.customer;
@@ -316,14 +305,12 @@ window.editRepair = async (id) => {
   document.getElementById("notes").value = data.notes || "";
   document.getElementById("editModal").style.display = "flex";
 };
-
 window.completeRepair = async (id) => {
-  if(!confirm("Mark this complete?")) return;
+  if(!confirm("Mark complete?")) return;
   const { error } = await client.from('repairs').update({ completed:true }).eq('id', id);
   if(error){ console.error(error); alert("Complete failed"); return; }
   loadRepairs();
 };
-
 window.deleteRepair = async (id) => {
   if(!confirm("Delete permanently?")) return;
   const { error } = await client.from('repairs').delete().eq('id', id);
@@ -331,11 +318,12 @@ window.deleteRepair = async (id) => {
   loadRepairs();
 };
 
+// Filters
 document.getElementById("showCompleted").onchange = renderRepairs;
 document.getElementById("filterDevice").onchange = renderRepairs;
 
+// Initial load
 loadRepairs();
-
 </script>
 </body>
 </html>

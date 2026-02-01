@@ -110,13 +110,18 @@ h1{text-align:center;margin-bottom:30px;}
 </div>
 
 <script>
-// Listen for input changes
+function roundToNearest5(value){
+  // Round to nearest 5
+  return Math.round(value / 5) * 5;
+}
+
 document.querySelectorAll('.calc-input').forEach(input => {
   input.addEventListener('input', e => {
     const percent = parseFloat(e.target.dataset.percent);
     const cost = parseFloat(e.target.value) || 0;
     const final = cost + cost * (percent/100);
-    e.target.nextElementSibling.innerText = `£${final.toFixed(2)}`;
+    const rounded = roundToNearest5(final);
+    e.target.nextElementSibling.innerText = `£${rounded}`;
   });
 });
 </script>

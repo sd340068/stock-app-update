@@ -196,13 +196,13 @@ th{
   </div>
 </div>
 
-<!-- 1️⃣ Load Supabase library BEFORE using it -->
+<!-- 1️⃣ Load Supabase global script first -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.34.0/dist/supabase.min.js"></script>
 
-<!-- 2️⃣ Our JS code -->
+<!-- 2️⃣ Our code using the global `supabase` object -->
 <script>
 const SUPABASE_URL = "https://thxyrmscrwstcyhifijv.supabase.co";
-const SUPABASE_KEY = "sb_publishable_U1nguijT4zbVmfkZ-RP29Q_X2Tr-WoE"; // Use your project anon key
+const SUPABASE_KEY = "sb_publishable_U1nguijT4zbVmfkZ-RP29Q_X2Tr-WoE";
 const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 let repairs = [];
@@ -213,15 +213,11 @@ function daysOpen(date){
 }
 
 async function loadRepairs(){
-  const { data, error } = await client
-    .from("repairs")
-    .select("*")
-    .order("checked_in", { ascending: true });
-
-  console.log("Supabase data:", data, "Error:", error);
+  const { data, error } = await client.from("repairs").select("*").order("checked_in", { ascending: true });
 
   if(error){
     alert("Failed to load repairs. Check console.");
+    console.error(error);
     return;
   }
 

@@ -45,6 +45,8 @@ body{
   justify-content:space-between;
   align-items:center;
   margin-bottom:20px;
+  flex-wrap:wrap;
+  gap:12px;
 }
 
 .controls{
@@ -55,7 +57,7 @@ body{
 }
 
 select,input,textarea{
-  padding:6px 10px;
+  padding:8px 10px;
   border-radius:8px;
   border:1px solid var(--border);
 }
@@ -130,31 +132,26 @@ th{
   width:100%;
 }
 
-/* COMPLETE MODAL */
+/* COMPLETE MODAL TABS */
 .tabs{
   display:flex;
   gap:6px;
   margin-bottom:12px;
 }
 
-/* Completed modal tabs */
 .tab-btn{
   padding:8px 16px;
   border-radius:10px;
   border:none;
   cursor:pointer;
   font-weight:600;
-  background:#e5e7eb;
-  color:#fff;
 }
 
-/* Inactive tabs */
 .tab-btn:not(.active){
-  background:#dbeafe;          /* light blue */
-  color:#1e40af;               /* readable blue text */
+  background:#dbeafe;
+  color:#1e40af;
 }
 
-/* Active tab */
 .tab-btn.active{
   background:#2563eb;
   color:#fff;
@@ -162,15 +159,15 @@ th{
 
 .tab-content{
   display:none;
-  max-height:250px;
+  max-height:260px;
   overflow-y:auto;
   margin-bottom:12px;
 }
 
-  /* Parts selection rows */
+/* PARTS BOXES */
 .part-row{
   display:grid;
-  grid-template-columns:1fr auto 80px;
+  grid-template-columns:1fr auto 70px;
   align-items:center;
   gap:12px;
   padding:10px 12px;
@@ -178,31 +175,21 @@ th{
   border-radius:10px;
   margin-bottom:8px;
   background:#f8fafc;
-  font-size:14px;
 }
 
-/* Part name */
-.part-name{
-  font-weight:500;
-}
+.part-name{font-weight:500}
 
-/* Stock label */
-.stock-label{
-  font-weight:600;
-}
+.stock-label{font-weight:600}
 
-/* Stock number */
 .stock-count{
   font-weight:800;
   color:var(--green);
 }
 
-/* Quantity input */
 .part-row input{
   width:70px;
   text-align:center;
 }
-
 </style>
 </head>
 
@@ -276,8 +263,10 @@ if (!sessionStorage.getItem("auth")) {
 <input type="date" id="checkedIn">
 <textarea id="notes" placeholder="Notes"></textarea>
 
-<button onclick="saveRepair()">Save</button>
-<button class="secondary" onclick="closeAddModal()">Cancel</button>
+<div style="display:flex;gap:10px;justify-content:flex-end;">
+  <button onclick="saveRepair()">Save</button>
+  <button class="secondary" onclick="closeAddModal()">Cancel</button>
+</div>
 </div>
 </div>
 
@@ -315,7 +304,7 @@ function render(){
 
   repairs.forEach(r=>{
     if(f && r.device!==f) return;
-    if(!q && !s && r.completed) return;
+    if(!s && r.completed) return;
     if(q && !r.customer.toLowerCase().includes(q)) return;
 
     const d=daysOpen(r.checked_in);
@@ -392,7 +381,6 @@ async function deleteRepair(id){
   loadRepairs();
 }
 
-/* COMPLETE LOGIC (unchanged) */
 async function completeRepair(id){
   completingId=id;
   const r=repairs.find(x=>x.id===id);
@@ -407,27 +395,23 @@ async function completeRepair(id){
   ["PlayStation","Xbox","Nintendo","iPad","Laptop"].forEach((c,i)=>{
     html+=`<div class="tab-content" data-tab="${c}" style="display:${i?'none':'block'}">`;
     products.filter(p=>p.brand===c).forEach(p=>{
-products.filter(p=>p.brand===c).forEach(p=>{
-  html+=`
-    <div class="part-row">
-      <span class="part-name">${p.name}</span>
-      <span class="stock-label">
-        Stock <span class="stock-count">${p.stock}</span>
-      </span>
-      <input
-        type="number"
-        min="0"
-        max="${p.stock}"
-        data-id="${p.id}"
-      >
-    </div>
-  `;
-});
+      html+=`
+        <div class="part-row">
+          <span class="part-name">${p.name}</span>
+          <span class="stock-label">
+            Stock <span class="stock-count">${p.stock}</span>
+          </span>
+          <input type="number" min="0" max="${p.stock}" data-id="${p.id}">
+        </div>
+      `;
+    });
     html+=`</div>`;
   });
 
-  html+=`<button onclick="confirmComplete()">Confirm</button>
-          <button class="secondary" onclick="completeModal.style.display='none'">Cancel</button>`;
+  html+=`
+    <button onclick="confirmComplete()">Confirm</button>
+    <button class="secondary" onclick="completeModal.style.display='none'">Cancel</button>
+  `;
 
   completeContent.innerHTML=html;
   completeModal.style.display="flex";
@@ -437,7 +421,7 @@ products.filter(p=>p.brand===c).forEach(p=>{
       document.querySelectorAll(".tab-btn").forEach(x=>x.classList.remove("active"));
       document.querySelectorAll(".tab-content").forEach(x=>x.style.display="none");
       b.classList.add("active");
-      document.querySelector(`.tab-content[data-tab="${b.dataset.tab}"]`).style.display="block";
+      document.querySelector(\`.tab-content[data-tab="\${b.dataset.tab}"]\`).style.display="block";
     }
   });
 }

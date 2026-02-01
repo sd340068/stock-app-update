@@ -197,9 +197,9 @@ th{
 
 <!-- 🔐 PASSWORD GATE -->
 <script>
-const APP_PASSWORD = "ShopAccess123";
+const APP_PASSWORD = "BeckyStock";
 if (!sessionStorage.getItem("auth")) {
-  const pass = prompt("Enter password");
+  const pass = prompt("Staff Access - Please Enter Password");
   if (pass !== APP_PASSWORD) {
     alert("Access denied");
     location.href = "https://google.com";

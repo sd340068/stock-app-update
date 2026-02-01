@@ -4,10 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Repairs</title>
+
 <script type="module">
   import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-
-  // Supabase project config
   const SUPABASE_URL = "https://thxyrmscrwstcyhifijv.supabase.co";
   const SUPABASE_KEY = "sb_publishable_U1nguijT4zbVmfkZ-RP29Q_X2Tr-WoE";
   window.supabaseClient = createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -141,8 +140,8 @@ th{
 }
 </style>
 </head>
-<body>
 
+<body>
 <div class="wrapper">
   <div class="card">
     <div class="header">
@@ -177,6 +176,7 @@ th{
   </div>
 </div>
 
+<!-- Modal -->
 <div class="modal" id="editModal">
   <div class="modal-content">
     <h2 id="modalTitle">Add Repair</h2>
@@ -205,17 +205,19 @@ const client = window.supabaseClient;
 let repairs = [];
 let editingId = null;
 
-// Helper: calculate days open
+// Calculate days open
 function daysOpen(date){
-  return Math.max(0, Math.floor((Date.now() - new Date(date)) / 86400000));
+  return date ? Math.max(0, Math.floor((Date.now() - new Date(date)) / 86400000)) : 0;
 }
 
 // Load repairs
 async function loadRepairs(){
-  const { data, error } = await client.from('public.repairs')
-.select('*').order('checked_in', { ascending:true });
+  const { data, error } = await client.from('public.repairs').select('*');
   if(error){ console.error(error); alert("Failed to fetch repairs"); return; }
+
   repairs = data || [];
+  // Sort by checked_in ascending
+  repairs.sort((a,b) => new Date(a.checked_in || 0) - new Date(b.checked_in || 0));
   renderRepairs();
 }
 
@@ -240,7 +242,7 @@ function renderRepairs(){
     tr.innerHTML = `
       <td>${r.customer}</td>
       <td>${r.device}</td>
-      <td>${new Date(r.checked_in).toLocaleDateString()}</td>
+      <td>${r.checked_in ? new Date(r.checked_in).toLocaleDateString() : "—"}</td>
       <td>${days}</td>
       <td class="actions">
         <button onclick="editRepair(${r.id})">Edit</button>
@@ -284,12 +286,10 @@ document.getElementById("saveBtn").onclick = async () => {
   };
 
   if(editingId){
-    const { error } = await client.from('public.repairs')
-.update(payload).eq('id', editingId);
+    const { error } = await client.from('public.repairs').update(payload).eq('id', editingId);
     if(error){ console.error(error); alert("Update failed"); return; }
   } else {
-    const { error } = await client.from('public.repairs')
-.insert(payload);
+    const { error } = await client.from('public.repairs').insert(payload);
     if(error){ console.error(error); alert("Insert failed"); return; }
   }
 
@@ -299,8 +299,7 @@ document.getElementById("saveBtn").onclick = async () => {
 
 // Edit / Complete / Delete
 window.editRepair = async (id) => {
-  const { data, error } = await client.from('public.repairs')
-.select('*').eq('id', id).single();
+  const { data, error } = await client.from('public.repairs').select('*').eq('id', id).single();
   if(error){ console.error(error); alert("Load failed"); return; }
   editingId = data.id;
   document.getElementById("modalTitle").innerText = "Edit Repair";
@@ -311,15 +310,13 @@ window.editRepair = async (id) => {
 };
 window.completeRepair = async (id) => {
   if(!confirm("Mark complete?")) return;
-  const { error } = await client.from('public.repairs')
-.update({ completed:true }).eq('id', id);
+  const { error } = await client.from('public.repairs').update({ completed:true }).eq('id', id);
   if(error){ console.error(error); alert("Complete failed"); return; }
   loadRepairs();
 };
 window.deleteRepair = async (id) => {
   if(!confirm("Delete permanently?")) return;
-  const { error } = await client.from('public.repairs')
-.delete().eq('id', id);
+  const { error } = await client.from('public.repairs').delete().eq('id', id);
   if(error){ console.error(error); alert("Delete failed"); return; }
   loadRepairs();
 };
@@ -331,5 +328,6 @@ document.getElementById("filterDevice").onchange = renderRepairs;
 // Initial load
 loadRepairs();
 </script>
+
 </body>
 </html>

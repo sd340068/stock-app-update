@@ -147,6 +147,12 @@ if(!sessionStorage.getItem("auth")){
     </select>
     <input type="date" id="checkedIn">
     <textarea id="notes" placeholder="Notes"></textarea>
+    <label>Status:</label>
+    <select id="repairStatus">
+      <option>Checked-in</option>
+      <option>Awaiting parts</option>
+      <option>Completed</option>
+    </select>
     <button onclick="saveRepair()">Save</button>
     <button class="secondary" onclick="closeAddModal()">Cancel</button>
   </div>
@@ -161,7 +167,6 @@ let repairs=[],editingId=null;
 const stages=["Checked-in","Awaiting parts","Completed"];
 
 function daysOpen(d){return Math.floor((Date.now()-new Date(d))/86400000);}
-function daysClass(d){return d<=2?"green":d<=5?"amber":"red";}
 
 async function loadRepairs(){
   const {data}=await client.from("repairs").select("*").order("checked_in");
@@ -186,7 +191,6 @@ function render(){
   <td>${r.checked_in}</td>
   <td><span class="status-badge status-${r.status.replace(' ','\\ ')}">${r.status}</span></td>
   <td>
-    ${r.status!=="Completed"?`<button onclick="advanceStatus(${r.id})">→ Next Stage</button>`:""}
     <button onclick="editRepair(${r.id})">Edit</button>
     <button class="danger" onclick="deleteRepair(${r.id})">Delete</button>
   </td>
@@ -202,6 +206,7 @@ function openAddModal(){
   custName.value="";
   notes.value="";
   checkedIn.value=new Date().toISOString().slice(0,10);
+  repairStatus.value="Checked-in";
   addModal.style.display="flex";
 }
 
@@ -209,17 +214,19 @@ function closeAddModal(){addModal.style.display="none";}
 
 async function saveRepair(){
   const payload={
-    customer:custName.value,
-    device:deviceType.value,
-    checked_in:checkedIn.value,
-    notes:notes.value,
-    status:"Checked-in"
+    customer: custName.value,
+    device: deviceType.value,
+    checked_in: checkedIn.value,
+    notes: notes.value,
+    status: repairStatus.value
   };
+
   if(editingId){
     await client.from("repairs").update(payload).eq("id",editingId);
   } else{
     await client.from("repairs").insert(payload);
   }
+
   closeAddModal();
   loadRepairs();
 }
@@ -232,6 +239,7 @@ function editRepair(id){
   deviceType.value=r.device;
   checkedIn.value=r.checked_in;
   notes.value=r.notes;
+  repairStatus.value=r.status;
   addModal.style.display="flex";
 }
 
@@ -239,17 +247,6 @@ async function deleteRepair(id){
   if(!confirm("Delete this repair?")) return;
   await client.from("repairs").delete().eq("id",id);
   loadRepairs();
-}
-
-async function advanceStatus(id){
-  const r=repairs.find(x=>x.id===id);
-  if(!r) return;
-  const currentIndex=stages.indexOf(r.status);
-  const nextStatus=stages[Math.min(currentIndex+1, stages.length-1)];
-  const { error } = await client.from("repairs").update({ status: nextStatus }).eq("id",id);
-  if(error){ console.error(error); return; }
-  r.status=nextStatus;
-  render();
 }
 
 deviceFilter.onchange=render;

@@ -16,12 +16,11 @@
   --muted:#64748b;
   --green:#16a34a;
   --amber:#f59e0b;
-  --red:#dc2626;
   --blue:#2563eb;
+  --red:#dc2626;
 }
 
 *{box-sizing:border-box}
-
 body{
   margin:0;
   font-family:Inter,system-ui;
@@ -29,9 +28,7 @@ body{
   padding:36px 20px;
   color:var(--text);
 }
-
 .wrapper{max-width:1200px;margin:auto;}
-
 .card{
   background:var(--panel);
   border-radius:22px;
@@ -46,25 +43,18 @@ body{
   align-items:center;
   margin-bottom:20px;
 }
-
 .controls{
   display:flex;
   gap:10px;
   align-items:center;
   flex-wrap:wrap;
 }
-
 select,input,textarea{
   padding:6px 10px;
   border-radius:8px;
   border:1px solid var(--border);
 }
-
-textarea{
-  min-height:160px;
-  resize:vertical;
-}
-
+textarea{min-height:160px;resize:vertical;}
 button{
   background:var(--blue);
   color:#fff;
@@ -73,190 +63,93 @@ button{
   padding:8px 14px;
   cursor:pointer;
 }
-
-button.secondary{
-  background:#e5e7eb;
-  color:#0f172a;
-}
-
-button.danger{
-  background:var(--red);
-}
+button.secondary{background:#e5e7eb;color:#0f172a;}
+button.danger{background:var(--red);}
 
 /* TABLE */
 table{width:100%;border-collapse:collapse;}
+th,td{padding:14px;border-bottom:1px solid var(--border);text-align:center;}
+th{font-size:12px;color:var(--muted);background:#f8fafc;}
 
-th,td{
-  padding:14px;
-  border-bottom:1px solid var(--border);
-  text-align:center;
-}
-
-th{
-  font-size:12px;
-  color:var(--muted);
-  background:#f8fafc;
-}
-
-.days.green{color:var(--green);font-weight:600}
-.days.amber{color:var(--amber);font-weight:600}
-.days.red{color:var(--red);font-weight:700}
-
-/* MODALS */
-.modal{
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,.45);
-  display:none;
-  align-items:center;
-  justify-content:center;
-  z-index:10;
-}
-
-.modal-content{
-  background:#fff;
-  border-radius:20px;
-  padding:24px;
-  width:520px;
-  max-width:90%;
-  display:flex;
-  flex-direction:column;
-  gap:12px;
-}
-
-.modal-content input,
-.modal-content select,
-.modal-content textarea{
-  width:100%;
-}
-
-/* COMPLETE MODAL */
-.tabs{
-  display:flex;
-  gap:6px;
-  margin-bottom:12px;
-}
-
-/* Completed modal tabs */
-.tab-btn{
-  padding:8px 16px;
-  border-radius:10px;
-  border:none;
-  cursor:pointer;
+/* STATUS BADGES */
+.status-badge{
+  display:inline-block;
+  padding:4px 10px;
+  border-radius:12px;
   font-weight:600;
-  background:#dbeafe;  /* slightly lighter blue */
-  color:#1e40af;       /* readable text */
-}
-
-.tab-btn.active{
-  background:#2563eb;
+  font-size:12px;
   color:#fff;
 }
-
-.tab-content{
-  display:none;
-  max-height:250px;
-  overflow-y:auto;
-  margin-bottom:12px;
-}
-
-/* Parts boxes inside tab-content */
-.tab-content label{
-  display:block;
-  margin-bottom:8px;
-  font-weight:normal;
-}
-
-.tab-content .stock-num{
-  font-weight:700;
-  color:var(--green);
-}
+.status-Checked-in{background:var(--blue);}
+.status-Awaiting\ parts{background:var(--amber);}
+.status-Completed{background:var(--green);}
 </style>
 </head>
-
 <body>
 
 <!-- 🔐 PASSWORD GATE -->
 <script>
 const APP_PASSWORD = "ShopAccess123";
-if (!sessionStorage.getItem("auth")) {
+if(!sessionStorage.getItem("auth")){
   const pass = prompt("Enter password");
-  if (pass !== APP_PASSWORD) {
-    alert("Access denied");
-    location.href = "https://google.com";
-  } else {
-    sessionStorage.setItem("auth", "yes");
-  }
+  if(pass !== APP_PASSWORD){ alert("Access denied"); location.href="https://google.com"; }
+  else sessionStorage.setItem("auth","yes");
 }
 </script>
 
 <div class="wrapper">
-<div class="card">
+  <div class="card">
+    <div class="header">
+      <h1>🛠 Repairs <span id="openCounter" style="color:var(--red)">0 open</span></h1>
+      <div class="controls">
+        <input id="customerSearch" placeholder="Search customer…">
+        <select id="deviceFilter">
+          <option value="">All Devices</option>
+          <option>PlayStation</option>
+          <option>Xbox</option>
+          <option>Nintendo</option>
+          <option>iPad</option>
+          <option>Laptop</option>
+        </select>
+        <label><input type="checkbox" id="showCompleted"> Show completed</label>
+        <button onclick="openAddModal()">+ Add Repair</button>
+      </div>
+    </div>
 
-<div class="header">
-  <h1>🛠 Repairs <span id="openCounter" style="color:var(--red)">0 open</span></h1>
-  <div class="controls">
-    <input id="customerSearch" placeholder="Search customer…">
-    <select id="deviceFilter">
-      <option value="">All Devices</option>
+    <button class="secondary" onclick="location.href='index.html'">← Back</button>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Customer</th>
+          <th>Device</th>
+          <th>Checked In</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="repairsBody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ADD / EDIT MODAL -->
+<div class="modal" id="addModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);align-items:center;justify-content:center;z-index:10;">
+  <div style="background:#fff;border-radius:20px;padding:24px;width:520px;max-width:90%;display:flex;flex-direction:column;gap:12px;">
+    <h2 id="modalTitle">Add Repair</h2>
+    <input id="custName" placeholder="Customer name">
+    <select id="deviceType">
       <option>PlayStation</option>
       <option>Xbox</option>
       <option>Nintendo</option>
       <option>iPad</option>
       <option>Laptop</option>
     </select>
-    <label><input type="checkbox" id="showCompleted"> Show completed</label>
-    <button onclick="openAddModal()">+ Add Repair</button>
+    <input type="date" id="checkedIn">
+    <textarea id="notes" placeholder="Notes"></textarea>
+    <button onclick="saveRepair()">Save</button>
+    <button class="secondary" onclick="closeAddModal()">Cancel</button>
   </div>
-</div>
-
-<button class="secondary" onclick="location.href='index.html'">← Back</button>
-
-<table>
-<thead>
-<tr>
-  <th>Customer</th>
-  <th>Device</th>
-  <th>Checked In</th>
-  <th>Days Open</th>
-  <th>Actions</th>
-</tr>
-</thead>
-<tbody id="repairsBody"></tbody>
-</table>
-
-</div>
-</div>
-
-<!-- ADD / EDIT MODAL -->
-<div class="modal" id="addModal">
-<div class="modal-content">
-<h2 id="modalTitle">Add Repair</h2>
-
-<input id="custName" placeholder="Customer name">
-<select id="deviceType">
-  <option>PlayStation</option>
-  <option>Xbox</option>
-  <option>Nintendo</option>
-  <option>iPad</option>
-  <option>Laptop</option>
-</select>
-<input type="date" id="checkedIn">
-<textarea id="notes" placeholder="Notes"></textarea>
-
-<button onclick="saveRepair()">Save</button>
-<button class="secondary" onclick="closeAddModal()">Cancel</button>
-</div>
-</div>
-
-<!-- DETAILS MODAL -->
-<div class="modal" id="detailsModal">
-<div class="modal-content" id="detailsContent"></div>
-</div>
-
-<!-- COMPLETE MODAL -->
-<div class="modal" id="completeModal">
-<div class="modal-content" id="completeContent"></div>
 </div>
 
 <script>
@@ -264,10 +157,11 @@ const SUPABASE_URL="https://thvbweemnzdvwyaxvwbz.supabase.co";
 const SUPABASE_KEY="sb_publishable_U6Nsj6HClebAVWOx7MLhng_3t2z6w1G";
 const client=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 
-let repairs=[],editingId=null,completingId=null;
+let repairs=[],editingId=null;
+const stages=["Checked-in","Awaiting parts","Completed"];
 
-const daysOpen=d=>Math.floor((Date.now()-new Date(d))/86400000);
-const daysClass=d=>d<=2?"green":d<=5?"amber":"red";
+function daysOpen(d){return Math.floor((Date.now()-new Date(d))/86400000);}
+function daysClass(d){return d<=2?"green":d<=5?"amber":"red";}
 
 async function loadRepairs(){
   const {data}=await client.from("repairs").select("*").order("checked_in");
@@ -276,37 +170,30 @@ async function loadRepairs(){
 }
 
 function render(){
-  repairsBody.innerHTML="";
   const f=deviceFilter.value;
   const s=showCompleted.checked;
   const q=customerSearch.value.toLowerCase();
-
+  repairsBody.innerHTML="";
   repairs.forEach(r=>{
     if(f && r.device!==f) return;
-
-    // ✅ Show completed if searching, otherwise respect checkbox
-    if(!q && !s && r.completed) return;
-
-    // Customer search
+    if(!s && r.status==="Completed") return;
     if(q && !r.customer.toLowerCase().includes(q)) return;
 
-    const d=daysOpen(r.checked_in);
     repairsBody.innerHTML+=`
 <tr>
-<td>${r.customer}</td>
-<td>${r.device}</td>
-<td>${r.checked_in}</td>
-<td class="days ${daysClass(d)}">${d}</td>
-<td>
-  <button onclick="viewDetails(${r.id})">Details</button>
-  ${r.completed?'':`<button onclick="completeRepair(${r.id})">Complete</button>`}
-  <button onclick="editRepair(${r.id})">Edit</button>
-  <button class="danger" onclick="deleteRepair(${r.id})">Delete</button>
-</td>
+  <td>${r.customer}</td>
+  <td>${r.device}</td>
+  <td>${r.checked_in}</td>
+  <td><span class="status-badge status-${r.status.replace(' ','\\ ')}">${r.status}</span></td>
+  <td>
+    ${r.status!=="Completed"?`<button onclick="advanceStatus(${r.id})">→ Next Stage</button>`:""}
+    <button onclick="editRepair(${r.id})">Edit</button>
+    <button class="danger" onclick="deleteRepair(${r.id})">Delete</button>
+  </td>
 </tr>`;
   });
 
-  openCounter.innerText=`${repairs.filter(r=>!r.completed).length} open`;
+  openCounter.innerText=`${repairs.filter(r=>r.status!=="Completed").length} open`;
 }
 
 function openAddModal(){
@@ -326,12 +213,13 @@ async function saveRepair(){
     device:deviceType.value,
     checked_in:checkedIn.value,
     notes:notes.value,
-    completed:false
+    status:"Checked-in"
   };
-  editingId
-    ? await client.from("repairs").update(payload).eq("id",editingId)
-    : await client.from("repairs").insert(payload);
-
+  if(editingId){
+    await client.from("repairs").update(payload).eq("id",editingId);
+  } else{
+    await client.from("repairs").insert(payload);
+  }
   closeAddModal();
   loadRepairs();
 }
@@ -347,85 +235,21 @@ function editRepair(id){
   addModal.style.display="flex";
 }
 
-function viewDetails(id){
-  const r=repairs.find(x=>x.id===id);
-  detailsContent.innerHTML=`
-<h2>${r.customer}</h2>
-<p><strong>Device:</strong> ${r.device}</p>
-<p><strong>Checked in:</strong> ${r.checked_in}</p>
-<p><strong>Notes:</strong><br>${r.notes||"—"}</p>
-<button onclick="detailsModal.style.display='none'">Close</button>`;
-  detailsModal.style.display="flex";
-}
-
 async function deleteRepair(id){
   if(!confirm("Delete this repair?")) return;
   await client.from("repairs").delete().eq("id",id);
   loadRepairs();
 }
 
-/* COMPLETE LOGIC */
-async function completeRepair(id){
-  completingId=id;
+async function advanceStatus(id){
   const r=repairs.find(x=>x.id===id);
-  const {data:products}=await client.from("products").select("*");
-
-  let html=`<h2>Complete: ${r.customer}</h2><div class="tabs">`;
-  ["PlayStation","Xbox","Nintendo","iPad","Laptop"].forEach((c,i)=>{
-    html+=`<button class="tab-btn ${i?'':'active'}" data-tab="${c}">${c}</button>`;
-  });
-  html+=`</div>`;
-
-  ["PlayStation","Xbox","Nintendo","iPad","Laptop"].forEach((c,i)=>{
-    html+=`<div class="tab-content" data-tab="${c}" style="display:${i?'none':'block'}">`;
-    products.filter(p=>p.brand===c).forEach(p=>{
-      html+=`<label>${p.name} (<span class="stock-num">Stock ${p.stock}</span>) <input type="number" min="0" max="${p.stock}" data-id="${p.id}"></label>`;
-    });
-    html+=`</div>`;
-  });
-
-  html+=`<button onclick="confirmComplete()">Confirm</button>
-          <button class="secondary" onclick="completeModal.style.display='none'">Cancel</button>`;
-
-  completeContent.innerHTML=html;
-  completeModal.style.display="flex";
-
-  document.querySelectorAll(".tab-btn").forEach(b=>{
-    b.onclick=()=>{
-      document.querySelectorAll(".tab-btn").forEach(x=>x.classList.remove("active"));
-      document.querySelectorAll(".tab-content").forEach(x=>x.style.display="none");
-      b.classList.add("active");
-      document.querySelector(`.tab-content[data-tab="${b.dataset.tab}"]`).style.display="block";
-    }
-  });
-}
-
-async function confirmComplete() {
-  // Loop through part inputs and update stock
-  const inputs = document.querySelectorAll('.tab-content input[type="number"]');
-  for (const input of inputs) {
-    const used = parseInt(input.value, 10) || 0;
-    if (used > 0) {
-      const partId = input.dataset.id;
-      // Get current stock
-      const { data: part, error: fetchError } = await client.from('products').select('*').eq('id', partId).single();
-      if (fetchError) { console.error(fetchError); continue; }
-      const newStock = Math.max(0, part.stock - used);
-      // Update stock in Supabase
-      const { error: updateError } = await client.from('products').update({ stock: newStock }).eq('id', partId);
-      if (updateError) console.error(updateError);
-    }
-  }
-
-  // Mark repair as completed
-  const { error: completeError } = await client.from('repairs').update({ completed: true }).eq('id', completingId);
-  if (completeError) console.error(completeError);
-
-  completeModal.style.display = 'none';
-  completingId = null;
-
-  // Reload repairs and products so index.html will reflect stock change
-  loadRepairs();
+  if(!r) return;
+  const currentIndex=stages.indexOf(r.status);
+  const nextStatus=stages[Math.min(currentIndex+1, stages.length-1)];
+  const { error } = await client.from("repairs").update({ status: nextStatus }).eq("id",id);
+  if(error){ console.error(error); return; }
+  r.status=nextStatus;
+  render();
 }
 
 deviceFilter.onchange=render;

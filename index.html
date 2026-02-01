@@ -266,6 +266,17 @@ tbody tr:hover{background:#f8fafc}
   color:#0f172a;
 }
 
+  #priceBtn{
+  background:#16a34a; /* green */
+  color:#fff;
+  border:none;
+  border-radius:8px;
+  padding:6px 14px;
+  cursor:pointer;
+  transition:background .2s;
+}
+#priceBtn:hover{background:#15803d;}
+
 .stock-input{
   width:90px;
   padding:6px;
@@ -309,17 +320,22 @@ tbody tr:hover{background:#f8fafc}
 
     <div class="header">
       <h2 id="tableTitle">Select a brand</h2>
-      <div class="header-right">
-        <button id="repairBadge" onclick="location.href='repairs.html'">
-  🛠 Open Repairs
-          <span id="repairCountBadge">0</span>
-        </button>
-        <div id="connectionStatus" class="status live">
-          <span class="dot"></span>
-          <span class="label">LIVE</span>
-        </div>
-        <button id="unlockBtn" onclick="unlockEditing()">🔒 Unlock Editing</button>
-      </div>
+<div class="header-right">
+  <button id="repairBadge" onclick="location.href='repairs.html'">
+    🛠 Open Repairs
+    <span id="repairCountBadge">0</span>
+  </button>
+
+  <button id="priceBtn" onclick="location.href='repair-prices.html'">
+    💰 Repair Prices
+  </button>
+
+  <div id="connectionStatus" class="status live">
+    <span class="dot"></span>
+    <span class="label">LIVE</span>
+  </div>
+  <button id="unlockBtn" onclick="unlockEditing()">🔒 Unlock Editing</button>
+</div>
     </div>
 
     <table>
@@ -538,6 +554,7 @@ loadStock();
 </script>
 </body>
 </html>
+
 
 
 

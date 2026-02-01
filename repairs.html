@@ -30,7 +30,7 @@ body{
   color:var(--text);
 }
 
-.wrapper{ max-width:1200px; margin:auto; }
+.wrapper{max-width:1200px;margin:auto;}
 
 .card{
   background:var(--panel);
@@ -39,6 +39,7 @@ body{
   box-shadow:0 30px 60px rgba(0,0,0,.12);
 }
 
+/* HEADER */
 .header{
   display:flex;
   justify-content:space-between;
@@ -59,7 +60,10 @@ select,input,textarea{
   border:1px solid var(--border);
 }
 
-textarea{ min-height:120px; }
+textarea{
+  min-height:160px;
+  resize:vertical;
+}
 
 button{
   background:var(--blue);
@@ -75,10 +79,12 @@ button.secondary{
   color:#0f172a;
 }
 
-table{
-  width:100%;
-  border-collapse:collapse;
+button.danger{
+  background:var(--red);
 }
+
+/* TABLE */
+table{width:100%;border-collapse:collapse;}
 
 th,td{
   padding:14px;
@@ -96,6 +102,7 @@ th{
 .days.amber{color:var(--amber);font-weight:600}
 .days.red{color:var(--red);font-weight:700}
 
+/* MODALS */
 .modal{
   position:fixed;
   inset:0;
@@ -103,6 +110,7 @@ th{
   display:none;
   align-items:center;
   justify-content:center;
+  z-index:10;
 }
 
 .modal-content{
@@ -112,6 +120,33 @@ th{
   width:520px;
   max-width:90%;
 }
+
+/* COMPLETE MODAL */
+.tabs{
+  display:flex;
+  gap:6px;
+  margin-bottom:12px;
+}
+
+.tab-btn{
+  background:#e5e7eb;
+  border:none;
+  padding:6px 12px;
+  border-radius:8px;
+  cursor:pointer;
+}
+
+.tab-btn.active{
+  background:var(--blue);
+  color:#fff;
+}
+
+.tab-content{
+  display:none;
+  max-height:250px;
+  overflow-y:auto;
+  margin-bottom:12px;
+}
 </style>
 </head>
 
@@ -120,7 +155,6 @@ th{
 <!-- 🔐 PASSWORD GATE -->
 <script>
 const APP_PASSWORD = "ShopAccess123";
-
 if (!sessionStorage.getItem("auth")) {
   const pass = prompt("Enter password");
   if (pass !== APP_PASSWORD) {
@@ -138,7 +172,7 @@ if (!sessionStorage.getItem("auth")) {
 <div class="header">
   <h1>🛠 Repairs <span id="openCounter" style="color:var(--red)">0 open</span></h1>
   <div class="controls">
-    <input id="customerSearch" placeholder="Search customer…" />
+    <input id="customerSearch" placeholder="Search customer…">
     <select id="deviceFilter">
       <option value="">All Devices</option>
       <option>PlayStation</option>
@@ -152,7 +186,7 @@ if (!sessionStorage.getItem("auth")) {
   </div>
 </div>
 
-<button onclick="location.href='index.html'" class="secondary">← Back</button>
+<button class="secondary" onclick="location.href='index.html'">← Back</button>
 
 <table>
 <thead>
@@ -191,15 +225,25 @@ if (!sessionStorage.getItem("auth")) {
 </div>
 </div>
 
+<!-- DETAILS MODAL -->
+<div class="modal" id="detailsModal">
+<div class="modal-content" id="detailsContent"></div>
+</div>
+
+<!-- COMPLETE MODAL -->
+<div class="modal" id="completeModal">
+<div class="modal-content" id="completeContent"></div>
+</div>
+
 <script>
-const SUPABASE_URL = "https://thvbweemnzdvwyaxvwbz.supabase.co";
-const SUPABASE_KEY = "sb_publishable_U6Nsj6HClebAVWOx7MLhng_3t2z6w1G";
-const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const SUPABASE_URL="https://thvbweemnzdvwyaxvwbz.supabase.co";
+const SUPABASE_KEY="sb_publishable_U6Nsj6HClebAVWOx7MLhng_3t2z6w1G";
+const client=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 
-let repairs=[], editingId=null;
+let repairs=[],editingId=null,completingId=null;
 
-function daysOpen(d){ return Math.floor((Date.now()-new Date(d))/86400000); }
-function daysClass(d){ return d<=2?"green":d<=5?"amber":"red"; }
+const daysOpen=d=>Math.floor((Date.now()-new Date(d))/86400000);
+const daysClass=d=>d<=2?"green":d<=5?"amber":"red";
 
 async function loadRepairs(){
   const {data}=await client.from("repairs").select("*").order("checked_in");
@@ -208,29 +252,30 @@ async function loadRepairs(){
 }
 
 function render(){
-  const body=document.getElementById("repairsBody");
-  body.innerHTML="";
-  const filter=deviceFilter.value;
-  const show=showCompleted.checked;
-  const search=customerSearch.value.toLowerCase();
+  repairsBody.innerHTML="";
+  const f=deviceFilter.value;
+  const s=showCompleted.checked;
+  const q=customerSearch.value.toLowerCase();
 
   repairs.forEach(r=>{
-    if(filter && r.device!==filter) return;
-    if(!search && !show && r.completed) return;
-    if(search && !r.customer.toLowerCase().includes(search)) return;
+    if(f && r.device!==f) return;
+    if(!q && !s && r.completed) return;
+    if(q && !r.customer.toLowerCase().includes(q)) return;
 
     const d=daysOpen(r.checked_in);
-    body.innerHTML+=`
-    <tr>
-      <td>${r.customer}</td>
-      <td>${r.device}</td>
-      <td>${r.checked_in}</td>
-      <td class="days ${daysClass(d)}">${d}</td>
-      <td>
-        <button onclick="editRepair(${r.id})">Edit</button>
-        <button class="secondary" onclick="deleteRepair(${r.id})">Delete</button>
-      </td>
-    </tr>`;
+    repairsBody.innerHTML+=`
+<tr>
+<td>${r.customer}</td>
+<td>${r.device}</td>
+<td>${r.checked_in}</td>
+<td class="days ${daysClass(d)}">${d}</td>
+<td>
+  <button onclick="viewDetails(${r.id})">Details</button>
+  ${r.completed?'':`<button onclick="completeRepair(${r.id})">Complete</button>`}
+  <button onclick="editRepair(${r.id})">Edit</button>
+  <button class="danger" onclick="deleteRepair(${r.id})">Delete</button>
+</td>
+</tr>`;
   });
 
   openCounter.innerText=`${repairs.filter(r=>!r.completed).length} open`;
@@ -238,13 +283,14 @@ function render(){
 
 function openAddModal(){
   editingId=null;
+  modalTitle.innerText="Add Repair";
   custName.value="";
   notes.value="";
   checkedIn.value=new Date().toISOString().slice(0,10);
   addModal.style.display="flex";
 }
 
-function closeAddModal(){ addModal.style.display="none"; }
+function closeAddModal(){addModal.style.display="none";}
 
 async function saveRepair(){
   const payload={
@@ -254,11 +300,10 @@ async function saveRepair(){
     notes:notes.value,
     completed:false
   };
-  if(editingId){
-    await client.from("repairs").update(payload).eq("id",editingId);
-  }else{
-    await client.from("repairs").insert(payload);
-  }
+  editingId
+    ? await client.from("repairs").update(payload).eq("id",editingId)
+    : await client.from("repairs").insert(payload);
+
   closeAddModal();
   loadRepairs();
 }
@@ -266,6 +311,7 @@ async function saveRepair(){
 function editRepair(id){
   const r=repairs.find(x=>x.id===id);
   editingId=id;
+  modalTitle.innerText="Edit Repair";
   custName.value=r.customer;
   deviceType.value=r.device;
   checkedIn.value=r.checked_in;
@@ -273,9 +319,62 @@ function editRepair(id){
   addModal.style.display="flex";
 }
 
+function viewDetails(id){
+  const r=repairs.find(x=>x.id===id);
+  detailsContent.innerHTML=`
+<h2>${r.customer}</h2>
+<p><strong>Device:</strong> ${r.device}</p>
+<p><strong>Checked in:</strong> ${r.checked_in}</p>
+<p><strong>Notes:</strong><br>${r.notes||"—"}</p>
+<button onclick="detailsModal.style.display='none'">Close</button>`;
+  detailsModal.style.display="flex";
+}
+
 async function deleteRepair(id){
   if(!confirm("Delete this repair?")) return;
   await client.from("repairs").delete().eq("id",id);
+  loadRepairs();
+}
+
+/* COMPLETE LOGIC (unchanged) */
+async function completeRepair(id){
+  completingId=id;
+  const r=repairs.find(x=>x.id===id);
+  const {data:products}=await client.from("products").select("*");
+
+  let html=`<h2>Complete: ${r.customer}</h2><div class="tabs">`;
+  ["PlayStation","Xbox","Nintendo","iPad","Laptop"].forEach((c,i)=>{
+    html+=`<button class="tab-btn ${i?'':'active'}" data-tab="${c}">${c}</button>`;
+  });
+  html+=`</div>`;
+
+  ["PlayStation","Xbox","Nintendo","iPad","Laptop"].forEach((c,i)=>{
+    html+=`<div class="tab-content" data-tab="${c}" style="display:${i?'none':'block'}">`;
+    products.filter(p=>p.brand===c).forEach(p=>{
+      html+=`${p.name} (Stock ${p.stock}) <input type="number" min="0" max="${p.stock}" data-id="${p.id}"><br>`;
+    });
+    html+=`</div>`;
+  });
+
+  html+=`<button onclick="confirmComplete()">Confirm</button>
+          <button class="secondary" onclick="completeModal.style.display='none'">Cancel</button>`;
+
+  completeContent.innerHTML=html;
+  completeModal.style.display="flex";
+
+  document.querySelectorAll(".tab-btn").forEach(b=>{
+    b.onclick=()=>{
+      document.querySelectorAll(".tab-btn").forEach(x=>x.classList.remove("active"));
+      document.querySelectorAll(".tab-content").forEach(x=>x.style.display="none");
+      b.classList.add("active");
+      document.querySelector(`.tab-content[data-tab="${b.dataset.tab}"]`).style.display="block";
+    }
+  });
+}
+
+async function confirmComplete(){
+  await client.from("repairs").update({completed:true}).eq("id",completingId);
+  completeModal.style.display="none";
   loadRepairs();
 }
 

@@ -21,39 +21,156 @@
 }
 
 *{box-sizing:border-box}
-body{margin:0;font-family:Inter,system-ui;background:var(--bg);padding:36px 20px;color:var(--text);}
+
+body{
+  margin:0;
+  font-family:Inter,system-ui;
+  background:var(--bg);
+  padding:36px 20px;
+  color:var(--text);
+}
+
 .wrapper{max-width:1200px;margin:auto;}
-.card{background:var(--panel);border-radius:22px;padding:28px;box-shadow:0 30px 60px rgba(0,0,0,.12);}
+
+.card{
+  background:var(--panel);
+  border-radius:22px;
+  padding:28px;
+  box-shadow:0 30px 60px rgba(0,0,0,.12);
+}
 
 /* HEADER */
-.header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;}
-.controls{display:flex;gap:10px;align-items:center;flex-wrap:wrap;}
-select,input,textarea{padding:6px 10px;border-radius:8px;border:1px solid var(--border);}
-textarea{min-height:160px;resize:vertical;}
-button{background:var(--blue);color:#fff;border:none;border-radius:10px;padding:8px 14px;cursor:pointer;}
-button.secondary{background:#e5e7eb;color:#0f172a;}
-button.danger{background:var(--red);color:#fff;}
+.header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:20px;
+}
+
+.controls{
+  display:flex;
+  gap:10px;
+  align-items:center;
+  flex-wrap:wrap;
+}
+
+select,input,textarea{
+  padding:6px 10px;
+  border-radius:8px;
+  border:1px solid var(--border);
+}
+
+textarea{
+  min-height:160px;
+  resize:vertical;
+}
+
+button{
+  background:var(--blue);
+  color:#fff;
+  border:none;
+  border-radius:10px;
+  padding:8px 14px;
+  cursor:pointer;
+}
+
+button.secondary{
+  background:#e5e7eb;
+  color:#0f172a;
+}
+
+button.danger{
+  background:var(--red);
+}
 
 /* TABLE */
 table{width:100%;border-collapse:collapse;}
-th,td{padding:14px;border-bottom:1px solid var(--border);text-align:center;}
-th{font-size:12px;color:var(--muted);background:#f8fafc;}
-.days.green{color:var(--green);font-weight:600;}
-.days.amber{color:var(--amber);font-weight:600;}
-.days.red{color:var(--red);font-weight:700;}
+
+th,td{
+  padding:14px;
+  border-bottom:1px solid var(--border);
+  text-align:center;
+}
+
+th{
+  font-size:12px;
+  color:var(--muted);
+  background:#f8fafc;
+}
+
+.days.green{color:var(--green);font-weight:600}
+.days.amber{color:var(--amber);font-weight:600}
+.days.red{color:var(--red);font-weight:700}
 
 /* MODALS */
-.modal{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;z-index:10;}
-.modal-content{background:#fff;border-radius:20px;padding:24px;width:520px;max-width:90%;display:flex;flex-direction:column;gap:12px;}
-.modal-content input,.modal-content select,.modal-content textarea{width:100%;}
+.modal{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.45);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  z-index:10;
+}
 
-/* COMPLETE MODAL TABS */
-.tabs{display:flex;gap:6px;margin-bottom:12px;}
-.tab-btn{padding:8px 16px;border-radius:10px;border:none;cursor:pointer;font-weight:600;background:#dbeafe;color:#1e40af;}
-.tab-btn.active{background:#2563eb;color:#fff;}
-.tab-content{display:none;max-height:250px;overflow-y:auto;margin-bottom:12px;}
-.tab-content label{display:block;margin-bottom:8px;font-weight:500;}
-.tab-content .stock-number{color:var(--green);font-weight:700;margin-left:4px;}
+.modal-content{
+  background:#fff;
+  border-radius:20px;
+  padding:24px;
+  width:520px;
+  max-width:90%;
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
+
+.modal-content input,
+.modal-content select,
+.modal-content textarea{
+  width:100%;
+}
+
+/* COMPLETE MODAL */
+.tabs{
+  display:flex;
+  gap:6px;
+  margin-bottom:12px;
+}
+
+/* Completed modal tabs */
+.tab-btn{
+  padding:8px 16px;
+  border-radius:10px;
+  border:none;
+  cursor:pointer;
+  font-weight:600;
+  background:#dbeafe;  /* slightly lighter blue */
+  color:#1e40af;       /* readable text */
+}
+
+.tab-btn.active{
+  background:#2563eb;
+  color:#fff;
+}
+
+.tab-content{
+  display:none;
+  max-height:250px;
+  overflow-y:auto;
+  margin-bottom:12px;
+}
+
+/* Parts boxes inside tab-content */
+.tab-content label{
+  display:block;
+  margin-bottom:8px;
+  font-weight:normal;
+}
+
+.tab-content .stock-num{
+  font-weight:700;
+  color:var(--green);
+}
 </style>
 </head>
 
@@ -62,10 +179,14 @@ th{font-size:12px;color:var(--muted);background:#f8fafc;}
 <!-- 🔐 PASSWORD GATE -->
 <script>
 const APP_PASSWORD = "ShopAccess123";
-if(!sessionStorage.getItem("auth")){
-  const pass=prompt("Enter password");
-  if(pass!==APP_PASSWORD){alert("Access denied");location.href="https://google.com";}
-  else{sessionStorage.setItem("auth","yes");}
+if (!sessionStorage.getItem("auth")) {
+  const pass = prompt("Enter password");
+  if (pass !== APP_PASSWORD) {
+    alert("Access denied");
+    location.href = "https://google.com";
+  } else {
+    sessionStorage.setItem("auth", "yes");
+  }
 }
 </script>
 
@@ -111,6 +232,7 @@ if(!sessionStorage.getItem("auth")){
 <div class="modal" id="addModal">
 <div class="modal-content">
 <h2 id="modalTitle">Add Repair</h2>
+
 <input id="custName" placeholder="Customer name">
 <select id="deviceType">
   <option>PlayStation</option>
@@ -121,6 +243,7 @@ if(!sessionStorage.getItem("auth")){
 </select>
 <input type="date" id="checkedIn">
 <textarea id="notes" placeholder="Notes"></textarea>
+
 <button onclick="saveRepair()">Save</button>
 <button class="secondary" onclick="closeAddModal()">Cancel</button>
 </div>
@@ -141,37 +264,17 @@ const SUPABASE_URL="https://thvbweemnzdvwyaxvwbz.supabase.co";
 const SUPABASE_KEY="sb_publishable_U6Nsj6HClebAVWOx7MLhng_3t2z6w1G";
 const client=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 
-// DOM references
-const repairsBody=document.getElementById("repairsBody");
-const addModal=document.getElementById("addModal");
-const detailsModal=document.getElementById("detailsModal");
-const detailsContent=document.getElementById("detailsContent");
-const completeModal=document.getElementById("completeModal");
-const completeContent=document.getElementById("completeContent");
-
-const custName=document.getElementById("custName");
-const deviceType=document.getElementById("deviceType");
-const checkedIn=document.getElementById("checkedIn");
-const notes=document.getElementById("notes");
-
-const customerSearch=document.getElementById("customerSearch");
-const deviceFilter=document.getElementById("deviceFilter");
-const showCompleted=document.getElementById("showCompleted");
-const openCounter=document.getElementById("openCounter");
-
 let repairs=[],editingId=null,completingId=null;
 
 const daysOpen=d=>Math.floor((Date.now()-new Date(d))/86400000);
 const daysClass=d=>d<=2?"green":d<=5?"amber":"red";
 
-// Load all repairs
 async function loadRepairs(){
   const {data}=await client.from("repairs").select("*").order("checked_in");
   repairs=data||[];
   render();
 }
 
-// Render table
 function render(){
   repairsBody.innerHTML="";
   const f=deviceFilter.value;
@@ -180,7 +283,11 @@ function render(){
 
   repairs.forEach(r=>{
     if(f && r.device!==f) return;
-    if(!s && r.completed) return;
+
+    // ✅ Show completed if searching, otherwise respect checkbox
+    if(!q && !s && r.completed) return;
+
+    // Customer search
     if(q && !r.customer.toLowerCase().includes(q)) return;
 
     const d=daysOpen(r.checked_in);
@@ -202,17 +309,17 @@ function render(){
   openCounter.innerText=`${repairs.filter(r=>!r.completed).length} open`;
 }
 
-// Add / edit modal
 function openAddModal(){
   editingId=null;
   modalTitle.innerText="Add Repair";
   custName.value="";
-  deviceType.value="PlayStation";
-  checkedIn.value=new Date().toISOString().slice(0,10);
   notes.value="";
+  checkedIn.value=new Date().toISOString().slice(0,10);
   addModal.style.display="flex";
 }
+
 function closeAddModal(){addModal.style.display="none";}
+
 async function saveRepair(){
   const payload={
     customer:custName.value,
@@ -221,11 +328,14 @@ async function saveRepair(){
     notes:notes.value,
     completed:false
   };
-  if(editingId) await client.from("repairs").update(payload).eq("id",editingId);
-  else await client.from("repairs").insert(payload);
+  editingId
+    ? await client.from("repairs").update(payload).eq("id",editingId)
+    : await client.from("repairs").insert(payload);
+
   closeAddModal();
   loadRepairs();
 }
+
 function editRepair(id){
   const r=repairs.find(x=>x.id===id);
   editingId=id;
@@ -237,7 +347,6 @@ function editRepair(id){
   addModal.style.display="flex";
 }
 
-// Details modal
 function viewDetails(id){
   const r=repairs.find(x=>x.id===id);
   detailsContent.innerHTML=`
@@ -249,14 +358,13 @@ function viewDetails(id){
   detailsModal.style.display="flex";
 }
 
-// Delete
 async function deleteRepair(id){
   if(!confirm("Delete this repair?")) return;
   await client.from("repairs").delete().eq("id",id);
   loadRepairs();
 }
 
-// Complete modal
+/* COMPLETE LOGIC */
 async function completeRepair(id){
   completingId=id;
   const r=repairs.find(x=>x.id===id);
@@ -271,14 +379,13 @@ async function completeRepair(id){
   ["PlayStation","Xbox","Nintendo","iPad","Laptop"].forEach((c,i)=>{
     html+=`<div class="tab-content" data-tab="${c}" style="display:${i?'none':'block'}">`;
     products.filter(p=>p.brand===c).forEach(p=>{
-      html+=`<label>${p.name} (Stock <span class="stock-number">${p.stock}</span>)
-<input type="number" min="0" max="${p.stock}" data-id="${p.id}"></label>`;
+      html+=`<label>${p.name} (<span class="stock-num">Stock ${p.stock}</span>) <input type="number" min="0" max="${p.stock}" data-id="${p.id}"></label>`;
     });
     html+=`</div>`;
   });
 
   html+=`<button onclick="confirmComplete()">Confirm</button>
-<button class="secondary" onclick="completeModal.style.display='none'">Cancel</button>`;
+          <button class="secondary" onclick="completeModal.style.display='none'">Cancel</button>`;
 
   completeContent.innerHTML=html;
   completeModal.style.display="flex";
@@ -293,21 +400,17 @@ async function completeRepair(id){
   });
 }
 
-// Confirm complete
 async function confirmComplete(){
   await client.from("repairs").update({completed:true}).eq("id",completingId);
   completeModal.style.display="none";
   loadRepairs();
 }
 
-// Filters
 deviceFilter.onchange=render;
 showCompleted.onchange=render;
 customerSearch.oninput=render;
 
-// Load on start
 loadRepairs();
 </script>
-
 </body>
 </html>

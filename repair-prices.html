@@ -116,7 +116,8 @@ document.querySelectorAll('.calc-input').forEach(input => {
     const percent = parseFloat(e.target.dataset.percent);
     const cost = parseFloat(e.target.value) || 0;
     const final = cost + cost * (percent/100);
-    e.target.nextElementSibling.innerText = `$${final.toFixed(2)}`;
+    // Change $ to £
+    e.target.nextElementSibling.innerText = `£${final.toFixed(2)}`;
   });
 });
 </script>

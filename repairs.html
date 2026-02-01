@@ -113,9 +113,9 @@ th{font-size:12px;color:var(--muted);background:#f8fafc;}
 
 <!-- 🔐 PASSWORD GATE -->
 <script>
-const APP_PASSWORD = "ShopAccess123";
+const APP_PASSWORD = "BeckyStock";
 if(!sessionStorage.getItem("auth")){
-  const pass = prompt("Enter password");
+  const pass = prompt("Staff Access - Please Enter Password");
   if(pass !== APP_PASSWORD){ alert("Access denied"); location.href="https://google.com"; }
   else sessionStorage.setItem("auth","yes");
 }
@@ -182,6 +182,11 @@ if(!sessionStorage.getItem("auth")){
   </div>
 </div>
 
+<!-- DETAILS MODAL -->
+<div class="modal" id="detailsModal">
+  <div class="modal-content" id="detailsContent"></div>
+</div>
+
 <!-- COMPLETE MODAL -->
 <div class="modal" id="completeModal">
   <div class="modal-content" id="completeContent"></div>
@@ -219,6 +224,7 @@ function render(){
   <td>${r.checked_in}</td>
   <td><span class="status-badge status-${r.status.replace(' ', '-')}">${r.status}</span></td>
   <td>
+    <button onclick="viewDetails(${r.id})">Details</button>
     ${r.status!=="Completed"?`<button onclick="completeRepair(${r.id})">Complete</button>`:""}
     <button onclick="editRepair(${r.id})">Edit</button>
     <button class="danger" onclick="deleteRepair(${r.id})">Delete</button>
@@ -272,6 +278,20 @@ function editRepair(id){
   addModal.style.display="flex";
 }
 
+function viewDetails(id){
+  const r = repairs.find(x => x.id === id);
+  if(!r) return;
+  detailsContent.innerHTML = `
+    <h2>${r.customer}</h2>
+    <p><strong>Device:</strong> ${r.device}</p>
+    <p><strong>Checked In:</strong> ${r.checked_in}</p>
+    <p><strong>Status:</strong> <span class="status-badge status-${r.status.replace(' ', '-')}">${r.status}</span></p>
+    <p><strong>Notes:</strong><br>${r.notes || "—"}</p>
+    <button onclick="detailsModal.style.display='none'">Close</button>
+  `;
+  detailsModal.style.display = "flex";
+}
+
 async function deleteRepair(id){
   if(!confirm("Delete this repair?")) return;
   await client.from("repairs").delete().eq("id",id);
@@ -284,7 +304,7 @@ async function completeRepair(id){
   const r=repairs.find(x=>x.id===id);
   if(!r) return;
 
-  // Open modal to reduce stock (similar to old complete modal)
+  // Open modal to reduce stock
   const { data:products } = await client.from("products").select("*");
   let html=`<h2>Complete: ${r.customer}</h2><p>Device: ${r.device}</p>`;
   html+=`<div>`;

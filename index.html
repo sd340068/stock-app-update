@@ -516,12 +516,12 @@ async function loadStock(){
  loadRepairCount();
 }
 
-/* Repair badge count */
+/* Repair badge count (only active repairs) */
 async function loadRepairCount(){
-  const { count, error } = await client
+  const { data, error } = await client
     .from('repairs')
     .select('*', { count: 'exact', head: true })
-    .eq('completed', false);
+    .in('status', ['Checked-in', 'Awaiting parts']); // Only count these statuses
 
   if (error) {
     console.error("Repair count failed:", error);
@@ -529,13 +529,14 @@ async function loadRepairCount(){
     return;
   }
 
-  document.getElementById('repairCountBadge').innerText = count ?? 0;
+  document.getElementById('repairCountBadge').innerText = data?.length ?? 0;
 }
 
 loadStock();
 </script>
 </body>
 </html>
+
 
 
 

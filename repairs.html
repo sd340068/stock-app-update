@@ -8,9 +8,11 @@
 <script type="module">
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
+// === Supabase config ===
 const SUPABASE_URL = "https://thxyrmscrwstcyhifijv.supabase.co";
 const SUPABASE_KEY = "sb_publishable_U1nguijT4zbVmfkZ-RP29Q_X2Tr-WoE";
 
+// Create global client
 window.supabaseClient = createClient(SUPABASE_URL, SUPABASE_KEY);
 </script>
 
@@ -112,32 +114,52 @@ const client = window.supabaseClient;
 let repairs = [];
 let editingId = null;
 
+// Helper to calculate days open
 function daysOpen(date){
   return date ? Math.max(0, Math.floor((Date.now() - new Date(date)) / 86400000)) : 0;
 }
 
+// Load all repairs safely
 async function loadRepairs(){
-  const { data, error } = await client.from('repairs').select('*');
-  if(error){ console.error(error); alert("Failed to fetch repairs"); return; }
-  repairs = data || [];
-  repairs.sort((a,b) => new Date(a.checked_in || 0) - new Date(b.checked_in || 0));
-  renderRepairs();
+  try {
+    const { data, error } = await client.from('repairs').select('*');
+    console.log("Fetched repairs:", data, error);  // <-- log results
+    if(error){ throw error; }
+
+    repairs = data || [];
+    // Sort ascending by checked_in (nulls last)
+    repairs.sort((a,b) => {
+      if(!a.checked_in) return 1;
+      if(!b.checked_in) return -1;
+      return new Date(a.checked_in) - new Date(b.checked_in);
+    });
+
+    renderRepairs();
+  } catch(e){
+    console.error("Failed to load repairs:", e);
+    document.getElementById("repairsBody").innerHTML = `<tr><td colspan="5">Error loading repairs</td></tr>`;
+  }
 }
 
+// Render table with filters
 function renderRepairs(){
   const tbody = document.getElementById("repairsBody");
   const showCompleted = document.getElementById("showCompleted").checked;
   const filterDevice = document.getElementById("filterDevice").value;
   tbody.innerHTML = "";
 
-  if(repairs.length === 0){
+  const filtered = repairs.filter(r => {
+    if(!showCompleted && r.completed) return false;
+    if(filterDevice && r.device !== filterDevice) return false;
+    return true;
+  });
+
+  if(filtered.length === 0){
     tbody.innerHTML = `<tr><td colspan="5">No repairs found</td></tr>`;
     return;
   }
 
-  repairs.forEach(r => {
-    if(!showCompleted && r.completed) return;
-    if(filterDevice && r.device !== filterDevice) return;
+  filtered.forEach(r => {
     const days = daysOpen(r.checked_in);
     const tr = document.createElement("tr");
     tr.innerHTML = `
@@ -154,10 +176,10 @@ function renderRepairs(){
     tbody.appendChild(tr);
   });
 
-  document.getElementById("openCounter").innerText =
-    repairs.filter(r => !r.completed).length + " open";
+  document.getElementById("openCounter").innerText = filtered.filter(r => !r.completed).length + " open";
 }
 
+// Modal handling
 function openModal(){
   editingId = null;
   document.getElementById("modalTitle").innerText = "Add Repair";
@@ -172,9 +194,11 @@ function closeModal(){ document.getElementById("editModal").style.display = "non
 document.getElementById("editModal").addEventListener("click", e => { if(e.target.id==="editModal") closeModal(); });
 document.addEventListener("keydown", e => { if(e.key==="Escape") closeModal(); });
 
+// Save repair
 document.getElementById("saveBtn").onclick = async () => {
   const customer = document.getElementById("customer").value.trim();
   if(!customer){ alert("Customer required"); return; }
+
   const payload = {
     customer,
     device: document.getElementById("device").value,
@@ -182,17 +206,24 @@ document.getElementById("saveBtn").onclick = async () => {
     completed: false,
     checked_in: new Date().toISOString()
   };
-  if(editingId){
-    const { error } = await client.from('repairs').update(payload).eq('id', editingId);
-    if(error){ console.error(error); alert("Update failed"); return; }
-  } else {
-    const { error } = await client.from('repairs').insert(payload);
-    if(error){ console.error(error); alert("Insert failed"); return; }
+
+  try {
+    if(editingId){
+      const { error } = await client.from('repairs').update(payload).eq('id', editingId);
+      if(error) throw error;
+    } else {
+      const { error } = await client.from('repairs').insert(payload);
+      if(error) throw error;
+    }
+    closeModal();
+    loadRepairs();
+  } catch(e){
+    console.error("Save failed:", e);
+    alert("Failed to save repair");
   }
-  closeModal();
-  loadRepairs();
 };
 
+// Edit / Complete / Delete
 window.editRepair = async (id) => {
   const { data, error } = await client.from('repairs').select('*').eq('id', id).single();
   if(error){ console.error(error); alert("Load failed"); return; }
@@ -203,14 +234,12 @@ window.editRepair = async (id) => {
   document.getElementById("notes").value = data.notes || "";
   document.getElementById("editModal").style.display = "flex";
 };
-
 window.completeRepair = async (id) => {
   if(!confirm("Mark complete?")) return;
   const { error } = await client.from('repairs').update({ completed:true }).eq('id', id);
   if(error){ console.error(error); alert("Complete failed"); return; }
   loadRepairs();
 };
-
 window.deleteRepair = async (id) => {
   if(!confirm("Delete permanently?")) return;
   const { error } = await client.from('repairs').delete().eq('id', id);
@@ -218,9 +247,11 @@ window.deleteRepair = async (id) => {
   loadRepairs();
 };
 
+// Filters
 document.getElementById("showCompleted").onchange = renderRepairs;
 document.getElementById("filterDevice").onchange = renderRepairs;
 
+// Initial load
 loadRepairs();
 </script>
 

@@ -191,19 +191,22 @@ function render(){
     if(!s && r.status==="Completed") return;
     if(q && !r.customer.toLowerCase().includes(q)) return;
 
-    repairsBody.innerHTML+=`
+repairsBody.innerHTML += `
 <tr>
   <td>${r.customer}</td>
   <td>${r.device}</td>
   <td>${r.checked_in}</td>
-  <td><span class="status-badge status-${r.status.replace(' ','\\ ')}">${r.status}</span></td>
   <td>
-    ${r.status!=="Completed"?`<button onclick="completeRepair(${r.id})">Complete</button>`:""}
+    <span class="status-badge status-${r.status.replace(' ', '-')}">
+      ${r.status}
+    </span>
+  </td>
+  <td>
+    ${r.status !== "Completed" ? `<button onclick="completeRepair(${r.id})">Complete</button>` : ""}
     <button onclick="editRepair(${r.id})">Edit</button>
     <button class="danger" onclick="deleteRepair(${r.id})">Delete</button>
   </td>
 </tr>`;
-  });
 
   openCounter.innerText=`${repairs.filter(r=>r.status!=="Completed").length} open`;
 }

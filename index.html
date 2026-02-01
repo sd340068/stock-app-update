@@ -490,9 +490,17 @@ async function loadStock(){
 
 /* Repair badge count */
 async function loadRepairCount(){
-  const { count } = await client.from('repairs')
-    .select('*', { count:'exact', head:true });
-  
+  const { count, error } = await client
+    .from('repairs')
+    .select('*', { count: 'exact', head: true })
+    .eq('completed', false);
+
+  if (error) {
+    console.error("Repair count failed:", error);
+    document.getElementById('repairCountBadge').innerText = "!";
+    return;
+  }
+
   document.getElementById('repairCountBadge').innerText = count ?? 0;
 }
 
@@ -500,3 +508,4 @@ loadStock();
 </script>
 </body>
 </html>
+

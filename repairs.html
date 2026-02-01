@@ -166,6 +166,43 @@ th{
   overflow-y:auto;
   margin-bottom:12px;
 }
+
+  /* Parts selection rows */
+.part-row{
+  display:grid;
+  grid-template-columns:1fr auto 80px;
+  align-items:center;
+  gap:12px;
+  padding:10px 12px;
+  border:1px solid var(--border);
+  border-radius:10px;
+  margin-bottom:8px;
+  background:#f8fafc;
+  font-size:14px;
+}
+
+/* Part name */
+.part-name{
+  font-weight:500;
+}
+
+/* Stock label */
+.stock-label{
+  font-weight:600;
+}
+
+/* Stock number */
+.stock-count{
+  font-weight:800;
+  color:var(--green);
+}
+
+/* Quantity input */
+.part-row input{
+  width:70px;
+  text-align:center;
+}
+
 </style>
 </head>
 
@@ -370,8 +407,22 @@ async function completeRepair(id){
   ["PlayStation","Xbox","Nintendo","iPad","Laptop"].forEach((c,i)=>{
     html+=`<div class="tab-content" data-tab="${c}" style="display:${i?'none':'block'}">`;
     products.filter(p=>p.brand===c).forEach(p=>{
-      html+=`${p.name} (Stock ${p.stock}) <input type="number" min="0" max="${p.stock}" data-id="${p.id}"><br>`;
-    });
+products.filter(p=>p.brand===c).forEach(p=>{
+  html+=`
+    <div class="part-row">
+      <span class="part-name">${p.name}</span>
+      <span class="stock-label">
+        Stock <span class="stock-count">${p.stock}</span>
+      </span>
+      <input
+        type="number"
+        min="0"
+        max="${p.stock}"
+        data-id="${p.id}"
+      >
+    </div>
+  `;
+});
     html+=`</div>`;
   });
 

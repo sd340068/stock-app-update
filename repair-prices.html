@@ -250,16 +250,30 @@ function calc(input,percent){
 
   const card = input.closest('.card');
 
+  // Quote price (blue)
   card.querySelector('.output').innerText =
     `Quote Price: £${price}`;
 
   const m = card.querySelector('.margin');
-  m.innerText = `Margin: £${margin.toFixed(2)}`;
 
-  m.className =
-    "margin " +
-    (margin < 10 ? "red" : margin < 20 ? "amber" : "green");
+  let label = "";
+  let colour = "";
+
+  if (margin < 10) {
+    label = "Avoid Quote";
+    colour = "red";
+  } else if (margin < 20) {
+    label = "Ok Quote";
+    colour = "amber";
+  } else {
+    label = "Good Quote";
+    colour = "green";
+  }
+
+  m.innerText = `Margin: £${margin.toFixed(2)} — ${label}`;
+  m.className = `margin ${colour}`;
 }
+
 
 function updateWarnings(){
   document.querySelectorAll('.card').forEach(card=>{

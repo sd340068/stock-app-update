@@ -12,6 +12,7 @@
   --border:#e5e7eb;
   --text:#0f172a;
   --muted:#64748b;
+  --blue:#2563eb;
   --green:#16a34a;
   --amber:#f59e0b;
   --red:#dc2626;
@@ -23,7 +24,7 @@ body{
   margin:0;
   font-family:Inter,system-ui;
   background:var(--bg);
-  padding:30px 16px;
+  padding:28px 16px;
   color:var(--text);
 }
 
@@ -44,14 +45,14 @@ h1{
 }
 
 .tagline a{
-  color:#2563eb;
+  color:var(--blue);
   text-decoration:none;
 }
 
 /* GRID */
 .grid{
   display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+  grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
   gap:18px;
 }
 
@@ -66,9 +67,9 @@ h1{
   align-items:center;
 }
 
-/* HEADER AREA – fixed height */
+/* HEADER AREA */
 .card-header{
-  min-height:230px;
+  min-height:260px;
   width:100%;
   display:flex;
   flex-direction:column;
@@ -81,7 +82,7 @@ h1{
   margin:0 0 6px;
 }
 
-/* Dropdown + placeholder equal styling */
+/* Dropdown + placeholder */
 select,
 .device-placeholder{
   margin-top:10px;
@@ -98,9 +99,9 @@ select,
   color:#475569;
 }
 
-/* FX5 info placeholder (equal height even when empty) */
+/* FX5 info (reserved height even if empty) */
 .fx5-info{
-  min-height:34px;
+  min-height:36px;
   margin-top:8px;
   font-size:12px;
   color:var(--muted);
@@ -127,10 +128,10 @@ input{
 .output{
   margin-top:12px;
   font-weight:700;
-    color:#2563eb; /* blue quote price */
+  color:var(--blue);
 }
 
-/* Margin badge */
+/* MARGIN */
 .margin{
   margin-top:6px;
   font-size:13px;
@@ -154,7 +155,7 @@ input{
 
 <div class="grid">
 
-<!-- LCD -->
+<!-- LCD SCREEN -->
 <div class="card">
   <div class="card-header">
     <h2>LCD Screen Repair</h2>
@@ -162,33 +163,33 @@ input{
     <div class="fx5-info">Only use the red FX5 Screen option cost here</div>
     <div class="customer-warning">
       You may see a message on the iPhone saying the replacement part can’t be verified.
-      This is normal, as Apple parts are paired to the motherboard when manufactured.
+      This is normal as Apple parts are paired to the motherboard when manufactured.
       The message may appear at times and disappears after 7 days.
     </div>
   </div>
 
-  <input type="number" placeholder="Parts cost (£)" oninput="calc(this,130,1)">
+  <input type="number" placeholder="Parts cost (£)" oninput="calc(this,130)">
   <div class="output"></div>
   <div class="margin"></div>
 </div>
 
-<!-- OLED -->
+<!-- OLED SCREEN -->
 <div class="card">
   <div class="card-header">
     <h2>OLED Screen Repair</h2>
-    <select onchange="updateWarnings()">
+    <select class="device-select" onchange="updateWarnings()">
       <option value="iPhone">iPhone</option>
       <option value="Android">Android</option>
     </select>
     <div class="fx5-info">Only use the purple FX5 Screen option cost here - iPhone</div>
     <div class="customer-warning" style="display:none;">
       You may see a message on the iPhone saying the replacement part can’t be verified.
-      This is normal, as Apple parts are paired to the motherboard when manufactured.
+      This is normal as Apple parts are paired to the motherboard when manufactured.
       The message may appear at times and disappears after 7 days.
     </div>
   </div>
 
-  <input type="number" placeholder="Parts cost (£)" oninput="calc(this,45,1)">
+  <input type="number" placeholder="Parts cost (£)" oninput="calc(this,45)">
   <div class="output"></div>
   <div class="margin"></div>
 </div>
@@ -197,19 +198,19 @@ input{
 <div class="card">
   <div class="card-header">
     <h2>Battery Repair</h2>
-    <select onchange="updateWarnings()">
+    <select class="device-select" onchange="updateWarnings()">
       <option value="iPhone">iPhone</option>
       <option value="Android">Android</option>
     </select>
     <div class="fx5-info"></div>
     <div class="customer-warning" style="display:none;">
       You may see a message on the iPhone saying the replacement part can’t be verified.
-      This is normal, as Apple parts are paired to the motherboard when manufactured.
+      This is normal as Apple parts are paired to the motherboard when manufactured.
       The message may appear at times and disappears after 7 days.
     </div>
   </div>
 
-  <input type="number" placeholder="Parts cost (£)" oninput="calc(this,115,1)">
+  <input type="number" placeholder="Parts cost (£)" oninput="calc(this,115)">
   <div class="output"></div>
   <div class="margin"></div>
 </div>
@@ -218,14 +219,14 @@ input{
 <div class="card">
   <div class="card-header">
     <h2>Charging Port Repair</h2>
-    <select>
+    <select class="device-select">
       <option value="iPhone">iPhone</option>
       <option value="Android">Android</option>
     </select>
     <div class="fx5-info"></div>
   </div>
 
-  <input type="number" placeholder="Parts cost (£)" oninput="calc(this,80,2)">
+  <input type="number" placeholder="Parts cost (£)" oninput="calc(this,80)">
   <div class="output"></div>
   <div class="margin"></div>
 </div>
@@ -234,12 +235,11 @@ input{
 </div>
 
 <script>
-<script>
 function roundTo5(n){
   return Math.round(n / 5) * 5;
 }
 
-function calc(input,percent,hours){
+function calc(input,percent){
   const cost = parseFloat(input.value || 0);
   const shipping = 3;
 
@@ -260,12 +260,10 @@ function calc(input,percent,hours){
     "margin " +
     (margin < 10 ? "red" : margin < 20 ? "amber" : "green");
 }
-</script>
-
 
 function updateWarnings(){
   document.querySelectorAll('.card').forEach(card=>{
-    const select = card.querySelector('select');
+    const select = card.querySelector('.device-select');
     const warn = card.querySelector('.customer-warning');
     if(!warn || !select) return;
     warn.style.display = select.value === 'iPhone' ? 'block' : 'none';

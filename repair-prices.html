@@ -3,269 +3,194 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Repair Prices</title>
-
+<title>Repair Price Calculators</title>
 <style>
-:root{
-  --bg:#f1f5f9;
-  --panel:#ffffff;
-  --border:#e5e7eb;
-  --text:#0f172a;
-  --muted:#64748b;
-  --blue:#2563eb;
-  --green:#16a34a;
-  --amber:#f59e0b;
-  --red:#dc2626;
-}
-
-*{box-sizing:border-box}
-
 body{
   margin:0;
   font-family:Inter,system-ui;
-  background:var(--bg);
-  padding:20px 14px;
-  color:var(--text);
+  background:#f1f5f9;
+  padding:20px;
+  color:#0f172a;
 }
-
 .wrapper{
   max-width:1200px;
   margin:auto;
+  text-align:center;
 }
-
 h1{
-  text-align:center;
-  font-size:24px;
-  margin-bottom:6px;
+  margin-bottom:5px;
 }
-
 .tagline{
-  text-align:center;
-  font-weight:700;
+  font-weight:bold;
+  margin-bottom:20px;
   font-size:14px;
-  margin-bottom:22px;
 }
-
 .calculators{
   display:grid;
-  grid-template-columns:repeat(4,1fr);
-  gap:18px;
+  grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+  gap:16px;
 }
-
-@media (max-width: 900px){
-  .calculators{grid-template-columns:1fr;}
-}
-
 .card{
-  background:var(--panel);
-  border-radius:18px;
-  padding:18px;
-  box-shadow:0 10px 28px rgba(0,0,0,.1);
+  background:#ffffff;
+  border-radius:16px;
+  padding:20px;
   display:flex;
   flex-direction:column;
-  gap:14px;
+  align-items:center;
+  box-shadow:0 10px 20px rgba(0,0,0,.1);
 }
-
-.card-header{text-align:center}
-
 .card h2{
-  font-size:18px;
-  margin:0;
+  margin:10px 0 5px;
 }
-
-.card-subtitle{
-  font-size:13px;
-  color:var(--muted);
+.card small{
+  color:#64748b;
+}
+input[type="number"], select{
+  margin-top:10px;
+  padding:8px;
+  width:80%;
+  border-radius:8px;
+  border:1px solid #e5e7eb;
+}
+.result{
+  margin-top:10px;
   font-weight:600;
-}
-
-.card-info{
-  font-size:12px;
-  color:var(--muted);
-  line-height:1.4;
-}
-
-.card input{
-  width:100%;
-  padding:14px;
   font-size:18px;
-  border-radius:10px;
-  border:1px solid var(--border);
-  text-align:right;
 }
-
-.result-box{
-  background:#f8fafc;
-  border-radius:14px;
-  padding:12px;
-  text-align:center;
-}
-
-.quote-label{
-  font-size:12px;
-  font-weight:700;
-  color:var(--muted);
-}
-
-.quote{
-  font-size:26px;
-  font-weight:800;
-  color:var(--blue);
-}
-
 .margin{
-  margin-top:6px;
+  margin-top:5px;
   font-size:14px;
-  font-weight:700;
 }
-
-.margin.good{color:var(--green)}
-.margin.warn{color:var(--amber)}
-.margin.bad{color:var(--red)}
-
-.margin-note{
+.margin.red{color:#dc2626;}
+.margin.amber{color:#f59e0b;}
+.margin.green{color:#16a34a;}
+.labour{
+  margin-top:5px;
+  font-size:13px;
+  color:#2563eb;
+}
+.info{
+  margin-top:5px;
   font-size:12px;
-  font-weight:700;
-  margin-top:4px;
-}
-
-.back-btn{
-  display:inline-block;
-  margin-bottom:14px;
-  padding:10px 16px;
-  border-radius:10px;
-  background:#e5e7eb;
-  color:var(--text);
-  text-decoration:none;
-  font-weight:600;
+  color:#64748b;
 }
 </style>
 </head>
-
 <body>
+
 <div class="wrapper">
-
-  <a href="index.html" class="back-btn">← Back</a>
-
   <h1>Repair Price Calculators</h1>
-  <div class="tagline">
-    Use replacebase.co.uk for parts cost. Console prices are from the website here:
-    <a href="https://cnlsrepair.co.uk/repairs/console-repairs/" target="_blank">Console Prices</a>
-  </div>
+  <div class="tagline">Use replacebase.co.uk for parts cost. Console prices are from the website here: <a href="https://cnlsrepair.co.uk/repairs/console-repairs/" target="_blank">Console Prices</a></div>
 
   <div class="calculators">
-
-    <!-- LCD -->
+    <!-- LCD Screen Repair -->
     <div class="card">
-      <div class="card-header">
-        <h2>LCD Screen Repair</h2>
-        <div class="card-subtitle">iPhone Only</div>
-        <div class="card-info">Only use the red FX5 Screen option cost here</div>
-      </div>
-      <input type="number" inputmode="decimal" placeholder="Parts cost (£)" data-percent="130">
-      <div class="result-box">
-        <div class="quote-label">Quote Price</div>
-        <div class="quote">—</div>
-        <div class="margin"></div>
-        <div class="margin-note"></div>
-      </div>
+      <h2>LCD Screen Repair</h2>
+      <small>iPhone Only</small>
+      <div class="info">Only use the red FX5 Screen option cost here</div>
+      <input type="number" placeholder="Parts cost (£)" class="partsCost" data-repair="lcd">
+      <div class="result" id="lcdResult">Quote: £0</div>
+      <div class="margin" id="lcdMargin">Margin: £0</div>
+      <div class="labour" id="lcdLabour">Labour estimate: 1 hr</div>
     </div>
 
-    <!-- OLED -->
+    <!-- OLED Screen Repair -->
     <div class="card">
-      <div class="card-header">
-        <h2>OLED Screen Repair</h2>
-        <div class="card-info">Only use the purple FX5 Screen option cost here - iPhone</div>
-      </div>
-      <input type="number" inputmode="decimal" placeholder="Parts cost (£)" data-percent="45">
-      <div class="result-box">
-        <div class="quote-label">Quote Price</div>
-        <div class="quote">—</div>
-        <div class="margin"></div>
-        <div class="margin-note"></div>
-      </div>
+      <h2>OLED Screen Repair</h2>
+      <select id="oledDevice">
+        <option value="iPhone">iPhone</option>
+        <option value="Android">Android</option>
+      </select>
+      <div class="info">Only use the purple FX5 Screen option cost here - iPhone</div>
+      <input type="number" placeholder="Parts cost (£)" class="partsCost" data-repair="oled">
+      <div class="result" id="oledResult">Quote: £0</div>
+      <div class="margin" id="oledMargin">Margin: £0</div>
+      <div class="labour" id="oledLabour">Labour estimate: 1 hr</div>
     </div>
 
-    <!-- Battery -->
+    <!-- Battery Repair -->
     <div class="card">
-      <div class="card-header">
-        <h2>Battery Repair</h2>
-      </div>
-      <input type="number" inputmode="decimal" placeholder="Parts cost (£)" data-percent="115">
-      <div class="result-box">
-        <div class="quote-label">Quote Price</div>
-        <div class="quote">—</div>
-        <div class="margin"></div>
-        <div class="margin-note"></div>
-      </div>
+      <h2>Battery Repair</h2>
+      <select id="batteryDevice">
+        <option value="iPhone">iPhone</option>
+        <option value="Android">Android</option>
+      </select>
+      <input type="number" placeholder="Parts cost (£)" class="partsCost" data-repair="battery">
+      <div class="result" id="batteryResult">Quote: £0</div>
+      <div class="margin" id="batteryMargin">Margin: £0</div>
+      <div class="labour" id="batteryLabour">Labour estimate: 1 hr</div>
     </div>
 
-    <!-- Charging -->
+    <!-- Charging Port Repair -->
     <div class="card">
-      <div class="card-header">
-        <h2>Charging Port Repair</h2>
-      </div>
-      <input type="number" inputmode="decimal" placeholder="Parts cost (£)" data-percent="80">
-      <div class="result-box">
-        <div class="quote-label">Quote Price</div>
-        <div class="quote">—</div>
-        <div class="margin"></div>
-        <div class="margin-note"></div>
-      </div>
+      <h2>Charging Port Repair</h2>
+      <select id="chargingDevice">
+        <option value="iPhone">iPhone</option>
+        <option value="Android">Android</option>
+      </select>
+      <input type="number" placeholder="Parts cost (£)" class="partsCost" data-repair="charging">
+      <div class="result" id="chargingResult">Quote: £0</div>
+      <div class="margin" id="chargingMargin">Margin: £0</div>
+      <div class="labour" id="chargingLabour">Labour estimate: 2 hr</div>
     </div>
 
   </div>
 </div>
 
 <script>
-const SHIPPING = 3;
+const repairConfig = {
+  lcd: { percentage: 130, labour: 1, deviceDependent:false },
+  oled: { percentage: 45, labour: { iPhone:1, Android:1.5 }, deviceDependent:true },
+  battery: { percentage:115, labour: { iPhone:1, Android:1 }, deviceDependent:true },
+  charging: { percentage:80, labour: { iPhone:2, Android:1 }, deviceDependent:true },
+};
 
-// New margin thresholds (£)
-const RED_MAX = 9;
-const AMBER_MAX = 19;
-
-function roundToNearest5(v){
-  return Math.round(v / 5) * 5;
+function roundToNearest5(x){
+  return Math.round(x/5)*5;
 }
 
-document.querySelectorAll('.card input').forEach(input => {
-  input.addEventListener('input', e => {
-    const percent = Number(e.target.dataset.percent);
-    const parts = Number(e.target.value) || 0;
+function calculateQuote(repair, partsCost, device=null){
+  const config = repairConfig[repair];
+  let quote = partsCost * (1 + config.percentage/100) + 3; // +£3 shipping
+  quote = roundToNearest5(quote);
+  const margin = quote - partsCost;
+  let labourTime = config.deviceDependent ? config.labour[device] : config.labour;
+  return {quote, margin, labourTime};
+}
 
-    const rawQuote = parts + (parts * percent / 100) + SHIPPING;
-    const quote = roundToNearest5(rawQuote);
+function updateCard(repair){
+  let partsInput = document.querySelector(`.partsCost[data-repair="${repair}"]`);
+  let device = null;
+  if(repairConfig[repair].deviceDependent){
+    device = document.getElementById(`${repair}Device`).value;
+  }
+  const partsCost = parseFloat(partsInput.value) || 0;
+  const {quote, margin, labourTime} = calculateQuote(repair, partsCost, device);
 
-    const costTotal = parts + SHIPPING;
-    const marginValue = quote - costTotal;
+  document.getElementById(`${repair}Result`).innerText = `Quote: £${quote}`;
+  let marginEl = document.getElementById(`${repair}Margin`);
+  marginEl.innerText = `Margin: £${margin}`;
+  if(margin<10) marginEl.className='margin red';
+  else if(margin<20) marginEl.className='margin amber';
+  else marginEl.className='margin green';
 
-    const box = e.target.nextElementSibling;
-    const marginEl = box.querySelector('.margin');
-    const noteEl = box.querySelector('.margin-note');
+  document.getElementById(`${repair}Labour`).innerText = `Labour estimate: ${labourTime} hr${labourTime>1?'s':''}`;
+}
 
-    box.querySelector('.quote').innerText = `£${quote}`;
-    marginEl.innerText = `Margin: £${marginValue}`;
+// Attach events
+document.querySelectorAll('.partsCost').forEach(input=>{
+  input.addEventListener('input', ()=>{
+    const repair = input.dataset.repair;
+    updateCard(repair);
+  });
+});
 
-    marginEl.className = "margin";
-    noteEl.innerText = "";
-
-    if (marginValue <= RED_MAX){
-      marginEl.classList.add("bad");
-      noteEl.innerText = "Margin too low – reconsider quote";
-      noteEl.style.color = "var(--red)";
-    } 
-    else if (marginValue <= AMBER_MAX){
-      marginEl.classList.add("warn");
-      noteEl.innerText = "Low margin";
-      noteEl.style.color = "var(--amber)";
-    } 
-    else {
-      marginEl.classList.add("good");
-      noteEl.innerText = "Healthy margin";
-      noteEl.style.color = "var(--green)";
-    }
+['oledDevice','batteryDevice','chargingDevice'].forEach(id=>{
+  document.getElementById(id).addEventListener('change', ()=>{
+    updateCard(id.replace('Device',''));
   });
 });
 </script>
+
 </body>
 </html>

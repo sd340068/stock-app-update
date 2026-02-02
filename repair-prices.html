@@ -99,7 +99,7 @@ select,
   color:#475569;
 }
 
-/* FX5 info (reserved height even if empty) */
+/* FX5 info (reserve height) */
 .fx5-info{
   min-height:36px;
   margin-top:8px;
@@ -112,6 +112,7 @@ select,
   font-size:12px;
   color:var(--red);
   margin-top:8px;
+  display:none;
 }
 
 /* INPUT */
@@ -138,9 +139,18 @@ input{
   font-weight:700;
 }
 
-.margin.red{color:var(--red)}
-.margin.amber{color:var(--amber)}
-.margin.green{color:var(--green)}
+.margin.red{color:var(--red);}
+.margin.red::before{content:"⚠️ ";}
+.margin.amber{color:var(--amber);}
+.margin.green{color:var(--green);}
+
+/* TIME */
+.time{
+  margin-top:6px;
+  font-size:12px;
+  color:var(--muted);
+  font-weight:600;
+}
 </style>
 </head>
 
@@ -167,10 +177,10 @@ input{
       The message may appear at times and disappears after 7 days.
     </div>
   </div>
-
   <input type="number" placeholder="Parts cost (£)" oninput="calc(this,130)">
   <div class="output"></div>
   <div class="margin"></div>
+  <div class="time"></div>
 </div>
 
 <!-- OLED SCREEN -->
@@ -182,16 +192,16 @@ input{
       <option value="Android">Android</option>
     </select>
     <div class="fx5-info">Only use the purple FX5 Screen option cost here - iPhone</div>
-    <div class="customer-warning" style="display:none;">
+    <div class="customer-warning">
       You may see a message on the iPhone saying the replacement part can’t be verified.
       This is normal as Apple parts are paired to the motherboard when manufactured.
       The message may appear at times and disappears after 7 days.
     </div>
   </div>
-
   <input type="number" placeholder="Parts cost (£)" oninput="calc(this,45)">
   <div class="output"></div>
   <div class="margin"></div>
+  <div class="time"></div>
 </div>
 
 <!-- BATTERY -->
@@ -203,16 +213,16 @@ input{
       <option value="Android">Android</option>
     </select>
     <div class="fx5-info"></div>
-    <div class="customer-warning" style="display:none;">
+    <div class="customer-warning">
       You may see a message on the iPhone saying the replacement part can’t be verified.
       This is normal as Apple parts are paired to the motherboard when manufactured.
       The message may appear at times and disappears after 7 days.
     </div>
   </div>
-
   <input type="number" placeholder="Parts cost (£)" oninput="calc(this,115)">
   <div class="output"></div>
   <div class="margin"></div>
+  <div class="time"></div>
 </div>
 
 <!-- CHARGING PORT -->
@@ -225,10 +235,10 @@ input{
     </select>
     <div class="fx5-info"></div>
   </div>
-
   <input type="number" placeholder="Parts cost (£)" oninput="calc(this,80)">
   <div class="output"></div>
   <div class="margin"></div>
+  <div class="time"></div>
 </div>
 
 </div>
@@ -239,22 +249,20 @@ function roundTo5(n){
   return Math.round(n / 5) * 5;
 }
 
-function calc(input,percent){
+function calc(input, percent){
   const cost = parseFloat(input.value || 0);
   const shipping = 3;
 
   const rawPrice = (cost + shipping) * (1 + percent / 100);
   const price = roundTo5(rawPrice);
-
   const margin = price - cost - shipping;
 
   const card = input.closest('.card');
-
-  // Quote price (blue)
-  card.querySelector('.output').innerText =
-    `Quote Price: £${price}`;
-
+  const output = card.querySelector('.output');
   const m = card.querySelector('.margin');
+  const timeEl = card.querySelector('.time');
+
+  output.innerText = `Quote Price: £${price}`;
 
   let label = "";
   let colour = "";
@@ -272,9 +280,22 @@ function calc(input,percent){
 
   m.innerText = `Margin: £${margin.toFixed(2)} — ${label}`;
   m.className = `margin ${colour}`;
+
+  // Repair time logic
+  let hours = "—";
+  const title = card.querySelector("h2").innerText;
+  const deviceSelect = card.querySelector(".device-select");
+  const device = deviceSelect ? deviceSelect.value : "iPhone";
+
+  if (title.includes("LCD")) hours = "1 hour";
+  if (title.includes("OLED")) hours = device === "iPhone" ? "1 hour" : "1.5 hours";
+  if (title.includes("Battery")) hours = "1 hour";
+  if (title.includes("Charging")) hours = device === "iPhone" ? "2 hours" : "1 hour";
+
+  timeEl.innerText = `Estimated repair time: ${hours}`;
 }
 
-
+// Show iPhone warning messages
 function updateWarnings(){
   document.querySelectorAll('.card').forEach(card=>{
     const select = card.querySelector('.device-select');
@@ -284,6 +305,7 @@ function updateWarnings(){
   });
 }
 
+// Run on page load
 updateWarnings();
 </script>
 

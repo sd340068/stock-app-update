@@ -229,11 +229,16 @@ input{
 <div class="card">
   <div class="card-header">
     <h2>Charging Port Repair</h2>
-    <select class="device-select">
+    <select class="device-select" onchange="updateWarnings()">
       <option value="iPhone">iPhone</option>
       <option value="Android">Android</option>
     </select>
     <div class="fx5-info"></div>
+    <div class="customer-warning">
+      You may see a message on the iPhone saying the replacement part can’t be verified.
+      This is normal as Apple parts are paired to the motherboard when manufactured.
+      The message may appear at times and disappears after 7 days.
+    </div>
   </div>
   <input type="number" placeholder="Parts cost (£)" oninput="calc(this,80)">
   <div class="output"></div>
@@ -261,6 +266,7 @@ function calc(input, percent){
   const output = card.querySelector('.output');
   const m = card.querySelector('.margin');
   const timeEl = card.querySelector('.time');
+  const warn = card.querySelector('.customer-warning');
 
   output.innerText = `Quote Price: £${price}`;
 
@@ -281,6 +287,13 @@ function calc(input, percent){
   m.innerText = `Margin: £${margin.toFixed(2)} — ${label}`;
   m.className = `margin ${colour}`;
 
+  // Show warning for iPhone tiles or LCD (no select)
+  if(warn){
+    const select = card.querySelector(".device-select");
+    const device = select ? select.value : "iPhone";
+    warn.style.display = device === "iPhone" ? "block" : "none";
+  }
+
   // Repair time logic
   let hours = "—";
   const title = card.querySelector("h2").innerText;
@@ -295,13 +308,14 @@ function calc(input, percent){
   timeEl.innerText = `Estimated repair time: ${hours}`;
 }
 
-// Show iPhone warning messages
+// Show iPhone warning messages on dropdown change
 function updateWarnings(){
   document.querySelectorAll('.card').forEach(card=>{
-    const select = card.querySelector('.device-select');
     const warn = card.querySelector('.customer-warning');
-    if(!warn || !select) return;
-    warn.style.display = select.value === 'iPhone' ? 'block' : 'none';
+    if(!warn) return;
+    const select = card.querySelector('.device-select');
+    const device = select ? select.value : "iPhone";
+    warn.style.display = device === "iPhone" ? "block" : "none";
   });
 }
 

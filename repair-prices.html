@@ -46,7 +46,7 @@ h1{text-align:center;margin-bottom:4px;}
   gap:18px;
 }
 
-/* ===== CALCULATOR CARDS ===== */
+/* ===== CARDS ===== */
 .card{
   background:var(--panel);
   border-radius:18px;
@@ -131,7 +131,7 @@ input{
 }
 
 /* ===== ACCORDIONS ===== */
-.section-title{text-align:center;margin:40px 0 16px;}
+.section-title{text-align:center;margin:50px 0 18px;}
 
 .accordion{
   background:var(--panel);
@@ -150,7 +150,7 @@ input{
   border-bottom:1px solid var(--border);
 }
 
-.accordion-content{display:none;padding:10px 20px;}
+.accordion-content{display:none;padding:12px 20px;}
 
 .sub-accordion{
   border:1px solid var(--border);
@@ -190,165 +190,182 @@ input{
   <a href="https://cnlsrepair.co.uk/repairs/console-repairs/" target="_blank">Console Prices</a>
 </div>
 
-<!-- ===== TOP CALCULATORS ===== -->
+<!-- ===== TOP CALCULATORS (UNCHANGED) ===== -->
 <div class="grid">
+  <!-- LCD -->
+  <div class="card">
+    <div class="card-header">
+      <h2>LCD Screen Repair</h2>
+      <div class="device-placeholder">iPhone Only</div>
+      <div class="fx5-info">Only use the red FX5 Screen option cost here</div>
+      <div class="customer-warning">
+        <span class="note-title">Note to Customer:</span>
+        <span class="triangle">⚠️</span>
+        You may see a message on the iPhone saying the replacement part can’t be verified.
+        This is normal as Apple parts are paired to the motherboard when manufactured.
+        The message may appear at times and disappears after 7 days.
+      </div>
+    </div>
+    <input type="number" placeholder="Parts cost (£)" oninput="calc(this,130)">
+    <div class="output"></div>
+    <div class="margin"></div>
+    <div class="time"></div>
+  </div>
 
-<!-- LCD -->
-<div class="card">
-  <div class="card-header">
-    <h2>LCD Screen Repair</h2>
-    <div class="device-placeholder">iPhone Only</div>
-    <div class="fx5-info">Only use the red FX5 Screen option cost here</div>
-    <div class="customer-warning">
-      <span class="note-title">Note to Customer:</span>
-      <span class="triangle">⚠️</span>
-      You may see a message on the iPhone saying the replacement part can’t be verified.
-      This is normal as Apple parts are paired to the motherboard when manufactured.
-      The message may appear at times and disappears after 7 days.
+  <!-- OLED -->
+  <div class="card">
+    <div class="card-header">
+      <h2>OLED Screen Repair</h2>
+      <select class="device-select" onchange="updateWarnings()">
+        <option value="iPhone">iPhone</option>
+        <option value="Android">Android</option>
+      </select>
+      <div class="fx5-info">Only use the purple FX5 Screen option cost here - iPhone</div>
+      <div class="customer-warning">
+        <span class="note-title">Note to Customer:</span>
+        <span class="triangle">⚠️</span>
+        You may see a message on the iPhone saying the replacement part can’t be verified.
+        This is normal as Apple parts are paired to the motherboard when manufactured.
+        The message may appear at times and disappears after 7 days.
+      </div>
+    </div>
+    <input type="number" placeholder="Parts cost (£)" oninput="calc(this,45)">
+    <div class="output"></div>
+    <div class="margin"></div>
+    <div class="time"></div>
+  </div>
+
+  <!-- BATTERY -->
+  <div class="card">
+    <div class="card-header">
+      <h2>Battery Repair</h2>
+      <select class="device-select" onchange="updateWarnings()">
+        <option value="iPhone">iPhone</option>
+        <option value="Android">Android</option>
+      </select>
+      <div class="fx5-info"></div>
+      <div class="customer-warning">
+        <span class="note-title">Note to Customer:</span>
+        <span class="triangle">⚠️</span>
+        You may see a message on the iPhone saying the replacement part can’t be verified.
+        This is normal as Apple parts are paired to the motherboard when manufactured.
+        The message may appear at times and disappears after 7 days.
+      </div>
+    </div>
+    <input type="number" placeholder="Parts cost (£)" oninput="calc(this,115)">
+    <div class="output"></div>
+    <div class="margin"></div>
+    <div class="time"></div>
+  </div>
+
+  <!-- CHARGING -->
+  <div class="card">
+    <div class="card-header">
+      <h2>Charging Port Repair</h2>
+      <select class="device-select" onchange="updateWarnings()">
+        <option value="iPhone">iPhone</option>
+        <option value="Android">Android</option>
+      </select>
+      <div class="fx5-info"></div>
+    </div>
+    <input type="number" placeholder="Parts cost (£)" oninput="calc(this,80)">
+    <div class="output"></div>
+    <div class="margin"></div>
+    <div class="time"></div>
+  </div>
+</div>
+
+<!-- ===== CONSOLES ===== -->
+<h2 class="section-title">Games Console Repairs</h2>
+
+<div class="accordion">
+  <div class="accordion-header">PlayStation <span>+</span></div>
+  <div class="accordion-content">
+    <div class="sub-accordion">
+      <div class="sub-header">PS4 <span>+</span></div>
+      <div class="sub-content">
+        <div class="price-row"><span>HDMI Port</span><span>£—</span></div>
+        <div class="price-row"><span>Overheating</span><span>£—</span></div>
+        <div class="price-row"><span>Power Supply</span><span>£—</span></div>
+      </div>
+    </div>
+    <div class="sub-accordion">
+      <div class="sub-header">PS5 <span>+</span></div>
+      <div class="sub-content">
+        <div class="price-row"><span>HDMI Port</span><span>£—</span></div>
+        <div class="price-row"><span>Overheating</span><span>£—</span></div>
+        <div class="price-row"><span>Power Supply</span><span>£—</span></div>
+      </div>
     </div>
   </div>
-  <input type="number" placeholder="Parts cost (£)" oninput="calc(this,130)">
-  <div class="output"></div>
-  <div class="margin"></div>
-  <div class="time"></div>
 </div>
 
-<!-- OLED -->
-<div class="card">
-  <div class="card-header">
-    <h2>OLED Screen Repair</h2>
-    <select class="device-select" onchange="updateWarnings()">
-      <option value="iPhone">iPhone</option>
-      <option value="Android">Android</option>
-    </select>
-    <div class="fx5-info">Only use the purple FX5 Screen option cost here - iPhone</div>
-    <div class="customer-warning">
-      <span class="note-title">Note to Customer:</span>
-      <span class="triangle">⚠️</span>
-      You may see a message on the iPhone saying the replacement part can’t be verified.
-      This is normal as Apple parts are paired to the motherboard when manufactured.
-      The message may appear at times and disappears after 7 days.
-    </div>
+<div class="accordion">
+  <div class="accordion-header">Xbox <span>+</span></div>
+  <div class="accordion-content">
+    <div class="sub-accordion"><div class="sub-header">Xbox One S <span>+</span></div><div class="sub-content"><div class="price-row"><span>HDMI Port</span><span>£—</span></div></div></div>
+    <div class="sub-accordion"><div class="sub-header">Xbox One X <span>+</span></div><div class="sub-content"><div class="price-row"><span>HDMI Port</span><span>£—</span></div></div></div>
+    <div class="sub-accordion"><div class="sub-header">Xbox Series S <span>+</span></div><div class="sub-content"><div class="price-row"><span>HDMI Port</span><span>£—</span></div></div></div>
+    <div class="sub-accordion"><div class="sub-header">Xbox Series X <span>+</span></div><div class="sub-content"><div class="price-row"><span>HDMI Port</span><span>£—</span></div></div></div>
   </div>
-  <input type="number" placeholder="Parts cost (£)" oninput="calc(this,45)">
-  <div class="output"></div>
-  <div class="margin"></div>
-  <div class="time"></div>
 </div>
 
-<!-- BATTERY -->
-<div class="card">
-  <div class="card-header">
-    <h2>Battery Repair</h2>
-    <select class="device-select" onchange="updateWarnings()">
-      <option value="iPhone">iPhone</option>
-      <option value="Android">Android</option>
-    </select>
-    <div class="fx5-info"></div>
-    <div class="customer-warning">
-      <span class="note-title">Note to Customer:</span>
-      <span class="triangle">⚠️</span>
-      You may see a message on the iPhone saying the replacement part can’t be verified.
-      This is normal as Apple parts are paired to the motherboard when manufactured.
-      The message may appear at times and disappears after 7 days.
-    </div>
+<div class="accordion">
+  <div class="accordion-header">Nintendo <span>+</span></div>
+  <div class="accordion-content">
+    <div class="sub-accordion"><div class="sub-header">Switch <span>+</span></div><div class="sub-content"><div class="price-row"><span>Screen</span><span>£—</span></div></div></div>
+    <div class="sub-accordion"><div class="sub-header">Switch Lite <span>+</span></div><div class="sub-content"><div class="price-row"><span>Screen</span><span>£—</span></div></div></div>
+    <div class="sub-accordion"><div class="sub-header">Switch OLED <span>+</span></div><div class="sub-content"><div class="price-row"><span>Screen</span><span>£—</span></div></div></div>
   </div>
-  <input type="number" placeholder="Parts cost (£)" oninput="calc(this,115)">
-  <div class="output"></div>
-  <div class="margin"></div>
-  <div class="time"></div>
 </div>
 
-<!-- CHARGING -->
-<div class="card">
-  <div class="card-header">
-    <h2>Charging Port Repair</h2>
-    <select class="device-select" onchange="updateWarnings()">
-      <option value="iPhone">iPhone</option>
-      <option value="Android">Android</option>
-    </select>
-    <div class="fx5-info"></div>
+<!-- ===== iPADS ===== -->
+<h2 class="section-title">iPad Repairs</h2>
+
+<div class="accordion">
+  <div class="accordion-header">iPads (Touchscreen Repair) <span>+</span></div>
+  <div class="accordion-content">
+    <div class="price-row"><span>iPad 7th Gen</span><span>£—</span></div>
+    <div class="price-row"><span>iPad 8th Gen</span><span>£—</span></div>
+    <div class="price-row"><span>iPad 9th Gen</span><span>£—</span></div>
+    <div class="price-row"><span>iPad 10th Gen</span><span>£—</span></div>
   </div>
-  <input type="number" placeholder="Parts cost (£)" oninput="calc(this,80)">
-  <div class="output"></div>
-  <div class="margin"></div>
-  <div class="time"></div>
 </div>
-
-</div>
-
-<!-- ===== CONSOLES + IPADS (unchanged from last step) ===== -->
-<!-- (Accordion sections remain exactly as previously provided) -->
 
 </div>
 
 <script>
-function roundTo5(n){
-  return Math.round(n / 5) * 5;
-}
+function roundTo5(n){return Math.round(n/5)*5;}
 
-function calc(input, percent){
-  const cost = parseFloat(input.value || 0);
-  const shipping = 3;
-
-  const rawPrice = (cost + shipping) * (1 + percent / 100);
-  const price = roundTo5(rawPrice);
-  const margin = price - cost - shipping;
-
-  const card = input.closest('.card');
-  const output = card.querySelector('.output');
-  const m = card.querySelector('.margin');
-  const timeEl = card.querySelector('.time');
-  const warn = card.querySelector('.customer-warning');
-
-  output.innerText = `Quote Price: £${price}`;
-
-  let label = "";
-  let colour = "";
-
-  if (margin < 10) {
-    label = "Avoid Quote";
-    colour = "red";
-  } else if (margin < 20) {
-    label = "Ok Quote";
-    colour = "amber";
-  } else {
-    label = "Good Quote";
-    colour = "green";
-  }
-
-  m.innerText = `Margin: £${margin.toFixed(2)} — ${label}`;
-  m.className = `margin ${colour}`;
-
-  if(warn){
-    const select = card.querySelector(".device-select");
-    const device = select ? select.value : "iPhone";
-    warn.style.display = device === "iPhone" ? "block" : "none";
-  }
-
-  /* ===== REPAIR TIME (RESTORED) ===== */
-  let hours = "—";
-  const title = card.querySelector("h2").innerText;
-  const deviceSelect = card.querySelector(".device-select");
-  const device = deviceSelect ? deviceSelect.value : "iPhone";
-
-  if (title.includes("LCD")) hours = "1 hour";
-  if (title.includes("OLED")) hours = device === "iPhone" ? "1 hour" : "1.5 hours";
-  if (title.includes("Battery")) hours = "1 hour";
-  if (title.includes("Charging")) hours = device === "iPhone" ? "2 hours" : "1 hour";
-
-  timeEl.innerText = `Estimated repair time: ${hours}`;
+function calc(input,percent){
+  const cost=parseFloat(input.value||0),shipping=3;
+  const price=roundTo5((cost+shipping)*(1+percent/100));
+  const margin=price-cost-shipping;
+  const card=input.closest('.card');
+  card.querySelector('.output').innerText=`Quote Price: £${price}`;
+  const m=card.querySelector('.margin');
+  m.className=`margin ${margin<10?'red':margin<20?'amber':'green'}`;
+  m.innerText=`Margin: £${margin.toFixed(2)}`;
+  const t=card.querySelector('h2').innerText;
+  const d=card.querySelector('.device-select')?.value||"iPhone";
+  let h="—";
+  if(t.includes("LCD"))h="1 hour";
+  if(t.includes("OLED"))h=d==="iPhone"?"1 hour":"1.5 hours";
+  if(t.includes("Battery"))h="1 hour";
+  if(t.includes("Charging"))h=d==="iPhone"?"2 hours":"1 hour";
+  card.querySelector('.time').innerText=`Estimated repair time: ${h}`;
+  const w=card.querySelector('.customer-warning');
+  if(w)w.style.display=d==="iPhone"?"block":"none";
 }
 
 function updateWarnings(){
   document.querySelectorAll('.customer-warning').forEach(w=>{
-    const select = w.closest('.card').querySelector('.device-select');
-    w.style.display = !select || select.value === "iPhone" ? "block" : "none";
+    const d=w.closest('.card').querySelector('.device-select')?.value||"iPhone";
+    w.style.display=d==="iPhone"?"block":"none";
   });
 }
 updateWarnings();
 
-/* Accordion logic */
 document.querySelectorAll('.accordion-header,.sub-header').forEach(h=>{
   h.onclick=()=>{
     const c=h.nextElementSibling;
@@ -358,6 +375,5 @@ document.querySelectorAll('.accordion-header,.sub-header').forEach(h=>{
   };
 });
 </script>
-
 </body>
 </html>

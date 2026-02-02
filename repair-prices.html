@@ -127,6 +127,7 @@ input{
 .output{
   margin-top:12px;
   font-weight:700;
+    color:#2563eb; /* blue quote price */
 }
 
 /* Margin badge */
@@ -233,6 +234,7 @@ input{
 </div>
 
 <script>
+<script>
 function roundTo5(n){
   return Math.round(n / 5) * 5;
 }
@@ -240,16 +242,26 @@ function roundTo5(n){
 function calc(input,percent,hours){
   const cost = parseFloat(input.value || 0);
   const shipping = 3;
-  const price = roundTo5((cost + shipping) * (1 + percent / 100));
+
+  const rawPrice = (cost + shipping) * (1 + percent / 100);
+  const price = roundTo5(rawPrice);
+
   const margin = price - cost - shipping;
 
   const card = input.closest('.card');
-  card.querySelector('.output').innerText = `Quote Price: £${price}`;
-  const m = card.querySelector('.margin');
-  m.innerText = `Margin: £${margin}`;
 
-  m.className = "margin " + (margin < 10 ? "red" : margin < 20 ? "amber" : "green");
+  card.querySelector('.output').innerText =
+    `Quote Price: £${price}`;
+
+  const m = card.querySelector('.margin');
+  m.innerText = `Margin: £${margin.toFixed(2)}`;
+
+  m.className =
+    "margin " +
+    (margin < 10 ? "red" : margin < 20 ? "amber" : "green");
 }
+</script>
+
 
 function updateWarnings(){
   document.querySelectorAll('.card').forEach(card=>{

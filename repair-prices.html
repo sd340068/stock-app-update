@@ -113,6 +113,20 @@ select,
   color:var(--red);
   margin-top:8px;
   display:none;
+  text-align:left;
+}
+
+/* Warning note title */
+.customer-warning .note-title{
+  font-weight:700;
+  display:block;
+  margin-bottom:3px;
+}
+
+/* ⚠️ triangle before warning */
+.customer-warning .triangle{
+  display:inline;
+  margin-right:4px;
 }
 
 /* INPUT */
@@ -172,6 +186,8 @@ input{
     <div class="device-placeholder">iPhone Only</div>
     <div class="fx5-info">Only use the red FX5 Screen option cost here</div>
     <div class="customer-warning">
+      <span class="note-title">Note to Customer:</span>
+      <span class="triangle">⚠️</span>
       You may see a message on the iPhone saying the replacement part can’t be verified.
       This is normal as Apple parts are paired to the motherboard when manufactured.
       The message may appear at times and disappears after 7 days.
@@ -193,6 +209,8 @@ input{
     </select>
     <div class="fx5-info">Only use the purple FX5 Screen option cost here - iPhone</div>
     <div class="customer-warning">
+      <span class="note-title">Note to Customer:</span>
+      <span class="triangle">⚠️</span>
       You may see a message on the iPhone saying the replacement part can’t be verified.
       This is normal as Apple parts are paired to the motherboard when manufactured.
       The message may appear at times and disappears after 7 days.
@@ -214,6 +232,8 @@ input{
     </select>
     <div class="fx5-info"></div>
     <div class="customer-warning">
+      <span class="note-title">Note to Customer:</span>
+      <span class="triangle">⚠️</span>
       You may see a message on the iPhone saying the replacement part can’t be verified.
       This is normal as Apple parts are paired to the motherboard when manufactured.
       The message may appear at times and disappears after 7 days.
@@ -235,6 +255,8 @@ input{
     </select>
     <div class="fx5-info"></div>
     <div class="customer-warning">
+      <span class="note-title">Note to Customer:</span>
+      <span class="triangle">⚠️</span>
       You may see a message on the iPhone saying the replacement part can’t be verified.
       This is normal as Apple parts are paired to the motherboard when manufactured.
       The message may appear at times and disappears after 7 days.

@@ -14,6 +14,8 @@
   --muted:#64748b;
   --blue:#2563eb;
   --green:#16a34a;
+  --amber:#f59e0b;
+  --red:#dc2626;
 }
 
 *{box-sizing:border-box}
@@ -92,18 +94,11 @@ h1{
   text-align:right;
 }
 
-/* RESULT BLOCK */
 .result-box{
   background:#f8fafc;
   border-radius:14px;
   padding:12px;
   text-align:center;
-}
-
-.quote{
-  font-size:26px;
-  font-weight:800;
-  color:var(--blue);
 }
 
 .quote-label{
@@ -112,11 +107,26 @@ h1{
   color:var(--muted);
 }
 
+.quote{
+  font-size:26px;
+  font-weight:800;
+  color:var(--blue);
+}
+
 .margin{
   margin-top:6px;
   font-size:14px;
   font-weight:700;
-  color:var(--green);
+}
+
+.margin.good{color:var(--green)}
+.margin.warn{color:var(--amber)}
+.margin.bad{color:var(--red)}
+
+.margin-note{
+  font-size:12px;
+  font-weight:700;
+  margin-top:4px;
 }
 
 .back-btn{
@@ -157,6 +167,7 @@ h1{
         <div class="quote-label">Quote Price</div>
         <div class="quote">—</div>
         <div class="margin"></div>
+        <div class="margin-note"></div>
       </div>
     </div>
 
@@ -171,6 +182,7 @@ h1{
         <div class="quote-label">Quote Price</div>
         <div class="quote">—</div>
         <div class="margin"></div>
+        <div class="margin-note"></div>
       </div>
     </div>
 
@@ -184,6 +196,7 @@ h1{
         <div class="quote-label">Quote Price</div>
         <div class="quote">—</div>
         <div class="margin"></div>
+        <div class="margin-note"></div>
       </div>
     </div>
 
@@ -197,6 +210,7 @@ h1{
         <div class="quote-label">Quote Price</div>
         <div class="quote">—</div>
         <div class="margin"></div>
+        <div class="margin-note"></div>
       </div>
     </div>
 
@@ -205,6 +219,10 @@ h1{
 
 <script>
 const SHIPPING = 3;
+
+// New margin thresholds (£)
+const RED_MAX = 9;
+const AMBER_MAX = 19;
 
 function roundToNearest5(v){
   return Math.round(v / 5) * 5;
@@ -220,12 +238,32 @@ document.querySelectorAll('.card input').forEach(input => {
 
     const costTotal = parts + SHIPPING;
     const marginValue = quote - costTotal;
-    const marginPercent = costTotal ? Math.round((marginValue / costTotal) * 100) : 0;
 
     const box = e.target.nextElementSibling;
+    const marginEl = box.querySelector('.margin');
+    const noteEl = box.querySelector('.margin-note');
+
     box.querySelector('.quote').innerText = `£${quote}`;
-    box.querySelector('.margin').innerText =
-      `Margin: £${marginValue} (${marginPercent}%)`;
+    marginEl.innerText = `Margin: £${marginValue}`;
+
+    marginEl.className = "margin";
+    noteEl.innerText = "";
+
+    if (marginValue <= RED_MAX){
+      marginEl.classList.add("bad");
+      noteEl.innerText = "Margin too low – reconsider quote";
+      noteEl.style.color = "var(--red)";
+    } 
+    else if (marginValue <= AMBER_MAX){
+      marginEl.classList.add("warn");
+      noteEl.innerText = "Low margin";
+      noteEl.style.color = "var(--amber)";
+    } 
+    else {
+      marginEl.classList.add("good");
+      noteEl.innerText = "Healthy margin";
+      noteEl.style.color = "var(--green)";
+    }
   });
 });
 </script>

@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 
 // Get the password from the environment variable
 const PASSWORD = process.env.BeckyStock
-const USERNAME = 'internal' // You can keep this static
+const USERNAME = 'cnlselectronics' // You can keep this static
 
 export function middleware(req) {
   const authHeader = req.headers.get('authorization')

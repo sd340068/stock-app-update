@@ -4,19 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <script>
-const APP_PASSWORD = "BeckyStock";
 
-if (!sessionStorage.getItem("auth")) {
-  const pass = prompt("Enter password");
-  if (pass !== APP_PASSWORD) {
-    alert("Access denied");
-    location.href = "https://google.com";
-  } else {
-    sessionStorage.setItem("auth", "yes");
-  }
-}
-</script>
 <title>Inventory</title>
 
 <style>
@@ -554,6 +542,7 @@ loadStock();
 </script>
 </body>
 </html>
+
 
 
 

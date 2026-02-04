@@ -3,8 +3,8 @@ import { NextResponse } from 'next/server'
 export function middleware(request) {
   const authHeader = request.headers.get('authorization')
 
-  const USER = 'internal'
-  const PASS = 'supersecret'
+  const USER = 'cnlselectronics'
+  const PASS = 'BeckyStock'
 
   const validAuth =
     'Basic ' + Buffer.from(`${USER}:${PASS}`).toString('base64')

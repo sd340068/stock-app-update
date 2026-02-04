@@ -1,15 +1,16 @@
 import { NextResponse } from 'next/server'
 
-export function middleware(request) {
-  const authHeader = request.headers.get('authorization')
+// Get the password from the environment variable
+const PASSWORD = process.env.BeckyStock
+const USERNAME = 'internal' // You can keep this static
 
-  const USER = 'cnlselectronics'
-  const PASS = 'BeckyStock'
+export function middleware(req) {
+  const authHeader = req.headers.get('authorization')
 
-  const validAuth =
-    'Basic ' + Buffer.from(`${USER}:${PASS}`).toString('base64')
+  const validAuth = 'Basic ' + Buffer.from(`${USERNAME}:${PASSWORD}`).toString('base64')
 
-  if (authHeader !== validAuth) {
+  // If no auth or wrong auth, prompt for login
+  if (!authHeader || authHeader !== validAuth) {
     return new Response('Authentication required', {
       status: 401,
       headers: {
@@ -18,5 +19,11 @@ export function middleware(request) {
     })
   }
 
+  // Allow access
   return NextResponse.next()
+}
+
+// Apply middleware to all paths
+export const config = {
+  matcher: '/:path*',
 }

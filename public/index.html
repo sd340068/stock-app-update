@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+
+<title>Inventory</title>
+
+<style>
+:root{
+  --bg:#f1f5f9;
+  --panel:#ffffff;
+  --border:#e5e7eb;
+  --text:#0f172a;
+  --muted:#64748b;
+  --ps:#2563eb;
+  --xbox:#16a34a;
+  --nintendo:#dc2626;
+  --ipad:#111827;
+}
+
+*{box-sizing:border-box}
+
+body{
+  margin:0;
+  font-family:Inter,system-ui;
+  background:
+    radial-gradient(1200px 400px at top center,#e0e7ff 0%,transparent 60%),
+    var(--bg);
+  background-repeat:no-repeat;
+  background-attachment:fixed;
+  color:var(--text);
+  padding:36px 20px;
+}
+
+.wrapper{
+  max-width:1150px;
+  margin:auto;
+}
+
+/* ---------- TILES ---------- */
+.tiles{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+  gap:18px;
+  margin-bottom:28px;
+}
+
+.tile{
+  background:var(--panel);
+  border-radius:18px;
+  padding:20px;
+  display:flex;
+  gap:16px;
+  cursor:pointer;
+  box-shadow:0 12px 28px rgba(0,0,0,.08);
+  border-left:6px solid transparent;
+  transition:.2s;
+}
+.tile:hover{
+  transform:translateY(-2px);
+  box-shadow:0 18px 36px rgba(0,0,0,.12);
+}
+.tile.active{
+  outline:2px solid #c7d2fe;
+}
+
+.tile.ps{border-left-color:var(--ps)}
+.tile.xbox{border-left-color:var(--xbox)}
+.tile.nintendo{border-left-color:var(--nintendo)}
+.tile.ipad{border-left-color:var(--ipad)}
+
+.tile-logo{
+  width:52px;
+  height:52px;
+  border-radius:14px;
+  background:#f8fafc;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.tile-logo img{
+  max-width:36px;
+  max-height:36px;
+}
+
+/* ---------- PANEL ---------- */
+.panel{
+  background:var(--panel);
+  border-radius:22px;
+  overflow:hidden;
+  box-shadow:0 30px 60px rgba(0,0,0,.12);
+}
+
+/* BRAND MOOD */
+.panel[data-brand="PlayStation"] .header{background:rgba(37,99,235,.06)}
+.panel[data-brand="Xbox"] .header{background:rgba(22,163,74,.06)}
+.panel[data-brand="Nintendo"] .header{background:rgba(220,38,38,.06)}
+.panel[data-brand="iPad"] .header{background:rgba(15,23,42,.06)}
+
+.panel-brand{
+  text-align:center;
+  padding:28px 20px 12px;
+  border-bottom:1px solid var(--border);
+}
+
+.panel-brand img{
+  height:90px;
+  margin-bottom:12px;
+}
+
+.panel-title{
+  font-size:18px;
+  font-weight:600;
+}
+
+.panel-subtitle{
+  font-size:13px;
+  color:var(--muted);
+}
+
+/* ---------- HEADER ---------- */
+.header{
+  padding:20px 30px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  border-bottom:1px solid var(--border);
+}
+
+.header-right{
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
+/* Repairs button */
+#repairBadge {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap:6px;
+  min-width:130px;
+  font-size:13px;
+  font-weight:600;
+  color:#fff;
+  background: var(--ps);
+  border: none;
+  border-radius:8px;
+  padding:6px 14px;
+  cursor:pointer;
+  transition: background .2s;
+}
+
+#repairBadge:hover {
+  background:#1d4ed8;
+  color:#fff;
+}
+
+/* Small badge on button */
+#repairCountBadge {
+  background: #f59e0b;
+  color: #fff;
+  font-size: 12px;
+  font-weight:600;
+  border-radius:999px;
+  padding:2px 8px;
+  line-height:1;
+  position: absolute;
+  top:-6px;
+  right:-6px;
+  box-shadow:0 2px 4px rgba(0,0,0,0.2);
+}
+
+/* STATUS */
+.status{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  font-size:12px;
+  font-weight:600;
+}
+.status .dot{
+  width:10px;
+  height:10px;
+  border-radius:50%;
+}
+.status.live .dot{
+  background:#22c55e;
+  animation:pulse 2s infinite;
+}
+.status.offline .dot{
+  background:#ef4444;
+  box-shadow:0 0 10px rgba(239,68,68,.9);
+}
+.status.live .label{color:#16a34a}
+.status.offline .label{color:#dc2626}
+
+@keyframes pulse{
+  0%{box-shadow:0 0 6px rgba(34,197,94,.6)}
+  50%{box-shadow:0 0 14px rgba(34,197,94,1)}
+  100%{box-shadow:0 0 6px rgba(34,197,94,.6)}
+}
+
+/* ---------- TABLE ---------- */
+table{
+  width:100%;
+  border-collapse:collapse;
+  text-align:center;
+}
+
+th,td{
+  padding:16px 30px;
+  border-bottom:1px solid var(--border);
+}
+
+th{
+  background:#f8fafc;
+  font-size:12px;
+  color:var(--muted);
+  position:sticky;
+  top:0;
+}
+
+tbody tr:hover{background:#f8fafc}
+
+.stock-ok{color:#16a34a;font-weight:600}
+.stock-low{color:#f59e0b;font-weight:600}
+.stock-critical{
+  color:#dc2626;
+  font-weight:700;
+  text-shadow:0 0 8px rgba(220,38,38,.35);
+}
+
+.action-btn{
+  background:#2563eb;
+  color:#fff;
+  border:none;
+  border-radius:8px;
+  padding:6px 14px;
+  cursor:pointer;
+}
+
+  .action-btn[disabled]{
+  opacity: 0.45;
+  cursor: not-allowed;
+  background: #94a3b8; /* muted gray-blue */
+}
+
+.secondary{
+  background:#e5e7eb;
+  color:#0f172a;
+}
+
+  #priceBtn{
+  background:#16a34a; /* green */
+  color:#fff;
+  border:none;
+  border-radius:8px;
+  padding:6px 14px;
+  cursor:pointer;
+  transition:background .2s;
+}
+#priceBtn:hover{background:#15803d;}
+
+.stock-input{
+  width:90px;
+  padding:6px;
+  border-radius:8px;
+  border:1px solid var(--border);
+}
+
+/* SAVE FEEDBACK */
+.saved-row{animation:savedFlash .8s}
+@keyframes savedFlash{
+  0%{background:#dcfce7}
+  100%{background:transparent}
+}
+
+.save-badge{
+  margin-left:10px;
+  font-size:11px;
+  color:#16a34a;
+  font-weight:600;
+  animation:fadeBadge 1.2s forwards;
+}
+@keyframes fadeBadge{
+  0%{opacity:0}
+  30%{opacity:1}
+  100%{opacity:0}
+}
+</style>
+</head>
+
+<body>
+<div class="wrapper">
+
+  <div id="brandTiles" class="tiles"></div>
+
+  <div class="panel">
+    <div class="panel-brand">
+      <img src="/logo.webp">
+      <div class="panel-title">Console Parts Inventory</div>
+      <div class="panel-subtitle">Live stock management</div>
+    </div>
+
+    <div class="header">
+      <h2 id="tableTitle">Select a brand</h2>
+<div class="header-right">
+  <button id="repairBadge" onclick="location.href='repairs.html'">
+    🛠 Open Repairs
+    <span id="repairCountBadge">0</span>
+  </button>
+
+  <button id="priceBtn" onclick="location.href='repair-prices.html'">
+    💰 Repair Prices
+  </button>
+
+  <div id="connectionStatus" class="status live">
+    <span class="dot"></span>
+    <span class="label">LIVE</span>
+  </div>
+  <button id="unlockBtn" onclick="unlockEditing()">🔒 Unlock Editing</button>
+</div>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Part</th>
+          <th>Brand</th>
+          <th>Stock</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="tableBody"></tbody>
+    </table>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SUPABASE_URL = "https://thvbweemnzdvwyaxvwbz.supabase.co";
+const SUPABASE_KEY = "sb_publishable_U6Nsj6HClebAVWOx7MLhng_3t2z6w1G";
+const EDIT_PASSWORD = "BeckyStock";
+
+const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+let allData = [];
+let activeBrand = null;
+let editingUnlocked = false;
+
+const brands = [
+ { name:"PlayStation", key:"ps", logo:"https://w7.pngwing.com/pngs/576/731/png-transparent-playstation-4-playstation-3-playstation-blue-angle-electronics-thumbnail.png" },
+ { name:"Xbox", key:"xbox", logo:"https://toppng.com/uploads/preview/xbox-logo-png-1518x1490-117357646030uslcz65ud.webp" },
+ { name:"Nintendo", key:"nintendo", logo:"https://w7.pngwing.com/pngs/638/371/png-transparent-nintendo-logo-nintendo-cdr-text-rectangle.png" },
+ { name:"iPad", key:"ipad", logo:"https://www.freepnglogos.com/uploads/apple-logo-png/apple-logo-icon-16.png" }
+];
+
+function stockClass(item){
+ const crit = Number(item.critical_threshold ?? 2);
+ const low = Number(item.low_threshold ?? 5);
+ if(item.stock <= crit) return "stock-critical";
+ if(item.stock <= low) return "stock-low";
+ return "stock-ok";
+}
+
+function timeAgo(date){
+ const d = new Date(date);
+ const mins = Math.floor((Date.now() - d) / 60000);
+ if(mins < 1) return "just now";
+ if(mins < 60) return `${mins} min ago`;
+ const hrs = Math.floor(mins / 60);
+ if(hrs < 24) return `${hrs}h ago`;
+ return `${Math.floor(hrs / 24)}d ago`;
+}
+
+function renderTiles(){
+ const c = document.getElementById("brandTiles");
+ c.innerHTML = "";
+
+ brands.forEach(b => {
+  const items = allData.filter(p => p.brand === b.name);
+  const critical = items.filter(p => stockClass(p) === "stock-critical").length;
+
+  const t = document.createElement("div");
+  t.className = `tile ${b.key} ${activeBrand === b.name ? "active" : ""}`;
+  t.onclick = () => {
+    activeBrand = b.name;
+    renderTiles();
+    renderTable();
+  };
+
+  t.innerHTML = `
+    <div class="tile-logo"><img src="${b.logo}"></div>
+    <div>
+      <strong>${b.name}</strong>
+      <div style="font-size:12px;color:var(--muted);margin-top:6px">
+        ${items.length} parts • ${critical} critical
+      </div>
+    </div>
+  `;
+  c.appendChild(t);
+ });
+}
+
+function renderTable(){
+ if(!activeBrand) return;
+
+ document.querySelector(".panel").dataset.brand = activeBrand;
+ document.getElementById("tableTitle").innerText = `${activeBrand} Parts`;
+
+ const body = document.getElementById("tableBody");
+ body.innerHTML = "";
+
+ allData.filter(p => p.brand === activeBrand).forEach(p => {
+  const updated = p.updated_at ? timeAgo(p.updated_at) : "—";
+
+  body.innerHTML += `
+    <tr>
+      <td>${p.name}</td>
+      <td>${p.brand}</td>
+      <td class="${stockClass(p)}">
+        ${p.stock}
+        <div style="font-size:11px;color:var(--muted)">Updated ${updated}</div>
+      </td>
+      <td>
+<button
+  class="action-btn"
+  ${editingUnlocked ? "" : "disabled title='Unlock editing to change stock'"}
+  onclick="startEdit(this, ${p.id}, ${p.stock})"
+>
+  Edit
+</button>
+      </td>
+    </tr>
+  `;
+ });
+}
+
+function unlockEditing(){
+ if(prompt("Password") === EDIT_PASSWORD){
+  editingUnlocked = true;
+  const b = document.getElementById("unlockBtn");
+  b.innerText = "Unlocked";
+  b.style.background = "#16a34a";
+  b.style.color = "#fff";
+  b.disabled = true;
+   renderTable();
+ }
+  
+}
+
+function startEdit(btn, id, stock){
+ if(!editingUnlocked) return;
+
+ const row = btn.closest("tr");
+ row.children[2].innerHTML = `<input class="stock-input" type="number" value="${stock}">`;
+ btn.parentElement.innerHTML =
+   `<button class="action-btn" onclick="saveEdit(this, ${id})">Save</button>`;
+}
+
+async function saveEdit(btn, id){
+ const row = btn.closest("tr");
+ const val = parseInt(row.querySelector("input").value, 10);
+
+ if (Number.isNaN(val)) {
+  alert("Invalid number");
+  return;
+ }
+
+ btn.disabled = true;
+ btn.innerText = "Saving…";
+
+ const { data, error } = await client
+  .from("products")
+  .update({
+    stock: val,
+    updated_at: new Date().toISOString()
+  })
+  .eq("id", id)
+  .select();
+
+ if (error) {
+  alert("Save failed: " + error.message);
+  console.error(error);
+  btn.disabled = false;
+  btn.innerText = "Save";
+  return;
+ }
+
+ const item = allData.find(p => p.id === id);
+ if (item) {
+  item.stock = val;
+  item.updated_at = new Date().toISOString();
+ }
+
+ renderTable();
+ renderTiles();
+}
+
+/* Load stock and repair count */
+async function loadStock(){
+ const { data, error } = await client
+  .from("products")
+  .select("*")
+  .order("brand");
+
+ if (error) {
+  alert("Load failed");
+  console.error(error);
+  return;
+ }
+
+ allData = data;
+ renderTiles();
+ renderTable();
+ loadRepairCount();
+}
+
+/* Repair badge count (only active repairs) */
+async function loadRepairCount(){
+  const { count, error } = await client
+    .from('repairs')
+    .select('*', { count: 'exact', head: true })
+    .in('status', ['Checked-in', 'Awaiting parts']); // Only count these statuses
+
+  if (error) {
+    console.error("Repair count failed:", error);
+    document.getElementById('repairCountBadge').innerText = "!";
+    return;
+  }
+
+  // Use the returned count, not data length
+  document.getElementById('repairCountBadge').innerText = count ?? 0;
+}
+
+
+loadStock();
+</script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+

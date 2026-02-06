@@ -4,19 +4,17 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
- <script>
-    function checkPassword() {
-      // Prompt user for password
+  <script>
+    window.onload = function() {
       const password = prompt("Enter the password:");
-
-      // Define the correct password
       const correctPassword = "BeckyStock";
 
-      // Check if password is correct
       if (password === correctPassword) {
         alert("Access granted!");
       } else {
         alert("Access denied!");
+        // Optionally, redirect to another page if password is wrong
+        window.location.href = "https://example.com";
       }
     }
   </script>
